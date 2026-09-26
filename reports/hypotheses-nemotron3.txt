@@ -1,28 +1,25 @@
-## 2026-09-26 19:39:58 UTC [target] (model nemotron3)
-[NEW] gateway.sumup.com hosted-fields iframe: PCI card-entry frame with postMessage API lacking event.origin validation, no X-Frame-Options/CSP/frame-ancestors, framable by any origin; form--submit drives PUT to api.sumup.com/v0.2/checkouts/{attacker-chosen-id} with attacker-supplied sessionId/payment payload. Proven live via netlog + iframe console.
-[NEW] pos-payment.sumup.com + staging.pos-payment.sumup.com: AWS API Gateway POS payment-link validator on raw AWS IPs (rotating eu-west-1 addresses). Root 404 returns branded payment-link page ("This link is invalid or a payment link has expired"). /ping → 200 healthy. Prod/staging byte-identical. No webhook/callback parameters discovered passively.
-[NEW] iso20022.sumup.com + iso20022-edge.sumup.com: ISO 20022/SEPA payment rail gateway on Istio mesh (x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*), no WAF, CORS probed → 400 zero access-control-* headers. Different trust model from Cloudflare/Vercel assets.
-[NEW] js.sumup.com (live Vercel, "SumUp JS SDK" doc page, referenced as apiBFF origin in gateway code), circuit.sumup.com (200, 4.1KB logo origin) — two new hosts absent from 30-cycle inventory.
-[NEW] mcp.sumup.com/.well-known/oauth-protected-resource → 200 at two paths (prod, never fetched in 29 cycles); publishes scopes_supported:["offline_access","email"]; kid-optional try-all on /mcp (RFC 8725 §3.11 deviation).
-[NEW] Five hostnames publish RFC1918 private addresses in public DNS: social-media-presence-api.sumup.com → 10.59.128.36/10.59.134.23/10.59.137.168, klocwork.dev.solo.sumup.com → 10.86.212.167, three others.
-[NEW] Three S3 buckets on SumUp-operated namespaces: sumup-embedded-build.s3.dev.solo.sumup.com, hardware-shared.s3.dev.solo.sumup.com, sumup-angelwatch-tms-live.s3.live.solo.sumup.com.
-[CHANGED] api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now 404 (was 200 static {"card"}) — gateway requires bearer even for spec-declared oauth2:[] operations.
-[CHANGED] dashboard.sumup.com / support.sumup.com probed first time in 28 cycles — both 308 permanent aliases to me.sumup.com / help.sumup.com (Vercel).
-[CHANGED] redirect_uri allowlist widening refuted on modern auth.sumup.com for dashboard client by 6 controlled negatives — all invalid_request (exact URI match proven by host-root rejection).
-[CHANGED] Legacy callback sweep used wrong path for dashboard candidate (/callback instead of registered /api/sso/callback) — "0 HITs" conclusion invalid; re-tested with correct path: still invalid_request.
-[CHANGED] reports/gateway-hostedfields-cross-origin-messenger.md GENUINELY on disk — 198 lines, 8,532 B, sha256 12bdc51a13b523110819d91fcaaf397a52c9672e2127ff13494cd7f5e854a3a8.
-[CHANGED] reports/valid-bugs.md 79 → 92 lines / 10,621 B, gateway finding appended with report path, line count, hash inline.
-[CHANGED] pos-payment.sumup.com now resolves to 108.132.234.197, 34.249.73.228, 54.229.56.57 (rotating) — last cycle's hardcoded 46.51.170.212 was stale.
-[CHANGED] gateway.sumup.com defect re-verified LIVE and byte-identical: /hosted.js 26,839 B, sha256 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873.
-[CHANGED] "UUID-shape regex as remaining gate" claim from prior cycles did NOT reproduce on current bundle (grep → 0 hits) and removed from report.
-[PRIO] gateway.sumup.com,9.5,attack_surface=10,business_value=10,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=10
-[PRIO] pos-payment.sumup.com,8.8,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=5,cloud_surface=9,freshness=10
-[PRIO] iso20022.sumup.com,8.2,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=5,cloud_surface=9,freshness=10
-[PRIO] auth.sam-app.ro/oauth2/register,8.0,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=10,cloud_surface=7,freshness=8
-[PRIO] mcp.sumup.com/mcp,7.5,attack_surface=7,business_value=8,tech_exposure=9,gate_ease=5,cloud_surface=8,freshness=9
-[PRIO] js.sumup.com/api,6.5,attack_surface=7,business_value=6,tech_exposure=7,gate_ease=5,cloud_surface=7,freshness=10
-[PRIO] social-media-presence-api.sumup.com (RFC1918 DNS),6.0,attack_surface=6,business_value=5,tech_exposure=8,gate_ease=5,cloud_surface=8,freshness=10
-[PRIO] api.sumup.com,4.0,attack_surface=4,business_value=9,tech_exposure=6,gate_ease=1,cloud_surface=6,freshness=1
+## 2026-09-26 22:13:53 UTC [target] (model nemotron3)
+[NEW] gateway.sumup.com hosted-fields iframe cross-origin postMessage defect confirmed LIVE with PoC: no event.origin validation, no X-Frame-Options/CSP frame-ancestors, framable by any origin; form--submit drives PUT /v0.2/checkouts/{attacker-chosen-id} with attacker-supplied sessionId and payment payload; payment_type !== "card" branch skips frame-access gate entirely; response exfiltration blocked by bug (document.referrer as targetOrigin throws), not control; sha256 of /hosted.js 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873 verified byte-identical
+[NEW] pos-payment.sumup.com + staging.pos-payment.sumup.com discovered via CT breadth (225 names, 34 mapped): AWS API Gateway with IAM/SigV4 auth on rotating raw AWS IPs (eu-west-1); root 404 returns branded payment-link page ("This link is invalid or a payment link has expired"); /ping → 200 healthy; prod/staging byte-identical replicas; no webhook/callback/return_url parameters discovered passively
+[NEW] iso20022.sumup.com + iso20022-edge.sumup.com discovered via CT breadth: ISO 20022/SEPA payment rail gateway on Istio mesh (x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*); different responses per host; CORS probed with evil origin → 400 zero access-control-* headers; WAF-less mesh gateway on payment rail
+[NEW] js.sumup.com (live Vercel, "SumUp JS SDK" doc page, referenced as apiBFF origin in gateway code), circuit.sumup.com (200, 4.1KB logo origin) — two new hosts absent from 30-cycle inventory
+[NEW] mcp.sumup.com/.well-known/oauth-protected-resource → 200 at two paths (prod, never fetched in 29 cycles); publishes scopes_supported:["offline_access","email"]; kid-optional try-all on /mcp (RFC 8725 §3.11 deviation); prod trust-store sweep (30 kid candidates): exactly 8 published prod kids trusted, 0 undeclared; alg allowlist {RS256, EdDSA} enforced; RS256→HS256 and alg:none explicitly rejected
+[NEW] client_id=dashboard ACCEPTS email scope (302 login_challenge) on modern auth.sumup.com — completes consent set {openid, classic, offline, readers.read, terminals.read, email}; offline_access rejected (303 invalid_scope); email is one of two scopes mcp.sumup.com declares in RFC 9728
+[NEW] Five hostnames publish RFC1918 private addresses in public DNS: social-media-presence-api.sumup.com → 10.59.128.36/10.59.134.23/10.59.137.168, klocwork.dev.solo.sumup.com → 10.86.212.167, three others
+[NEW] Three S3 buckets on SumUp-operated namespaces are Cognito-gated (Lambda@Edge→Cognito User Pool), not raw S3: 302 → sumup-hardware-s3-external.auth.eu-west-1.amazoncognito.com with published app client IDs; redirect target reflected verbatim into OAuth state parameter
+[NEW] reports/gateway-hostedfields-cross-origin-messenger.md GENUINELY on disk — 310 lines, 12,533 B, sha256 cd94b180fb2f3f45863d472c38a2978602a28eb4bc02e6f472fb33b121239a0f; reports/valid-bugs.md 181 lines, running-count 1, gateway finding appended with report path/hash inline
+[CHANGED] api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now 404 (was 200 static {"card"}) — gateway requires bearer even for spec-declared oauth2:[] operations
+[CHANGED] auth.sam-app.ro/oauth2/register: POST 201 unauthenticated RFC 7591 confirmed LIVE; mints JWTs with empty scp, attacker-controlled aud; cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, ZERO overlap)
+[CHANGED] dashboard.sumup.com / support.sumup.com probed first time in 28 cycles — both 308 permanent aliases to me.sumup.com / help.sumup.com (Vercel)
+[CHANGED] redirect_uri allowlist widening refuted on modern auth.sumup.com for dashboard client by 6 controlled negatives — all invalid_request (exact URI match proven by host-root rejection)
+[CHANGED] Legacy callback sweep used wrong path for dashboard candidate (/callback instead of registered /api/sso/callback) — "0 HITs" conclusion invalid; re-tested with correct path: still invalid_request
+[CHANGED] pos-payment.sumup.com now resolves to 108.132.234.197, 34.249.73.228, 54.229.56.57 (rotating) — last cycle's hardcoded 46.51.170.212 was stale
+[PRIO] gateway.sumup.com,92,attack_surface=10,business_value=10,tech_exposure=10,gate_ease=10,cloud_surface=8,freshness=9
+[PRIO] pos-payment.sumup.com,84,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=8,cloud_surface=10,freshness=10
+[PRIO] auth.sam-app.ro/oauth2/register,83,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=8
+[PRIO] iso20022.sumup.com,78,attack_surface=8,business_value=10,tech_exposure=7,gate_ease=7,cloud_surface=9,freshness=9
+[PRIO] mcp.sumup.com/mcp,75,attack_surface=7,business_value=8,tech_exposure=8,gate_ease=6,cloud_surface=8,freshness=9
+[PRIO] auth.sumup.com (dashboard client),72,attack_surface=7,business_value=7,tech_exposure=7,gate_ease=7,cloud_surface=7,freshness=8
 [HYP] gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control
 class: MISCONFIG
 asset: gateway.sumup.com (/, /hosted.js postMessage API)
@@ -66,7 +63,7 @@ testability: PASSIVE
 [LEARN] ACCEPTED OATH @ auth.sumup.com: client_id=dashboard ACCEPTS email (302 login_challenge), completing its consent set as {openid, classic, offline, readers.read, terminals.read, email} while offline_access rejected (303 invalid_scope) — KB's "readers.read/terminals.read are the ONLY scopes" was a measurement gap.
 [LEARN] REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared — no stale/rotated-but-trusted/rogue signing key in prod trust store; staging loadtesting key absent.
 [LEARN] ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries (public:3a13954d-…, public:f06a4960-… each twice) — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key count.
-[LEARN] ACCEPTED OTHER @ reports/valid-bugs.md: ground truth re-verified via clean read — 79 lines, running count 0 header intact, auth.sam-app.ro finding flagged FILE REPORT; blocker remains HUMAN submission, not triage/evidence (13th consecutive cycle).
+[LEARN] ACCEPTED OTHER @ reports/valid-bugs.md: ground truth re-verified via clean read — 181 lines, running count 1 header intact, auth.sam-app.ro finding flagged FILE REPORT; blocker remains HUMAN submission, not triage/evidence (13th consecutive cycle).
 [LEARN] REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-probing has zero expected yield.
 [LEARN] ACCEPTED OTHER @ auth.sam-app.ro: /oauth2/register 404 on GET consistent with prior POST-only confirmation — endpoint presence unchanged, no drift signal.
 [LEARN] ACCEPTED AUTH @ api.sumup.com: 19 stable cycles → passive surface genuinely exhausted; only live bearer can discriminate aud/iss binding vs key-level gate; re-probing is waste.

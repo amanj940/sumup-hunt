@@ -1272,3 +1272,17 @@ https://iso20022.sumup.com/` -> HTTP 400
 https://iso20022-edge.sumup.com/` -> HTTP 404
 https://staging.pos-payment.sumup.com/ping` -> HTTP 400
 https://staging.pos-payment.sumup.com/ -> HTTP 403
+
+## 2026-09-26 22:17:04 UTC
+https://api.sumup.com/v0.2/checkouts/{attacker-chosen-id -> HTTP 404
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://pos-payment.sumup.com/ -> HTTP 403
+https://pos-payment.sumup.com/ping -> HTTP 403
+https://api.sumup.com/callback -> HTTP 404
+https://sumup-embedded-build.s3.dev.solo.sumup.com` -> ERR <urlopen error [Errno -2] Name or service not know
+https://sumup-hardware-s3-external.auth.eu-west-1.amazoncognito.com/authorize?client_id=2cepvoiffh5hlosl79knonc8at&redirect_uri=https%3A%2F%2Fsumup-embedded-build.s3.dev.solo.sumup.com&state=AAAAAAAAAAAA&response_type=token&scope=openid'` -> HTTP 400
+https://sumup-embedded-build.s3.dev.solo.sumup.com/hosted.js` -> HTTP 400
+https://iso20022.sumup.com/ -> HTTP 400
+https://iso20022.sumup.com/messages` -> HTTP 400
+https://iso20022.sumup.com/` -> HTTP 400
