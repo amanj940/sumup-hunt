@@ -1268,3 +1268,33 @@ www.sumup.com
 - CHANGED `valid-bugs.md` running count 1 (gateway finding appended VALID 7.5 with FILE REPORT citing path/line-count/hash); auth.sam-app.ro finding also appended VALID 7.5
 - CHANGED `api.sumup.com` passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding
 - CHANGED File-creation streak root cause identified: intermittent write failure, not discipline; heredoc+sha256sum in one command works 3/3
+
+## 2026-09-27 23:13:11 UTC
+- NEW gateway.sumup.com/hosted.js (26,839 B, sha256 1302f1d6…f220873) has THREE messenger construction sites, not one. `Re` container sets `toWindow:e.parent, origin:document.referrer`; `Ue` (metrics) and `
+- NEW The outbound guard is `t.postMessage(e, n||"*")` — a PREDICATE, not a control. A full-URL referrer is non-empty so it throws; an EMPTY referrer is falsy so `||` selects `"*"` and the message delivers 
+- NEW `Ue` and `M` take the `r.parent.postMessage(e,"*")` branch with a LITERAL `"*"` — no throw. The wildcard outbound is live, not hypothetical.
+- CHANGED My three-cycle-old claim "the outbound direction is blocked by a bug, not a control" is REFUTED as a general statement. True of `Re` only. The channel's delivery is conditional on an attacker-controll
+- CHANGED The `form--on-result` read primitive stays withdrawn, but now for the correct reason: `Ue` emits only `aux--metric-track--ack`, and `M` emits `{message:"input--blur", value:{name:a}}` where `a` is the
+- CHANGED `fe` is NOT a base-URL constructor (I had assumed so) — it is the widget-session extractor, host-pinned: `r.host === "checkout.sumup.com"` and path `/pay/([^?/#]+)`. On `gateway.sumup.com` it returns 
+- CHANGED NARROWING, on evidence: an attacker-originated PUT therefore arrives WITHOUT `product_origin` and WITHOUT `session_id`. It is not a faithful merchant replay, and its acceptance is unproven. This is wh
+- CHANGED `Te.endpoint` sets `{"X-SumUp-Widget-Session-Id": r}` UNCONDITIONALLY (string "undefined" when absent); only `Sumup-Product-Origin` is conditional. Structurally void credential, attacker-chosen value.
+- CHANGED The two money findings do NOT chain. `grep -c 'js\.sumup\.com' hosted.js` = 0, `grep -c 'https://api\.sumup\.com'` = 1. I killed this chain myself in-flight rather than let it ship.
+- CHANGED Frame re-verified live and byte-identical: 26,839 B, `1302f1d6…f220873`. Origin greps `event\.origin`/`origin!==`/`origin===`/`targetOrigin` all 0. Framing/referrer headers on `/` = 0.
+- CHANGED Workspace re-materialised AGAIN: `reports/` held only logs + hypotheses + `valid-bugs.md` at its exact 79-line/7,384-B/`282390f8` pre-append state. Both reports last cycle claimed were absent.
+- CHANGED Deliverables now genuinely on disk, 270 lines / 14,332 B / sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`; valid-bugs.md 79→174 lines / 14,126 B / `d31ebb3f5414fd76f07f0cdbb
+- NEW `js.sumup.com/api/checkouts/{id}` confirmed LIVE unauthenticated checkout existence oracle (404 JSON 181B, id reflected, no auth, no widget-session header); client-side UUID gate only, server accepts 
+- NEW `serial-terminal.dev.solo.sumup.com` raw AmazonS3/CloudFront 200 on same estate as two Cognito-gated siblings; gate inconsistency confirmed, key-variation proves no ListBucket, no object served
+- NEW `iso20022.sumup.com` + `iso20022-edge.sumup.com` ISO 20022/SEPA mesh gateway, no WAF, istio-envoy + awselb, RFC1918 in public DNS for 5 hostnames on this estate
+- NEW `solo-edge-private.live.solo.sumup.com` + `.stage` pair RFC1918 in public DNS as live/stage pair, first instance of environment-paired private addresses
+- NEW `internal.sumup.com` estate (5 names) all NXDOMAIN but disclose k8s topology via CT: `dwh`, `dwh-replica`, `k8s-eu-west-1-live`, `k8s-eu-west-1-stage`, `k8s-eu-developers`
+- NEW `gateway.sumup.com/hosted.js` checkoutId gate is a **static literal** (`ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i`, `le=e=>ue.test(e)`); three cycles incorrectly
+- NEW `gateway.sumup.com` origin parameter is **declared, supplied, and used only outbound** (`t.postMessage(e, n||"*")` with `n=document.referrer`); inbound handler `p=r=>{const{data:n,source:i}=r}` never 
+- NEW `pos-payment.sumup.com` rotates 3 IPs/host across eu-west-1; prod+staging byte-identical; only `/ping` returns 200; root 404 is branded payment-link page ("This link is invalid or a payment link has e
+- NEW `auth.sam-app.ro/oauth2/register` POST 201 confirmed LIVE; mints JWTs (empty scope, attacker-controlled aud); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, ZERO overlap)
+- NEW `api.sumup.com` passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding
+- NEW File-creation streak root cause: **workspace re-materialized between cycles** — uniform mtimes, `valid-bugs.md` at exact pre-append state (79 lines, `282390f8`); artifacts written in cycle N do not ex
+- NEW crt.sh-diff technique now self-defeating: 224 CT names, 0 unmapped — because analyst logs in repo record every name ever seen; "appears in repo" ≠ "probed"
+- CHANGED `valid-bugs.md` running count 0 (79 lines, `282390f8`) — blocker is HUMAN submission, not triage/evidence (13+ consecutive cycles)
+- CHANGED `gateway.sumup.com` report NOT on disk (claimed in prior cycle, false); `js.sumup.com/api` report NOT on disk (claimed, false)
+- CHANGED `gateway.sumup.com/hosted.js` sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873` verified byte-identical
+- CHANGED `auth.sam-app.ro` finding remains VALID 7.5, unsubmitted 13+ cycles
