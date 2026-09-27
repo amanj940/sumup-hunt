@@ -1325,3 +1325,17 @@ https://gateway.sumup.com/ -> 200 len=546
 https://gateway.sumup.com/hosted.js -> 200 len=26839
 https://pos-payment.sumup.com/ -> HTTP 403
 https://pos-payment.sumup.com/ping -> HTTP 403
+
+## 2026-09-27 17:21:54 UTC
+https://api.sumup.com/v0.2/checkouts/{attacker-chosen-id -> HTTP 404
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://pos-payment.sumup.com/ -> HTTP 403
+https://pos-payment.sumup.com/ping -> HTTP 403
+https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555' -> HTTP 404
+https://js.sumup.com/api/merchants/11111111-2222-4333-8444-555555555555 -> HTTP 404
+https://js.sumup.com/api/checkouts/not-a-uuid -> HTTP 404
+https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555/fee-calculation' -> HTTP 404
+https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555'` -> HTTP 404
+https://js.sumup.com/api/zzzz` -> HTTP 404
+https://js.sumup.com/api/checkouts/AAAA-not-a-uuid` -> HTTP 404

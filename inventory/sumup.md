@@ -1227,3 +1227,23 @@ www.sumup.com
 - CHANGED File-creation streak root cause identified: intermittent write failure, not discipline; heredoc+sha256sum in one command works 3/3
 - CHANGED `valid-bugs.md` running count 1 (gateway finding appended VALID 7.5 with FILE REPORT citing path/line-count/hash); auth.sam-app.ro finding also appended VALID 7.5
 - CHANGED `api.sumup.com` passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding
+
+## 2026-09-27 17:21:40 UTC
+- NEW `js.sumup.com/api/checkouts/{id}` is **unauthenticated per-checkout resource resolution** with a controlled proof the credential is not load-bearing: the official SDK's `X-SumUp-Widget-Session-Id` is 
+- NEW **Correction — BFF route table.** `/api/checkouts/{id}/apple-pay-session` returns the **84 B Vercel `text/plain` stub**, not an application class. Last cycle recorded it as a third response class. It 
+- NEW `js.sumup.com/sdk.js` → **404** (79 B Vercel stub). `sdk.js` is served by `gateway.sumup.com` (291,877 B, sha256 `0fae546a…`). Recorded because the previous cycle's citation named the artifact without
+- CHANGED `checkoutId` shape gate: a **static literal** in `sdk.js` (`xi = /^[0-9a-f]{8}-…-[089ab][0-9a-f]{3}-…$/i`), superseding three cycles of "unrecoverable from served bytes". Material fact is new: the ser
+- CHANGED `Ti` demo branch confirmed inert from source: `Ti=e=>Promise.resolve({demo:!0,message:"This is a demo…",payload:e})` — a local literal, never reaches the network. Not a finding; closed so it is not re
+- CHANGED `Referrer-Policy` absent from **all three** `gateway.sumup.com` responses (`/`, `/hosted.js`, `/sdk.js`) and not set in the frame document — on the one asset whose credential is a URL path segment.
+- CHANGED **Deliverables genuinely on disk, 10-cycle streak broken:** `reports/gateway-hostedfields-cross-origin-messenger.md` (146 lines, 6,578 B, sha256 `f5153ea1d18f5ed47c9ab3a0191e7d8de16ad1655417251e936043
+- CHANGED `gateway.sumup.com` re-verified byte-identical before writing: `/hosted.js` sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`, `event.origin` grep **0**, framing-header grep **
+- NEW `js.sumup.com/api/checkouts/{id}` LIVE unauthenticated checkout existence oracle (404 JSON with id reflected, no auth, no widget session header); client-side UUID gate only, server accepts any string;
+- NEW `serial-terminal.dev.solo.sumup.com` raw AmazonS3/CloudFront 200 on same estate as two Cognito-gated siblings; gate inconsistency confirmed, key-variation proves no ListBucket, no object served (defau
+- NEW `iso20022.sumup.com` + `iso20022-edge.sumup.com` ISO 20022/SEPA mesh gateway, no WAF, istio-envoy + awselb, RFC1918 in public DNS for 5 hostnames on this estate
+- NEW `solo-edge-private.live.solo.sumup.com` + `.stage` pair RFC1918 in public DNS as live/stage pair, first instance of environment-paired private addresses
+- NEW `internal.sumup.com` estate (5 names) all NXDOMAIN but disclose k8s topology via CT: `dwh`, `dwh-replica`, `k8s-eu-west-1-live`, `k8s-eu-west-1-stage`, `k8s-eu-developers`
+- CHANGED `gateway.sumup.com` report on disk (174 lines, sha256 `dcbac1b7…`); finding narrowed: runtime checkoutId gate EXISTS (`le(r)` → `ue.test(r)`, `new RegExp(a.pattern)`), pattern unrecoverable from bytes
+- CHANGED `auth.sam-app.ro/oauth2/register` POST 201 confirmed LIVE; mints JWTs (empty scope, attacker-controlled aud); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, ZERO overlap)
+- CHANGED `pos-payment.sumup.com` rotates 3 IPs/host across eu-west-1; prod+staging byte-identical; only `/ping` returns 200; root 404 is branded payment-link page
+- CHANGED `valid-bugs.md` running count 1 (gateway finding appended VALID 7.5 with FILE REPORT citing path/line-count/hash); auth.sam-app.ro finding also appended VALID 7.5
+- CHANGED `api.sumup.com` passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding

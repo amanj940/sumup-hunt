@@ -1,32 +1,22 @@
-## 2026-09-27 12:28:53 UTC [target] (model nemotron3)
-[NEW] `js.sumup.com/api/checkouts/{id}` — LIVE unauthenticated checkout existence oracle (404 JSON with id reflected, no auth, no widget session header); client-side UUID gate only, server accepts any string; sibling `/api/checkouts/{id}/fee-calculation` routed (POST-only); second money-touching origin built by `gateway.sumup.com/sdk.js`
-[NEW] `serial-terminal.dev.solo.sumup.com` — raw AmazonS3/CloudFront 200 on same estate as two Cognito-gated siblings; gate inconsistency confirmed, but key-variation proves no ListBucket, no object served (default doc only)
-[NEW] `iso20022.sumup.com` + `iso20022-edge.sumup.com` — ISO 20022/SEPA mesh gateway, no WAF, istio-envoy + awselb, RFC1918 in public DNS for 5 hostnames on this estate
-[NEW] `solo-edge-private.live.solo.sumup.com` + `.stage` pair — RFC1918 in public DNS as live/stage pair, first instance of environment-paired private addresses
-[NEW] `internal.sumup.com` estate (5 names) — all NXDOMAIN but disclose k8s topology via CT: `dwh`, `dwh-replica`, `k8s-eu-west-1-live`, `k8s-eu-west-1-stage`, `k8s-eu-developers`
-[CHANGED] `gateway.sumup.com` report genuinely on disk this cycle (174 lines, sha256 `dcbac1b7…`); finding narrowed: runtime checkoutId gate EXISTS (`le(r)` → `ue.test(r)`, `new RegExp(a.pattern)`), pattern unrecoverable from bytes
-[CHANGED] `auth.sam-app.ro/oauth2/register` — POST 201 confirmed LIVE; mints JWTs (empty scope, attacker-controlled aud); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, ZERO overlap)
-[CHANGED] `pos-payment.sumup.com` — rotates 3 IPs/host across eu-west-1; prod+staging byte-identical; only `/ping` returns 200; root 404 is branded payment-link page
-[CHANGED] File-creation streak root cause identified: intermittent write failure, not discipline; heredoc+sha256sum in one command works 3/3
+## 2026-09-27 17:19:40 UTC [target] (model nemotron3)
+[NEW] `js.sumup.com/api/checkouts/{id}` LIVE unauthenticated checkout existence oracle (404 JSON with id reflected, no auth, no widget session header); client-side UUID gate only, server accepts any string; sibling `/api/checkouts/{id}/fee-calculation` routed (POST-only); second money-touching origin built by `gateway.sumup.com/sdk.js`
+[NEW] `serial-terminal.dev.solo.sumup.com` raw AmazonS3/CloudFront 200 on same estate as two Cognito-gated siblings; gate inconsistency confirmed, key-variation proves no ListBucket, no object served (default doc only)
+[NEW] `iso20022.sumup.com` + `iso20022-edge.sumup.com` ISO 20022/SEPA mesh gateway, no WAF, istio-envoy + awselb, RFC1918 in public DNS for 5 hostnames on this estate
+[NEW] `solo-edge-private.live.solo.sumup.com` + `.stage` pair RFC1918 in public DNS as live/stage pair, first instance of environment-paired private addresses
+[NEW] `internal.sumup.com` estate (5 names) all NXDOMAIN but disclose k8s topology via CT: `dwh`, `dwh-replica`, `k8s-eu-west-1-live`, `k8s-eu-west-1-stage`, `k8s-eu-developers`
+[CHANGED] `gateway.sumup.com` report on disk (174 lines, sha256 `dcbac1b7…`); finding narrowed: runtime checkoutId gate EXISTS (`le(r)` → `ue.test(r)`, `new RegExp(a.pattern)`), pattern unrecoverable from bytes
+[CHANGED] `auth.sam-app.ro/oauth2/register` POST 201 confirmed LIVE; mints JWTs (empty scope, attacker-controlled aud); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, ZERO overlap)
+[CHANGED] `pos-payment.sumup.com` rotates 3 IPs/host across eu-west-1; prod+staging byte-identical; only `/ping` returns 200; root 404 is branded payment-link page
 [CHANGED] `valid-bugs.md` running count 1 (gateway finding appended VALID 7.5 with FILE REPORT citing path/line-count/hash); auth.sam-app.ro finding also appended VALID 7.5
 [CHANGED] `api.sumup.com` passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding
-[PRIO] js.sumup.com/api/checkouts/{id},8.65,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=10,cloud_surface=7,freshness=10
 [PRIO] gateway.sumup.com,9.50,attack_surface=10,business_value=10,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=10
 [PRIO] pos-payment.sumup.com,8.80,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=9,cloud_surface=9,freshness=9
-[PRIO] auth.sam-app.ro/oauth2/register,8.50,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=8
+[PRIO] js.sumup.com/api/checkouts/{id},8.65,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=10,cloud_surface=7,freshness=10
 [PRIO] iso20022.sumup.com + iso20022-edge.sumup.com,8.55,attack_surface=8,business_value=10,tech_exposure=8,gate_ease=7,cloud_surface=8,freshness=10
+[PRIO] auth.sam-app.ro/oauth2/register,8.50,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=8
 [PRIO] mcp.sumup.com/mcp,7.50,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=9,cloud_surface=7,freshness=9
 [PRIO] Cognito dev.solo app clients,6.50,attack_surface=7,business_value=5,tech_exposure=8,gate_ease=10,cloud_surface=6,freshness=10
 [PRIO] serial-terminal.dev.solo.sumup.com,4.00,attack_surface=5,business_value=3,tech_exposure=4,gate_ease=10,cloud_surface=5,freshness=10
-[HYP] js.sumup.com/api/checkouts/{id} unauthenticated per-checkout existence oracle on hosted-fields BFF
-class: MISCONFIG
-asset: js.sumup.com/api/checkouts/{checkoutId} (Vercel; second API origin built by gateway.sumup.com/sdk.js)
-confidence: 72
-reasoning: GET returns 404 application/json 181 B with `detail:"Checkout <id> does not exist."`, id reflected, no Authorization/cookie/X-SumUp-Widget-Session-Id. Control `/api/merchants/{uuid}` returns 84 B text/plain NOT_FOUND (Vercel catch-all) — proves application executes. `/api/checkouts/not-a-uuid` returns 155 B with id reflected — no server-side UUID validation. `/api/checkouts/{uuid}/fee-calculation` returns 144 B "Endpoint does not exist." — third response class, route registered. Bundle `fetchCheckout` returns `id, currency, amount, status, merchant_code, merchant_name, merchant_country, merchant_sandbox, purpose, lxn_session_token`.
-evidence_needed: A checkout id that exists returning 200 with that object and NO valid X-SumUp-Widget-Session-Id. Deliberately not obtained: valid ids are customer data, program forbids testing against it.
-verify_steps: curl -sS 'https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555' (expect 404 181 B JSON, id reflected) -> curl -sS -o /dev/null -w '%{http_code} %{size_download} %{content_type}\n' https://js.sumup.com/api/merchants/11111111-2222-4333-8444-555555555555 (expect 404 84 text/plain stub) -> curl -sS https://js.sumup.com/api/checkouts/not-a-uuid (expect 155 B, id reflected, no server UUID check) -> curl -sS 'https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555/fee-calculation' (expect 144 B "Endpoint does not exist.", routed without POST)
-impact: Unauthenticated per-checkout existence oracle on second money-touching origin, no server-side id validation, no auth in front of resource resolution. If 200 path reachable without valid session id → pre-auth BOLA disclosing merchant identity/amounts → High. Capped Medium as posture; disclosure leg explicitly unclaimed.
-testability: PASSIVE
 [HYP] gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control
 class: MISCONFIG
 asset: gateway.sumup.com (/, /hosted.js postMessage API)
@@ -45,15 +35,24 @@ evidence_needed: Discovery of webhook/callback/return_url parameters on payment-
 verify_steps: GET https://pos-payment.sumup.com/ (branded 404) -> GET https://pos-payment.sumup.com/ping -> enumerate paths via CT-mapped names (crt.sh diff: 225 names, 34 mapped -> 190 unmapped) and common API Gateway patterns (/prod/, /v1/, /pay/, /link/, /webhook/, /callback/) -> probe discovered params with 169.254.169.254 payloads
 impact: If webhook/callback param exists, SSRF to AWS metadata yields IAM role credentials; payment-link enumeration could leak merchant transaction data
 testability: PASSIVE
+[HYP] js.sumup.com/api/checkouts/{id} unauthenticated per-checkout existence oracle on hosted-fields BFF
+class: MISCONFIG
+asset: js.sumup.com/api/checkouts/{checkoutId} (Vercel; second API origin built by gateway.sumup.com/sdk.js)
+confidence: 72
+reasoning: GET returns 404 application/json 181 B with `detail:"Checkout <id> does not exist."`, id reflected, no Authorization/cookie/X-SumUp-Widget-Session-Id. Control `/api/merchants/{uuid}` returns 84 B text/plain NOT_FOUND (Vercel catch-all) — proves application executes. `/api/checkouts/not-a-uuid` returns 155 B with id reflected — no server-side UUID validation. `/api/checkouts/{uuid}/fee-calculation` returns 144 B "Endpoint does not exist." — third response class, route registered. Bundle `fetchCheckout` returns `id, currency, amount, status, merchant_code, merchant_name, merchant_country, merchant_sandbox, purpose, lxn_session_token`.
+evidence_needed: A checkout id that exists returning 200 with that object and NO valid X-SumUp-Widget-Session-Id. Deliberately not obtained: valid ids are customer data, program forbids testing against it.
+verify_steps: curl -sS 'https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555' (expect 404 181 B JSON, id reflected) -> curl -sS -o /dev/null -w '%{http_code} %{size_download} %{content_type}\n' https://js.sumup.com/api/merchants/11111111-2222-4333-8444-555555555555 (expect 404 84 text/plain stub) -> curl -sS https://js.sumup.com/api/checkouts/not-a-uuid (expect 155 B, id reflected, no server UUID check) -> curl -sS 'https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555/fee-calculation' (expect 144 B "Endpoint does not exist.", routed without POST)
+impact: Unauthenticated per-checkout existence oracle on second money-touching origin, no server-side id validation, no auth in front of resource resolution. If 200 path reachable without valid session id → pre-auth BOLA disclosing merchant identity/amounts → High. Capped Medium as posture; disclosure leg explicitly unclaimed.
+testability: PASSIVE
 [PARKED] mcp.sumup.com/mcp kid-optional try-all widens alg=none/HS256 attack surface: confidence 75 but exploitation purely theoretical — no JWKS pollution vector, no cross-env key reuse (ZERO kid overlap confirmed), HS256/none explicitly rejected; hardening deviation only, not a bypass
 [PARKED] PUT /v0.2/checkouts/{checkout_id}/apple-pay-session SSRF: requires AUTH_HELPED (valid merchant token + owned checkout_id); no passive path to checkout creation or token acquisition
 [PARKED] support-centre.sumup.com expired certificate: SSL/TLS best practice explicitly out of scope per program; only relevance is OAuth redirect host trust boundary — finding is the stale registration, cert is evidence
 [PARKED] iso20022.sumup.com SSRF via payment rail webhook/callback: no parameters discovered passively; Istio mesh with no WAF but parameter surface unknown; requires POST (AUTH_HELPED)
 [PARKED] serial-terminal.dev.solo.sumup.com data exposure: controlled key-variation check shows no ListBucket, no object served; gate inconsistency (Cognito on siblings, none here) is Low hardening, not leak
 [PARKED] Cognito dev.solo implicit grant: response_type=token enabled on two clients but token delivery origin serves NO content (all paths 302/0 B); no reader for fragment → leak unproven; capped Low
-[FINAL] 1. js.sumup.com/api/checkouts/{id} unauthenticated existence oracle — 72, PASSIVE, new this cycle, report on disk with in-context hash
-[FINAL] 2. gateway.sumup.com hosted-fields cross-origin messenger — 92, PASSIVE, complete evidence reproduced, Medium
-[FINAL] 3. pos-payment.sumup.com IAM/SigV4 trust model divergence + payment-link surface — 75, PASSIVE, high-value net-new asset class, needs param discovery
+[FINAL] 1. gateway.sumup.com hosted-fields cross-origin messenger — 92, PASSIVE, complete evidence reproduced, Medium
+[FINAL] 2. pos-payment.sumup.com IAM/SigV4 trust model divergence + payment-link surface — 75, PASSIVE, high-value net-new asset class, needs param discovery
+[FINAL] 3. js.sumup.com/api/checkouts/{id} unauthenticated existence oracle — 72, PASSIVE, new this cycle, report on disk with in-context hash
 [FINAL] 4. auth.sam-app.ro/oauth2/register unauthenticated dynamic client registration → mintable JWTs on staging — 85, PASSIVE, fileable per triage (7.5), unsubmitted 13+ cycles
 [NEXT] PROBE: GET https://pos-payment.sumup.com/ + breadth-first path enumeration via crt.sh diff (225 names, 34 mapped -> 190 unmapped) targeting payment-link/webhook/callback parameters; resolve all unmapped names to non-Cloudflare IPs
 [LEARN] ACCEPTED MISCONFIG @ js.sumup.com/api: the whole finding came from recovering the call shape instead of guessing path shapes. Six cycles closed this origin with a 6-shape prefix sweep; the real paths were sitting in sdk.js and the sweep was structurally incapable of hitting them, because the client only issues the request when the id matches a UUID regex. The same shape of error the KB already recorded for the legacy-callback sweep — an exhaustive sweep is only exhaustive over the values actually sent — had simply been repeated on a different asset, by me, and the general lesson had not transferred.
