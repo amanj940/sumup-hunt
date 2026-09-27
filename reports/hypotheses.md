@@ -3086,3 +3086,25 @@
 - LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
 - LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
 - LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob
+
+## RANKED HYPOTHESES 2026-09-27 20:20:42 UTC
+- [92] gateway.sumup.com: gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control (from art/lead_nemotron3.txt)
+- [88] gateway.sumup.com: The hosted-fields origin guard is present but wired to the wrong direction, so the privileged inbound channel is open to every origin (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: submit the two reports to bugs.olivermaicher.eu. (1) `reports/gateway-hostedfields-cross-origin-messenger.md` — 227 lines, 10,791 B, sha256 `9e071c1b0db7
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://pos-payment.sumup.com/ + breadth-first path enumeration via crt.sh diff (225 names, 34 mapped -> 190 unmapped) targeting payment-link/webhook
+- LEARN: ACCEPTED MISCONFIG @ `gateway.sumup.com/hosted.js`: the finding sharpened because I read the *parameter* rather than searching for the *check*. Three cycles fra
+- LEARN: REJECTED OTHER @ `gateway.sumup.com/hosted.js`: the "unrecoverable runtime pattern" gate. Three cycles recorded the checkoutId check as `new RegExp(a.pattern)` 
+- LEARN: ACCEPTED OTHER @ `reports/` and the workspace: the file-creation streak has a cause no amount of write discipline could have fixed. I had accepted, across three
+- LEARN: REJECTED MISCONFIG @ `js.sumup.com/api`: the wildcard-CORS-plus-credentials pair, re-examined and still hardening-only. Written into the report explicitly as *n
+- LEARN: ACCEPTED MISCONFIG @ js.sumup.com/api: the whole finding came from recovering the call shape instead of guessing path shapes. Six cycles closed this origin with
+- LEARN: REJECTED MISCONFIG @ js.sumup.com/api: treating access-control-allow-origin: * + access-control-allow-credentials: true as token theft. The pair is present, but
+- LEARN: ACCEPTED OTHER @ reports/: eight cycles of "verify your writes" advice, and this cycle finally falsified the diagnosis. The filesystem was writable, both heredo
+- LEARN: ACCEPTED MISCONFIG @ gateway.sumup.com: hosted-fields postMessage API performs no event.origin validation and the frame ships no X-Frame-Options/frame-ancestors
+- LEARN: ACCEPTED OTHER @ gateway.sumup.com: the asset the KB dismissed as a "non-Next 404" one cycle earlier is the program's highest-value surface — a PCI card-entry f
+- LEARN: REJECTED MISCONFIG @ gateway.sumup.com: response exfiltration via the postMessage API. Two candidate outbound channels tested directly, neither delivered; send(
+- LEARN: ACCEPTED OTHER @ mcp.sumup.com: RFC 9728 resource-server metadata LIVE on prod MCP host at two paths publishing scopes_supported:["offline_access","email"] — KB
+- LEARN: REJECTED AUTH @ mcp.sumup.com/mcp: JWT alg:none and RS256->HS256 key confusion both explicitly refused by production bearer verifier; allowlist exactly {RS256, 
+- LEARN: ACCEPTED OATH @ auth.sumup.com: client_id=dashboard ACCEPTS email (302 login_challenge), completing its consent set as {openid, classic, offline, readers.read, 
+- LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
+- LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
+- LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob
