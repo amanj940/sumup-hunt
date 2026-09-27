@@ -1286,3 +1286,17 @@ https://sumup-embedded-build.s3.dev.solo.sumup.com/hosted.js` -> HTTP 400
 https://iso20022.sumup.com/ -> HTTP 400
 https://iso20022.sumup.com/messages` -> HTTP 400
 https://iso20022.sumup.com/` -> HTTP 400
+
+## 2026-09-27 00:47:03 UTC
+https://api.sumup.com/v0.2/checkouts/{attacker-chosen-id -> HTTP 404
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://pos-payment.sumup.com/ -> HTTP 403
+https://pos-payment.sumup.com/ping -> HTTP 403
+https://api.sumup.com/callback -> HTTP 404
+https://serial-terminal.dev.solo.sumup.com/` -> HTTP 404
+https://serial-terminal.dev.solo.sumup.com/?list-type=2 -> 200 len=2723
+https://serial-terminal.dev.solo.sumup.com/nonexistent-key-zzz` -> HTTP 404
+https://sumup-embedded-build.s3.dev.solo.sumup.com/ -> 200 len=?
+https://crt.sh/?q=%25.sumup.com&output=json' -> ERR The read operation timed out
+https://iso20022.sumup.com/ -> HTTP 400
