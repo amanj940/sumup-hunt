@@ -1,21 +1,4 @@
-## 2026-09-27 00:43:52 UTC [target] (model nemotron3)
-[NEW] gateway.sumup.com hosted-fields iframe: PCI card-entry frame with postMessage API lacking event.origin validation, no X-Frame-Options/CSP/frame-ancestors, framable by any origin; form--submit drives PUT /v0.2/checkouts/{attacker-chosen-id} with attacker-supplied sessionId and payment payload (live netlog captured)
-[NEW] pos-payment.sumup.com + staging.pos-payment.sumup.com: AWS API Gateway POS payment-link validator on rotating raw AWS IPs (eu-west-1); root 404 returns branded payment-link page ("This link is invalid or a payment link has expired"); /ping → 200 healthy; prod/staging byte-identical
-[NEW] iso20022.sumup.com + iso20022-edge.sumup.com: ISO 20022/SEPA payment rail gateway on Istio mesh (x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*), no WAF, different trust model
-[NEW] js.sumup.com (live Vercel, "SumUp JS SDK" doc page, referenced as apiBFF origin in gateway code), circuit.sumup.com (200, 4.1KB logo origin) — two new hosts absent from 30-cycle inventory
-[NEW] mcp.sumup.com/.well-known/oauth-protected-resource → 200 at two paths (prod, never fetched in 29 cycles); publishes scopes_supported:["offline_access","email"]; kid-optional try-all on /mcp (RFC 8725 §3.11 deviation)
-[NEW] client_id=dashboard ACCEPTS email scope (302 login_challenge) on modern auth.sumup.com — completes consent set {openid, classic, offline, readers.read, terminals.read, email}; offline_access rejected
-[NEW] Five hostnames publish RFC1918 private addresses in public DNS: social-media-presence-api.sumup.com → 10.59.128.36/10.59.134.23/10.59.137.168, klocwork.dev.solo.sumup.com → 10.86.212.167, three others
-[NEW] Three S3 buckets on SumUp-operated namespaces are Cognito-gated (Lambda@Edge→Cognito User Pool), not raw S3: 302 → sumup-hardware-s3-external.auth.eu-west-1.amazoncognito.com with published app client IDs
-[NEW] AWS Cognito implicit grant (response_type=token) ENABLED on two SumUp app clients — 2cepvoiffh5hlosl79knonc8at and 1dolam18pelmhvt9b9n3eqsmn0; controlled 5-value matrix: exactly {code, token} accepted, id_token/hybrid/bogus rejected
-[NEW] dashboard.sumup.com / support.sumup.com probed first time in 28 cycles — both 308 permanent aliases to me.sumup.com / help.sumup.com (Vercel)
-[CHANGED] api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now 404 (was 200 static {"card"}) — gateway requires bearer even for spec-declared oauth2:[] operations
-[CHANGED] auth.sam-app.ro/oauth2/register: POST 201 unauthenticated RFC 7591 confirmed LIVE; mints JWTs with empty scp, attacker-controlled aud; cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, ZERO overlap)
-[CHANGED] redirect_uri allowlist widening refuted on modern auth.sumup.com for dashboard client by 6 controlled negatives — all invalid_request (exact URI match proven by host-root rejection)
-[CHANGED] Legacy callback sweep used wrong path for dashboard candidate (/callback instead of registered /api/sso/callback) — "0 HITs" conclusion invalid; re-tested with correct path: still invalid_request
-[CHANGED] reports/gateway-hostedfields-cross-origin-messenger.md GENUINELY on disk — 247 lines, 12,338 B, sha256 bca86e1d25e85e05b2ff4f7e57a5eaf610102286abed9994f61f313a565af155
-[CHANGED] reports/cognito-implicit-grant-dev-solo-buckets.md created — 198 lines, 10,095 B, sha256 bdf2b441def1886812bb0d8a5abd7f665f4fd8525064b9a0baf0054bd55cde78
-[CHANGED] reports/valid-bugs.md running count 1 (gateway finding appended VALID 7.5 with FILE REPORT citing path/line-count/hash)
+## 2026-09-27 06:30:00 UTC [target] (model nemotron3)
 [PRIO] gateway.sumup.com,9.5,attack_surface=10,business_value=10,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=10
 [PRIO] pos-payment.sumup.com,8.8,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=9,cloud_surface=9,freshness=9
 [PRIO] auth.sam-app.ro/oauth2/register,8.5,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=8
@@ -23,6 +6,7 @@
 [PRIO] iso20022.sumup.com,7.2,attack_surface=8,business_value=9,tech_exposure=7,gate_ease=6,cloud_surface=8,freshness=9
 [PRIO] js.sumup.com,6.8,attack_surface=7,business_value=6,tech_exposure=7,gate_ease=10,cloud_surface=7,freshness=10
 [PRIO] Cognito dev.solo app clients,6.5,attack_surface=7,business_value=5,tech_exposure=8,gate_ease=10,cloud_surface=6,freshness=10
+[PRIO] serial-terminal.dev.solo.sumup.com,4.0,attack_surface=5,business_value=3,tech_exposure=4,gate_ease=10,cloud_surface=5,freshness=10
 [HYP] gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control
 class: MISCONFIG
 asset: gateway.sumup.com (/, /hosted.js postMessage API)
@@ -54,6 +38,7 @@ testability: PASSIVE
 [PARKED] PUT /v0.2/checkouts/{checkout_id}/apple-pay-session SSRF: requires AUTH_HELPED (valid merchant token + owned checkout_id); no passive path to checkout creation or token acquisition
 [PARKED] support-centre.sumup.com expired certificate: SSL/TLS best practice explicitly out of scope per program; only relevance is OAuth redirect host trust boundary — finding is the stale registration, cert is evidence
 [PARKED] iso20022.sumup.com SSRF via payment rail webhook/callback: no parameters discovered passively; Istio mesh with no WAF but parameter surface unknown
+[PARKED] serial-terminal.dev.solo.sumup.com data exposure: controlled key-variation check shows no ListBucket, no object served; gate inconsistency (Cognito on siblings, none here) is Low hardening, not leak
 [FINAL] 1. gateway.sumup.com hosted-fields cross-origin messenger — 92, PASSIVE, complete evidence reproduced, Medium
 [FINAL] 2. pos-payment.sumup.com IAM/SigV4 trust model divergence + payment-link surface — 75, PASSIVE, high-value net-new asset class, needs param discovery
 [FINAL] 3. auth.sam-app.ro/oauth2/register unauthenticated dynamic client registration → mintable JWTs on staging — 85, PASSIVE, fileable per triage (7.5), unsubmitted 13+ cycles
