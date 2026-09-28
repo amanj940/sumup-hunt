@@ -51203,3 +51203,33 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED OTHER @ `reports/`: the write mechanism is 7 for 7, but the more useful discipline this cycle was reading the artifact before writing about it. Three separate claims in my own carry-forward — the unrecoverable runtime gate, the "only messenger" outbound, and the BFF chain I was mid-way through asserting — were each falsified by opening the file. The BFF chain is the one worth naming: I was one sentence from publishing a two-finding exploit chain that does not exist, and a single grep (`js\.sumup\.com` = 0) killed it. A proposed chain is a hypothesis like any other and owes the same control.
 [RISK] sumup: 82. Up 3, and the gains are of a different kind than the last several cycles. The report is on disk with a hash taken in the same act as the write, so the file-delivery risk I have carried for 30+ cycles is closed for this artifact. The larger gain is that three carried-forward technical claims were falsified by reading the source rather than the summary — including a cross-origin chain between two of my own findings that would have inflated both. That is the error class that costs a triager credibility, and it is now measured rather than assumed: one of the three would have shipped. I am explicitly not scoring the submission as risk reduction. 21 cycles on, nothing is filed, and treating this report as delivered would be the same category of mistake as the file claims, one level up.
 ```
+===== ANALYST bigpickle 2026-09-28 01:47:19 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la reports/ 2>/dev/null | head -40; echo "---VALIDBUGS---"; wc -l reports/valid-bugs.md 2>/dev/null; sha256sum reports/*.md 2>/dev/null
+total 6940
+drwxr-xr-x  2 runner runner    4096 Sep 28 01:45 .
+drwxr-xr-x 12 runner runner    4096 Sep 28 01:45 ..
+-rw-r--r--  1 runner runner 4010802 Sep 28 01:45 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   34286 Sep 28 01:45 analyst-laguna.log
+-rw-r--r--  1 runner runner   34128 Sep 28 01:45 analyst-ling3.log
+-rw-r--r--  1 runner runner   34444 Sep 28 01:45 analyst-longcat.log
+-rw-r--r--  1 runner runner 2419176 Sep 28 01:45 analyst-nemotron3.log
+-rw-r--r--  1 runner runner   14854 Sep 28 01:45 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Sep 28 01:45 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Sep 28 01:45 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Sep 28 01:45 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   15612 Sep 28 01:45 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  485495 Sep 28 01:45 hypotheses.md
+-rw-r--r--  1 runner runner    9173 Sep 28 01:45 reposcan-findings.md
+-rw-r--r--  1 runner runner    7384 Sep 28 01:45 valid-bugs.md
+---VALIDBUGS---
+79 reports/valid-bugs.md
+210f93d8dfdad9a76cd3c26b4d5a7b1656b51d31a34e1b538962fec423561e0e  reports/hypotheses.md
+b0235c41128374dbd24bcf1bfe1eb9e0a2a2159b46a94ab12e3bc3d8ea3ec43d  reports/reposcan-findings.md
+282390f83b2213178c41f92857bb9df779abc3deaaefb81fb9b8f8c886ae6369  reports/valid-bugs.md
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/opencode/*, /tmp/*); auto-rejecting
+[0m✗ [0mcd /tmp/opencode 2>/dev/null || cd /tmp; curl -sS https://gateway.sumup.com/hosted.js -o /tmp/opencode/hosted.js 2>/dev/null; ls -l /tmp/opencode/hosted.js 2>/dev/null; sha256sum /tmp/opencode/hosted.js 2>/dev/null failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
