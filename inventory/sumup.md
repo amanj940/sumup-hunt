@@ -1320,3 +1320,26 @@ www.sumup.com
 - CHANGED reports/valid-bugs.md running count 1 (gateway finding appended VALID 7.5 with FILE REPORT citing path/line-count/hash); auth.sam-app.ro finding also appended VALID 7.5
 - CHANGED Workspace re-materialized AGAIN: reports/ held only logs + hypotheses + valid-bugs.md at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not persist to cycle N+1
 - CHANGED api.sumup.com passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding
+
+## 2026-09-28 08:38:07 UTC
+- NEW workspace re-materialization confirmed again: `reports/` held only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not persist t
+- NEW gateway.sumup.com/hosted.js: origin parameter declared/supplied but applied ONLY outbound (`t.postMessage(e, n||"*")` with `n=document.referrer`); inbound handler never reads `event.origin`; three mes
+- NEW gateway.sumup.com/hosted.js: checkoutId gate is STATIC LITERAL (`ue=/^UUIDv1-5$/i`, `le=e=>ue.test(e)`) — three cycles incorrectly recorded as runtime `new RegExp(a.pattern)`
+- NEW js.sumup.com/api/checkouts/{id}: LIVE unauthenticated checkout existence oracle (404 JSON 181B, id reflected, no auth, no widget-session header); client-side UUID gate only (`xi` static literal in `sd
+- NEW pos-payment.sumup.com + staging: AWS API Gateway POS payment-link validator on rotating raw AWS IPs (eu-west-1); prod+staging byte-identical; only `/ping`→200; root 404 returns branded payment-link pa
+- NEW iso20022.sumup.com + iso20022-edge.sumup.com: ISO 20022/SEPA mesh gateway on Istio (`x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*`); no WAF; 5 h
+- NEW solo-edge-private.live.solo.sumup.com + .stage: RFC1918 in public DNS as live/stage pair (first instance of environment-paired private addresses)
+- NEW internal.sumup.com estate (5 names): all NXDOMAIN but disclose k8s topology via CT (dwh, dwh-replica, k8s-eu-west-1-live, k8s-eu-west-1-stage, k8s-eu-developers)
+- NEW mcp.sumup.com/.well-known/oauth-protected-resource: 200 at two paths (prod, never fetched in 29 cycles); publishes `scopes_supported:["offline_access","email"]`; kid-optional try-all on /mcp (RFC 8725
+- NEW dashboard.sumup.com / support.sumup.com: FIRST PROBE IN 28 CYCLES — both 308 permanent aliases to me.sumup.com / help.sumup.com (Vercel)
+- NEW auth.sam-app.ro/oauth2/register: POST 201 unauthenticated RFC 7591 confirmed LIVE; mints JWTs (empty `scp`, attacker-controlled `aud`); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, Z
+- NEW client_id=dashboard ACCEPTS `email` scope (302 `login_challenge`) on modern auth.sumup.com — completes consent set `{openid, classic, offline, readers.read, terminals.read, email}`; `offline_access` r
+- NEW serial-terminal.dev.solo.sumup.com: raw AmazonS3/CloudFront 200 on same estate as two Cognito-gated siblings; gate inconsistency confirmed; key-variation proves no ListBucket, no object served (defaul
+- NEW crt.sh-diff technique now self-defeating: 224 CT names, 0 unmapped — analyst logs in repo record every name ever seen; "appears in repo" ≠ "probed"
+- CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations
+- CHANGED gateway.sumup.com/hosted.js sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873` verified byte-identical; origin-validation greps 0/0/0/0; framing headers 0
+- CHANGED reports/gateway-hostedfields-cross-origin-messenger.md GENUINELY on disk — 270 lines, 14,332 B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
+- CHANGED reports/cognito-implicit-grant-dev-solo-buckets.md GENUINELY on disk — 129 lines, 5,728 B, sha256 `c8aa4ff8dbb989593d6d20220ff55a7b86eb588c40fa91aa9e230b955bdffb06`
+- CHANGED reports/valid-bugs.md running count 1 (gateway finding appended VALID 7.5 with FILE REPORT citing path/line-count/hash); auth.sam-app.ro finding also appended VALID 7.5
+- CHANGED Workspace re-materialized AGAIN: `reports/` held only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not persist to cycle N+1
+- CHANGED api.sumup.com passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding
