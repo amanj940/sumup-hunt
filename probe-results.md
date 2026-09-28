@@ -1380,3 +1380,12 @@ https://gateway.sumup.com/hosted.js -> 200 len=26839
 https://gateway.sumup.com/ -> 200 len=546
 https://pos-payment.sumup.com/ -> HTTP 403
 https://pos-payment.sumup.com/ping -> HTTP 403
+
+## 2026-09-28 17:04:50 UTC
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://gateway.sumup.com/ -> 200 len=546
+https://pos-payment.sumup.com/ -> HTTP 403
+https://pos-payment.sumup.com/ping -> HTTP 403
+https://staging.pos-payment.sumup.com/` -> HTTP 400
+https://klocwork.dev.solo.sumup.com/` -> ERR <urlopen error timed out>
+https://mcp.sumup.com/` -> HTTP 404

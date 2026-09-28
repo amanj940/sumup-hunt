@@ -7202,3 +7202,38 @@ testability: AUTH_HELPED
 [RISK] sumup: 82. Up 3, and the gains are of a different kind than the last several cycles. The report is on disk with a hash taken in the same act as the write, so the file-delivery risk I have carried for 30+ cycles is closed for this artifact. The larger gain is that three carried-forward technical claims were falsified by reading the source rather than the summary — including a cross-origin chain between two of my own findings that would have inflated both. That is the error class that costs a triager credibility, and it is now measured rather than assumed: one of the three would have shipped. I am explicitly not scoring the submission as risk reduction. 21 cycles on, nothing is filed, and treating this report as delivered would be the same category of mistake as the file claims, one level up.
 ## 2026-09-28 01:45:54 UTC [target] (model bigpickle)
 ## 2026-09-28 08:37:57 UTC [target] (model bigpickle)
+## 2026-09-28 17:04:17 UTC [target] (model bigpickle)
+[HYP] Staging POS-payment environment publicly reachable without auth
+class: MISCONFIG
+asset: staging.pos-payment.sumup.com
+confidence: 45
+reasoning: inventory lists staging.pos-payment.sumup.com as company-owned; staging deployments of payment apps typically serve the built app, a non-prod login, and dev-configured API base URLs, and are frequently left internet-reachable
+evidence_needed: 200/3xx to `/` with no auth; a dev or staging API hostname, build/version string, debug flag, or source map in the served HTML/JS; a non-prod login that is itself unauthenticated-reachable with a data-returning endpoint
+verify_steps: `curl -sS -D- -o /dev/null https://staging.pos-payment.sumup.com/`; then GET `/`, `/manifest.json`, `/asset-manifest.json` at >=1 s spacing; read-only, no credentials submitted
+impact: if it serves staging data or dev API keys, an unauthenticated attacker reads non-production payment/merchant data — Low/Medium depending on content
+testability: PASSIVE
+[HYP] Klocwork static-analysis server reachable without authentication
+class: MISCONFIG
+asset: klocwork.dev.solo.sumup.com
+confidence: 40
+reasoning: klocwork.dev.solo.sumup.com is a dev-domain Klocwork instance; Klocwork servers hold project source, findings, and upload/project metadata and are historically deployed on internal-only networks
+evidence_needed: 200/302 to `/` with no auth challenge; any read of project list, findings, or source file content without credentials
+verify_steps: `curl -sS -D- -o /dev/null https://klocwork.dev.solo.sumup.com/`; then GET `/` and any unauthenticated project/findings path it advertises, >=1 s spacing, no auth headers
+impact: unauthenticated source-code and vulnerability disclosure for a payments codebase — High if source is served
+testability: PASSIVE
+[HYP] MCP tool server answers unauthenticated tool enumeration
+class: OTHER
+asset: mcp.sumup.com
+confidence: 40
+reasoning: mcp.sumup.com is a company-owned Model Context Protocol endpoint; MCP servers commonly expose a `/mcp` or `/sse` transport and a `/.well-known` descriptor, and are sometimes deployed without an auth layer
+evidence_needed: unauthenticated tool/resource enumeration returning schemas, or a descriptor disclosing upstream internal hosts and privileged operations
+verify_steps: `curl -sS -D- -o /dev/null https://mcp.sumup.com/`; then GET `/.well-known/oauth-authorization-server` and any advertised descriptor path, >=1 s spacing
+impact: unauthenticated enumeration of internal agent capabilities, and any privileged tool reachable without a session — Medium
+testability: PASSIVE
+[PARKED] none dropped — all three survivors are >=40 confidence, carry passive-first verify steps, and none map to a REJECTED class
+[FINAL] 1. Staging POS-payment environment publicly reachable without auth (45) 2. MCP tool server answers unauthenticated tool enumeration (40) 3. Klocwork static-analysis server reachable without authentication (40)
+[NEXT] PROBE: `curl -sS -D- -o /dev/null --max-time 20 https://staging.pos-payment.sumup.com/` — read-only unauthenticated request, first of the ranked list, to establish whether the staging payment environment is internet-reachable without auth
+[LEARN] REJECTED OTHER @ circuit.sumup.com: a public Storybook is only a finding if it discloses something the vendor does not already publish. Recovering the full 102-chunk MDX/story module set and diffing it against the vendor's public repo proved content parity and found no secret, internal host, or source path, so the whole class "internal docs exposed" was exhausted here and should not be re-attempted on other `@sumup-oss` doc hosts
+[LEARN] ACCEPTED MISCONFIG @ staging/klocwork/mcp hosts: none of the three has any direct evidence yet, so confidence stays at 40-45 and the next cycle must start with the single unauthenticated GET rather than assuming a finding exists
+[LEARN] REJECTED persistence-of-artifact @ workspace: three cycles in a row issued a `[NEXT] HUMAN` pointing at a report path that `ls` proved absent; any future report must be written and re-read with `wc -l`/`sha256sum` in the same command before it is referenced
+[RISK] sumup: 10 — this cycle issued roughly ten unauthenticated GETs at >=1 s spacing against a static CDN-hosted documentation site plus one read of a public raw.githubusercontent.com file; no credentials, no customer/financial/auth data, no mutating request, no auth-bypass attempt
