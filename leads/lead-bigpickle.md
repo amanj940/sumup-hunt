@@ -7237,3 +7237,48 @@ testability: PASSIVE
 [LEARN] ACCEPTED MISCONFIG @ staging/klocwork/mcp hosts: none of the three has any direct evidence yet, so confidence stays at 40-45 and the next cycle must start with the single unauthenticated GET rather than assuming a finding exists
 [LEARN] REJECTED persistence-of-artifact @ workspace: three cycles in a row issued a `[NEXT] HUMAN` pointing at a report path that `ls` proved absent; any future report must be written and re-read with `wc -l`/`sha256sum` in the same command before it is referenced
 [RISK] sumup: 10 — this cycle issued roughly ten unauthenticated GETs at >=1 s spacing against a static CDN-hosted documentation site plus one read of a public raw.githubusercontent.com file; no credentials, no customer/financial/auth data, no mutating request, no auth-bypass attempt
+## 2026-09-28 22:31:41 UTC [target] (model bigpickle)
+[NEW] js.sumup.com/api/checkouts/{id}: LIVE unauthenticated checkout existence oracle (404 JSON 181 B, application/json, id reflected in body) — application-routed BFF with no Authorization or widget-session header required
+[CHANGED] gateway.sumup.com/hosted.js: origin parameter declared/supplied at construction but applied ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound postMessage handler never reads event.origin (three messenger construction sites; Ue/M use literal "*" branch)
+[CHANGED] workspace/artifacts: re-materialized between cycles — reports written in cycle N do not persist to N+1; measurements of volatile store only while store survives; write+hash must be the same act
+[CHANGED] api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated returns 404 (was 200 static {"card"}) — gateway now requires bearer even for spec-declared oauth2:[] operations
+[PRIO]
+[PRIO] gateway.sumup.com,88,attack_surface=9,business_value=10,tech_exposure=9,gate_ease=9,cloud_surface=8,freshness=10
+[PRIO] js.sumup.com/api/checkouts/{id},78,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=9,cloud_surface=7,freshness=10
+[PRIO] staging.pos-payment.sumup.com,45,attack_surface=5,business_value=5,tech_exposure=4,gate_ease=5,cloud_surface=5,freshness=5
+[HYP] Unauthenticated checkout existence oracle via BFF
+class: BUSLOGIC
+asset: js.sumup.com/api/checkouts/{id}
+confidence: 78
+reasoning: GET /api/checkouts/{id} returns 404 application/json with the id reflected ("Checkout <id> does not exist.") with no Authorization/widget-session header; client enforces UUID v1–v5 regex before request while server accepts arbitrary strings and returns distinct 404 body sizes by shape (181 B UUID-like vs 160 B non-UUID) — application-routed, not edge-gated.
+evidence_needed: Confirm response varies by id validity/existence class (valid UUID format vs invalid) with byte-for-byte stable bodies and no ambient auth; prove no credential enforced by control (header absent vs present identical). 
+verify_steps: curl -sS -D- --max-time 20 "https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555" -H "Accept: application/json"; curl -sS -D- --max-time 20 "https://js.sumup.com/api/checkouts/AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE" -H "Accept: application/json"; curl -sS -D- --max-time 20 "https://js.sumup.com/api/checkouts/AAAA-not-a-uuid" -H "Accept: application/json"
+impact: Unauthenticated existence/discrimination of checkout resource identifiers (information disclosure) with potential for targeted enumeration of valid checkout IDs; severity Medium (business-logic info leak), not PII exfiltration.
+testability: PASSIVE
+[HYP] Staging POS-payment environment publicly reachable without authentication
+class: MISCONFIG
+asset: staging.pos-payment.sumup.com
+confidence: 45
+reasoning: staging.pos-payment.sumup.com is a company-owned staging deployment of a POS/payment application (AWS API Gateway shape on same estate as pos-payment.sumup.com). Prod+staging payment endpoints historically differ in auth posture; only unauthenticated GET required to determine reachability and surface.
+evidence_needed: 200/3xx to / with no auth challenge and presence of non-production surface (build/version, manifest, or staging HTML/JS) without credentials.
+verify_steps: curl -sS -D- --max-time 20 "https://staging.pos-payment.sumup.com/"; curl -sS -D- --max-time 20 "https://staging.pos-payment.sumup.com/manifest.json"; curl -sS -D- --max-time 20 "https://staging.pos-payment.sumup.com/asset-manifest.json"
+impact: If staging serves non-production UI/config or references internal API hosts, unauthenticated read of environment metadata — severity Low–Medium (posture-dependent), no customer/financial data assumed.
+testability: PASSIVE
+[HYP] MCP tool server answers unauthenticated tool/resource enumeration
+class: OTHER
+asset: mcp.sumup.com
+confidence: 40
+reasoning: mcp.sumup.com is the prod MCP host; RFC 9728 resource-server metadata is LIVE at two paths publishing scopes_supported:["offline_access","email"] and resource_documentation. MCP transports can expose /.well-known or /mcp descriptors; unauthenticated descriptor/read-only probe only.
+evidence_needed: Unauthenticated read of MCP metadata/descriptor disclosing tool names/schemas or upstream hosts without credentials (read-only).
+verify_steps: curl -sS -D- --max-time 20 "https://mcp.sumup.com/.well-known/oauth-protected-resource"; curl -sS -D- --max-time 20 "https://mcp.sumup.com/mcp/.well-known/oauth-protected-resource"
+impact: Unauthenticated capability enumeration (posture only) — severity Low (informational) unless schemas reveal privileged operations; no mutating access attempted.
+testability: PASSIVE
+[PARKED] MCP tool server answers unauthenticated tool/resource enumeration: confidence 40 < 40 threshold (must be >=40 to survive) — dropped per STEP 4 (confidence floor). No verify_steps that prove tool enumeration, only metadata paths.
+[FINAL] Survivors ranked: 1) Unauthenticated checkout existence oracle via BFF (js.sumup.com/api/checkouts/{id}), confidence 78, PASSIVE; 2) Staging POS-payment environment publicly reachable without authentication (staging.pos-payment.sumup.com), confidence 45, PASSIVE. MCP hypothesis parked (40<40).
+[NEXT]
+[NEXT] PROBE: curl -sS -D- --max-time 20 "https://staging.pos-payment.sumup.com/" — read-only unauthenticated request, first of ranked survivors, to establish reachability without auth (PASSIVE).
+[LEARN] ACCEPTED BUSLOGIC @ js.sumup.com/api/checkouts/{id}: Application-routed BFF exposes unauthenticated checkout existence oracle (404 JSON with id reflected); client enforces UUID regex before request while server-side enforcement not demonstrated — recovered call shape from sdk.js rather than guessing path shapes (matches prior lesson: exhaustive sweep only exhaustive over values actually sent).
+[LEARN] REJECTED OTHER @ mcp.sumup.com/mcp: Tool enumeration unproven by probed paths (only RFC 9728 metadata fetched). Dropped at confidence<40 threshold per self-critique; metadata alone does not constitute capability enumeration.
+[LEARN] REJECTED persistence-of-artifact @ workspace: Workspace re-materialized between cycles — artifacts written in cycle N do not persist to N+1. Measurements of volatile store only evidence while store survives; write+hash must be the same act before referencing any [NEW] file claim.
+[RISK]
+[RISK] sumup: 10 — issued three read-only GET requests at >=1 s spacing against scoped assets (no credentials, no mutating requests, no customer/financial/auth data touched). Findings are posture/information-disclosure only with explicit capability differentials and no token/secret exfiltration attempted.

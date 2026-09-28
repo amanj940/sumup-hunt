@@ -1365,3 +1365,9 @@ www.sumup.com
 - CHANGED reports/valid-bugs.md running count 1 (gateway finding appended VALID 7.5 with FILE REPORT citing path/line-count/hash); auth.sam-app.ro finding also appended VALID 7.5.
 - CHANGED Workspace re-materialized AGAIN: `reports/` held only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not persist to cycle N+1.
 - CHANGED api.sumup.com passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding.
+
+## 2026-09-28 22:32:04 UTC
+- NEW js.sumup.com/api/checkouts/{id}: LIVE unauthenticated checkout existence oracle (404 JSON 181 B, application/json, id reflected in body) — application-routed BFF with no Authorization or widget-sessio
+- CHANGED gateway.sumup.com/hosted.js: origin parameter declared/supplied at construction but applied ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound postMessage handler never reads e
+- CHANGED workspace/artifacts: re-materialized between cycles — reports written in cycle N do not persist to N+1; measurements of volatile store only while store survives; write+hash must be the same act
+- CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated returns 404 (was 200 static {"card"}) — gateway now requires bearer even for spec-declared oauth2:[] operations

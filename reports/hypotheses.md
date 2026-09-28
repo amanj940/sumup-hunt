@@ -3178,3 +3178,23 @@
 - LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
 - LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
 - LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob
+
+## RANKED HYPOTHESES 2026-09-28 22:32:04 UTC
+- [88] gateway.sumup.com: gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control (from art/lead_nemotron3.txt)
+- [78] js.sumup.com/api/checkouts/{id}: Unauthenticated checkout existence oracle via BFF (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: curl -sS -D- --max-time 20 "https://staging.pos-payment.sumup.com/" — read-only unauthenticated request, first of ranked survivors, to establish reachabi
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://pos-payment.sumup.com/ + breadth-first path enumeration via known AWS API Gateway patterns (/prod/, /v1/, /pay/, /link/, /webhook/, /callback
+- LEARN: ACCEPTED BUSLOGIC @ js.sumup.com/api/checkouts/{id}: Application-routed BFF exposes unauthenticated checkout existence oracle (404 JSON with id reflected); clie
+- LEARN: REJECTED OTHER @ mcp.sumup.com/mcp: Tool enumeration unproven by probed paths (only RFC 9728 metadata fetched). Dropped at confidence<40 threshold per self-crit
+- LEARN: REJECTED persistence-of-artifact @ workspace: Workspace re-materialized between cycles — artifacts written in cycle N do not persist to N+1. Measurements of vol
+- LEARN: ACCEPTED OTHER @ reports/ and workspace: file-creation streak root cause is **workspace re-materialized between cycles** — uniform mtimes, no stray copies, vali
+- LEARN: ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound ha
+- LEARN: REJECTED OTHER @ gateway.sumup.com/hosted.js: "unrecoverable runtime pattern" gate — three cycles recorded checkoutId check as new RegExp(a.pattern); one retrac
+- LEARN: ACCEPTED MISCONFIG @ js.sumup.com/api: finding came from recovering call shape (sdk.js) not guessing path shapes; prefix sweep structurally incapable of hitting
+- LEARN: REJECTED MISCONFIG @ js.sumup.com/api: access-control-allow-origin:* + access-control-allow-credentials:true is hardening-only — withCredentials set only when o
+- LEARN: ACCEPTED OTHER @ mcp.sumup.com: RFC 9728 resource-server metadata LIVE on prod MCP at two paths publishing scopes_supported:["offline_access","email"] — KB only
+- LEARN: REJECTED AUTH @ mcp.sumup.com/mcp: JWT alg:none and RS256→HS256 key confusion both explicitly refused by prod verifier; allowlist exactly {RS256, EdDSA} (RS384/
+- LEARN: ACCEPTED OATH @ auth.sumup.com: client_id=dashboard ACCEPTS email (302 login_challenge), completing consent set {openid, classic, offline, readers.read, termina
+- LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
+- LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
+- LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob
