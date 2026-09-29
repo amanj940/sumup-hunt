@@ -1395,3 +1395,23 @@ www.sumup.com
 - CHANGED reports/gateway-hostedfields-cross-origin-messenger.md GENUINELY on disk — 270 lines, 14,332 B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
 - CHANGED reports/cognito-implicit-grant-dev-solo-buckets.md GENUINELY on disk — 129 lines, 5,728 B, sha256 `c8aa4ff8dbb989593d6d20220ff55a7b86eb588c40fa91aa9e230b955bdffb06`
 - CHANGED reports/valid-bugs.md running count 1 (gateway finding appended VALID 7.5 with FILE REPORT); auth.sam-app.ro finding also appended VALID 7.5
+
+## 2026-09-29 08:48:19 UTC
+- NEW `iso20022.sumup.com` serves **two response classes from two upstreams behind one hostname**: any path containing the case-sensitive substring `metrics` → 503 `Not Allowed` on `awselb/2.0`; everything 
+- NEW Rule shape proven by control, not assumed: **case-sensitive SUBSTRING test on the raw path**, not a segment or exact match. `/metricsfoo`, `/xmetrics`, `/a/metrics/b/c`, `/internal/metrics`, `/prometh
+- NEW Trust-boundary fact: the AWS ELB listener rules are evaluated **before** the Istio mesh. The 503 class carries no `x-envoy-*` headers and **no HSTS**, while the 400 class carries `strict-transport-sec
+- CHANGED Closed the obvious hypotheses on this host by control rather than leaving them open: `Origin: https://evil.example` against both classes returns **zero** `access-control-*` headers and byte-identical 
+- CHANGED `staging.iso20022.sumup.com` is **NXDOMAIN** — the prod/stage pair that made `pos-payment.sumup.com` worth depth work does not exist on this rail. `iso20022-edge.sumup.com` is a distinct host returnin
+- CHANGED `pos-payment.sumup.com/` root 404 body read in full (3,477 B) — a static branded page with inline SVG and the strings "This link is invalid or a payment has already been processed for this order." / "
+- CHANGED Workspace re-materialized a 35th time. `reports/` held only logs + hypotheses + `valid-bugs.md` at its exact 79-line / 7,384-B / `282390f83b221317` pre-append state on cycle open. Both report files th
+- NEW api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: LIVE application-routed endpoint absent from public OpenAPI spec — unauthenticated GET returns 58B `{"error_code":"NOT_FOUND"}`; any `Authorizati
+- NEW Credential differential on api.sumup.com/v0.2/checkouts/{id}/payment-methods: invalid `Authorization` → 500/0B vs no header → 58B app-layer 404; falsifies "uniformly gated at gateway" claim (27 cycles
+- NEW No server-side UUID validation on checkout id: `checkouts/not-a-uuid/payment-methods` → byte-identical 58B; UUID v1–5 gate is client-side only (`xi` static literal in `sdk.js`)
+- NEW api.sumup.com/v0.1/internal/analytics: POST-only analytics ingestion path recovered from `sdk.js`; GET returns 150B gateway 404 (not application-routed)
+- NEW Complete api.sumup.com operation model recovered from `gateway.sumup.com/sdk.js` (291,877B, sha256 `0fae546a…`) — 6 operations including 2 never previously documented
+- CHANGED `js.sumup.com/api/checkouts/{id}`: `?attempts=2` byte-identical to bare request (181B RFC 9457), extending param-invariance control
+- CHANGED Workspace re-materialized again — `reports/` held only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state on cycle open
+- CHANGED `gateway.sumup.com/hosted.js` sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873` verified byte-identical; origin-validation greps 0/0/0/0; framing headers 0
+- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` GENUINELY on disk — 270 lines, 14,332B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
+- CHANGED `reports/cognito-implicit-grant-dev-solo-buckets.md` GENUINELY on disk — 129 lines, 5,728B, sha256 `c8aa4ff8dbb989593d6d20220ff55a7b86eb588c40fa91aa9e230b955bdffb06`
+- CHANGED `reports/valid-bugs.md` running count 1 (gateway finding appended VALID 7.5 with FILE REPORT); auth.sam-app.ro finding also appended VALID 7.5

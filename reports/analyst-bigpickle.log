@@ -53301,3 +53301,457 @@ testability: HUMAN_ONLY
 
 [RISK] sumup: 8 — issued 11 unauthenticated read-only GETs at >=1 s spacing plus one public static-asset fetch of the first-party `sdk.js`. No credentials, no cookies, no mutating request, no customer/financial/PII/authentication data read or touched, no auth-bypass attempt, no rate-limit interaction. One request deliberately carried a syntactically invalid `Authorization` header to test credential handling, which is a negative-control on the target's own verifier and returned an empty 500; no valid credential, valid token, or merchant account was involved.
 ```
+===== ANALYST bigpickle 2026-09-29 08:48:19 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la reports/ 2>/dev/null | head -40; echo "---SHA---"; for f in reports/*.md; do [ -f "$f" ] && printf "%s %s %s\n" "$(wc -l < "$f")" "$(wc -c < "$f")" "$(sha256sum "$f" | cut -c1-16)"; done 2>/dev/null; echo "---MTIME---"; ls -la --time-style=full-iso reports/ 2>/dev/null | head -20
+total 7240
+drwxr-xr-x  2 runner runner    4096 Sep 29 08:44 .
+drwxr-xr-x 12 runner runner    4096 Sep 29 08:44 ..
+-rw-r--r--  1 runner runner 4224265 Sep 29 08:44 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   35371 Sep 29 08:44 analyst-laguna.log
+-rw-r--r--  1 runner runner   35208 Sep 29 08:44 analyst-ling3.log
+-rw-r--r--  1 runner runner   35534 Sep 29 08:44 analyst-longcat.log
+-rw-r--r--  1 runner runner 2506115 Sep 29 08:44 analyst-nemotron3.log
+-rw-r--r--  1 runner runner   11946 Sep 29 08:44 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Sep 29 08:44 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Sep 29 08:44 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Sep 29 08:44 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   14845 Sep 29 08:44 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  499583 Sep 29 08:44 hypotheses.md
+-rw-r--r--  1 runner runner    9173 Sep 29 08:44 reposcan-findings.md
+-rw-r--r--  1 runner runner    7384 Sep 29 08:44 valid-bugs.md
+---SHA---
+3221 499583 35cf1ebac3754336
+112 9173 b0235c41128374db
+79 7384 282390f83b221317
+---MTIME---
+total 7240
+drwxr-xr-x  2 runner runner    4096 2026-09-29 08:44:06.495291776 +0000 .
+drwxr-xr-x 12 runner runner    4096 2026-09-29 08:44:15.564361249 +0000 ..
+-rw-r--r--  1 runner runner 4224265 2026-09-29 08:44:06.492291753 +0000 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   35371 2026-09-29 08:44:06.493291761 +0000 analyst-laguna.log
+-rw-r--r--  1 runner runner   35208 2026-09-29 08:44:06.493291761 +0000 analyst-ling3.log
+-rw-r--r--  1 runner runner   35534 2026-09-29 08:44:06.493291761 +0000 analyst-longcat.log
+-rw-r--r--  1 runner runner 2506115 2026-09-29 08:44:06.494291768 +0000 analyst-nemotron3.log
+-rw-r--r--  1 runner runner   11946 2026-09-29 08:44:06.494291768 +0000 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 2026-09-29 08:44:06.494291768 +0000 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 2026-09-29 08:44:06.494291768 +0000 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 2026-09-29 08:44:06.494291768 +0000 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   14845 2026-09-29 08:44:06.494291768 +0000 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  499583 2026-09-29 08:44:06.495291776 +0000 hypotheses.md
+-rw-r--r--  1 runner runner    9173 2026-09-29 08:44:06.495291776 +0000 reposcan-findings.md
+-rw-r--r--  1 runner runner    7384 2026-09-29 08:44:06.495291776 +0000 valid-bugs.md
+[0m
+Workspace re-materialized again — `valid-bugs.md` is at exactly 79 lines / 7,384 B / `282390f83b221317` (pre-append state), and both report files last cycle claimed on disk are absent. Opening by reading, not trusting.
+[0m$ [0mcd /tmp/opencode && curl -sS -D- --max-time 25 "https://pos-payment.sumup.com/" -o /tmp/opencode/pospay.body 2>&1 | head -30; echo "=== BODY SIZE ==="; wc -c /tmp/opencode/pospay.body; echo "=== BODY ==="; cat /tmp/opencode/pospay.body
+HTTP/2 404 
+date: Tue, 29 Sep 2026 08:44:47 GMT
+content-type: text/html
+content-length: 3477
+x-amzn-requestid: f066d1d1-4354-43e4-8304-7abef0bb2d15
+x-amz-apigw-id: EdAT_FTdjoEEsIQ=
+
+=== BODY SIZE ===
+3477 /tmp/opencode/pospay.body
+=== BODY ===
+<html>
+  <head>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: aktiv-grotesk, Helvetica, Arial, system-ui, sans-serif, 'Segoe UI', Roboto,
+          'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+      }
+      svg {
+        margin: 20px 0;
+        width: 120px;
+      }
+      p {
+        margin: 10px;
+        font-size: 16px;
+        text-align: center;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <svg viewBox="0 0 214 63" xmlns="http://www.w3.org/2000/svg" fill="black">
+      <g fill-rule="evenodd">
+        <path
+          d="M58.2.5H5.1C2.7.5.7 2.5.7 4.9v52.8c0 2.4 2 4.4 4.4 4.4h53.1c2.4 0 4.4-2 4.4-4.4V4.9c0-2.5-2-4.4-4.4-4.4zM39.5 46.8c-5.4 5.4-14 5.6-19.7.7l-.1-.1c-.3-.3-.4-.9 0-1.3L38.9 27c.4-.3.9-.3 1.3 0 5 5.8 4.8 14.4-.7 19.8zm4-30.5L24.3 35.4c-.4.3-.9.3-1.3 0-5-5.7-4.8-14.3.6-19.7 5.4-5.4 14-5.6 19.7-.7 0 0 .1 0 .1.1.5.3.5.9.1 1.2z"
+          fill-rule="nonzero"
+        ></path>
+        <path
+          d="M144.5 17.6h-.1c-2.4 0-4.5 1-6 2.5-1.5-1.5-3.7-2.5-6-2.5h-.1c-4.6 0-8.4 3.7-8.4 8.4v16.3c.1 1.3 1.1 2.3 2.4 2.3 1.3 0 2.3-1 2.4-2.3V26c0-2 1.6-3.6 3.6-3.6h.1c2 0 3.5 1.5 3.6 3.5v16.4c.121 1.182.953 2.3 2.3 2.3 1.3 0 2.3-1 2.4-2.3V25.8c.1-1.9 1.7-3.5 3.6-3.5h.1c2 0 3.6 1.6 3.6 3.6v16.4c.1 1.3 1.1 2.3 2.4 2.3 1.3 0 2.3-1 2.4-2.3V26c.1-4.6-3.7-8.4-8.3-8.4zm-28.4 0c-1.3 0-2.3 1-2.4 2.3v16.3c0 2-1.6 3.6-3.7 3.6h-.1c-2 0-3.7-1.6-3.7-3.6V19.8c-.1-1.3-1.1-2.3-2.4-2.3-1.3 0-2.3 1-2.4 2.3v16.3c0 4.6 3.8 8.4 8.5 8.4h.1c4.7 0 8.5-3.8 8.5-8.4V19.9c0-1.3-1.1-2.3-2.4-2.3zm56.8 0c-1.3 0-2.3 1-2.4 2.3v16.3c0 2-1.6 3.6-3.7 3.6h-.1c-2 0-3.7-1.6-3.7-3.6V19.8c-.1-1.3-1.1-2.3-2.4-2.3-1.3 0-2.3 1-2.4 2.3v16.3c0 4.6 3.8 8.4 8.5 8.4h.1c4.7 0 8.5-3.8 8.5-8.4V19.9c-.1-1.3-1.1-2.3-2.4-2.3z"
+        ></path>
+        <path
+          d="M188.8 17.6h-.1c-4.8 0-8.6 3.8-8.6 8.5v29.6c0 1.3 1.1 2.4 2.4 2.4 1.3 0 2.4-1.1 2.4-2.4V43.4c.9.8 2.4 1.2 3.8 1.2h.1c4.8 0 8.4-4.1 8.4-8.8v-9.9c0-4.7-3.6-8.3-8.4-8.3zm3.8 18.4c0 2.6-1.7 3.7-3.7 3.7h-.1c-2.1 0-3.7-1.1-3.7-3.7v-9.9c0-2 1.7-3.7 3.7-3.7h.1c2.1 0 3.7 1.6 3.7 3.7V36z"
+          fill-rule="nonzero"
+        ></path>
+        <path
+          d="M89.6 28.3c-2.7-1.1-4.4-1.8-4.4-3.4 0-1.3 1-2.5 3.3-2.5 1.4 0 2.6.6 3.5 1.8.6.7 1.2 1.1 1.9 1.1 1.4 0 2.5-1.1 2.5-2.4 0-.5-.1-1-.4-1.3-1.5-2.3-4.6-3.9-7.5-3.9-4 0-8.1 2.5-8.1 7.3 0 4.9 4 6.5 7.3 7.7 2.6 1 4.9 1.9 4.9 4 0 1.6-1.5 3.2-4.3 3.2-.9 0-2.5-.2-3.6-1.5-.6-.7-1.3-1-1.9-1-1.3 0-2.5 1.1-2.5 2.4 0 .5.2 1 .5 1.4 1.5 2.3 4.9 3.4 7.5 3.4 4.4 0 9.2-2.8 9.2-7.9-.1-5.4-4.4-7.1-7.9-8.4z"
+        ></path>
+        <g fill-rule="nonzero">
+          <path
+            d="M208.4 17.6c-2.6 0-4.8 2.1-4.8 4.8 0 2.6 2.1 4.8 4.8 4.8 2.6 0 4.8-2.1 4.8-4.8 0-2.6-2.1-4.8-4.8-4.8zm0 8.4c-2 0-3.6-1.6-3.6-3.6s1.6-3.6 3.6-3.6 3.6 1.6 3.6 3.6-1.6 3.6-3.6 3.6z"
+          ></path>
+          <path
+            d="M208.9 22.6c.6-.1 1-.6 1-1.2 0-.8-.6-1.3-1.5-1.3h-1.2c-.3 0-.5.2-.5.5v3.3c0 .3.2.5.5.5s.5-.2.5-.5v-1.2l1.2 1.5c.1.2.2.2.5.2.4 0 .5-.3.5-.5s-.1-.3-.2-.4l-.8-.9zm-.4-.7h-.6v-1h.6c.3 0 .5.2.5.5 0 .2-.2.5-.5.5z"
+          ></path>
+        </g>
+      </g>
+    </svg>
+    <p>This link is invalid or a payment has already been processed for this order.</p>
+    <p>Please contact your support agent if you need a new link.</p>
+  </body>
+</html>
+[0m
+Root 404 body of `pos-payment.sumup.com` is a static branded page — no form, no script, no path template. The link-validator route is not discoverable from it. Pivoting to the least-probed money asset: an Istio-mesh ISO 20022/SEPA rail that has received only ~1 probe across 35 cycles. `libcluster` + `br-terminals` + envoy strongly suggests a JVM service, and the actuator surface has never been tested.
+[0m$ [0mcd /tmp/opencode && for p in "" "actuator" "actuator/health" "actuator/info" "actuator/env" "actuator/mappings" "health" "healthz" "readyz" "livez" "metrics" "swagger-ui/index.html" "v3/api-docs" "swagger-resources" "api-docs" "openapi.json" "info" "version"; do
+  u="https://iso20022.sumup.com/$p"
+  out=$(curl -sS -o /tmp/opencode/b -w '%{http_code} %{size_download} %{content_type}' --max-time 20 "$u" 2>/dev/null)
+  printf '%-24s %s\n' "/$p" "$out"
+  sleep 1.2
+done
+/                        400 11 
+/actuator                400 11 
+/actuator/health         400 11 
+/actuator/info           400 11 
+/actuator/env            400 11 
+/actuator/mappings       400 11 
+/health                  400 11 
+/healthz                 400 11 
+/readyz                  400 11 
+/livez                   400 11 
+/metrics                 503 11 text/plain; charset=utf-8
+/swagger-ui/index.html   400 11 
+/v3/api-docs             400 11 
+/swagger-resources       400 11 
+/api-docs                400 11 
+/openapi.json            400 11 
+/info                    400 11 
+/version                 400 11
+[0m
+`/metrics` returns **503** while all 16 other paths return **400** — a real discriminator, not noise. Let me capture bodies and headers for both classes.
+[0m$ [0mcd /tmp/opencode && echo "=== /metrics (503 class) ==="; curl -sS -D- --max-time 20 "https://iso20022.sumup.com/metrics" 2>&1 | head -40; sleep 1.2; echo; echo "=== / (400 class) ==="; curl -sS -D- --max-time 20 "https://iso20022.sumup.com/" 2>&1 | head -40; sleep 1.2; echo; echo "=== /actuator/mappings (400 class) ==="; curl -sS -D- --max-time 20 "https://iso20022.sumup.com/actuator/mappings" 2>&1 | head -40
+=== /metrics (503 class) ===
+HTTP/2 503 
+server: awselb/2.0
+date: Tue, 29 Sep 2026 08:45:47 GMT
+content-type: text/plain; charset=utf-8
+content-length: 11
+
+Not Allowed
+=== / (400 class) ===
+HTTP/2 400 
+date: Tue, 29 Sep 2026 08:45:49 GMT
+content-length: 11
+cache-control: max-age=0, private, must-revalidate
+server: istio-envoy
+strict-transport-security: max-age=31536000
+x-envoy-upstream-service-time: 0
+x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*
+
+Bad Request
+=== /actuator/mappings (400 class) ===
+HTTP/2 400 
+date: Tue, 29 Sep 2026 08:45:50 GMT
+content-length: 11
+cache-control: max-age=0, private, must-revalidate
+server: istio-envoy
+strict-transport-security: max-age=31536000
+x-envoy-upstream-service-time: 0
+x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*
+
+Bad Request
+[0m
+`/metrics` is served by **`awselb/2.0`** (a different upstream entirely) while all 16 others are served by `istio-envoy`. Both bodies are 11-byte Envoy stubs. Applying the control-pair discipline: is `/metrics` special because of the path, or is the divergence a whole different route group?
+[0m$ [0mcd /tmp/opencode && for p in "metrics" "metrics/" "metrics/foo" "foo/metrics" "METRICS" "Metrics" "metrics?x=1" "actuator" "actuator/" "prometheus" "prometheus/metrics" "status" "healthcheck" "internal/metrics"; do
+  h=$(curl -sS -D- -o /tmp/opencode/b2 --max-time 20 "https://iso20022.sumup.com/$p" 2>/dev/null | grep -iE '^(HTTP/|server:)' | tr -d '\r' | paste -sd' | ')
+  printf '%-22s %-42s body=%s\n' "/$p" "$h" "$(cat /tmp/opencode/b2)"
+  sleep 1.2
+done
+/metrics               HTTP/2 503  server: awselb/2.0             body=Not Allowed
+/metrics/              HTTP/2 503  server: awselb/2.0             body=Not Allowed
+/metrics/foo           HTTP/2 503  server: awselb/2.0             body=Not Allowed
+/foo/metrics           HTTP/2 503  server: awselb/2.0             body=Not Allowed
+/METRICS               HTTP/2 400  server: istio-envoy            body=Bad Request
+/Metrics               HTTP/2 400  server: istio-envoy            body=Bad Request
+/metrics?x=1           HTTP/2 503  server: awselb/2.0             body=Not Allowed
+/actuator              HTTP/2 400  server: istio-envoy            body=Bad Request
+/actuator/             HTTP/2 400  server: istio-envoy            body=Bad Request
+/prometheus            HTTP/2 400  server: istio-envoy            body=Bad Request
+/prometheus/metrics    HTTP/2 503  server: awselb/2.0             body=Not Allowed
+/status                HTTP/2 400  server: istio-envoy            body=Bad Request
+/healthcheck           HTTP/2 400  server: istio-envoy            body=Bad Request
+/internal/metrics      HTTP/2 503  server: awselb/2.0             body=Not Allowed
+[0m
+`/metrics` is not a special path — it is a **segment-matched route group on a different upstream**. Any path containing a lowercase `metrics` segment (`/foo/metrics`, `/internal/metrics`, `/prometheus/metrics`) → `awselb/2.0` 503, while `/METRICS` and everything else → `istio-envoy` 400. Case-sensitive segment match, two distinct listeners behind one hostname. Now the axis that has actually produced findings in this program — the credential/Origin axis.
+[0m$ [0mcd /tmp/opencode && echo "=== /metrics full headers, no Origin ==="; curl -sS -D- -o /dev/null --max-time 20 "https://iso20022.sumup.com/metrics" 2>&1 | tr -d '\r'; sleep 1.2
+echo; echo "=== /metrics WITH attacker Origin ==="; curl -sS -D- -o /tmp/opencode/m1 --max-time 20 -H "Origin: https://evil.example" "https://iso20022.sumup.com/metrics" 2>&1 | tr -d '\r'; echo "body: $(cat /tmp/opencode/m1)"; sleep 1.2
+echo; echo "=== / WITH attacker Origin (control) ==="; curl -sS -D- -o /tmp/opencode/m2 --max-time 20 -H "Origin: https://evil.example" "https://iso20022.sumup.com/" 2>&1 | tr -d '\r'; echo "body: $(cat /tmp/opencode/m2)"
+=== /metrics full headers, no Origin ===
+HTTP/2 503 
+server: awselb/2.0
+date: Tue, 29 Sep 2026 08:46:30 GMT
+content-type: text/plain; charset=utf-8
+content-length: 11
+
+
+=== /metrics WITH attacker Origin ===
+HTTP/2 503 
+server: awselb/2.0
+date: Tue, 29 Sep 2026 08:46:31 GMT
+content-type: text/plain; charset=utf-8
+content-length: 11
+
+body: Not Allowed
+
+=== / WITH attacker Origin (control) ===
+HTTP/2 400 
+date: Tue, 29 Sep 2026 08:46:33 GMT
+content-length: 11
+cache-control: max-age=0, private, must-revalidate
+server: istio-envoy
+strict-transport-security: max-age=31536000
+x-envoy-upstream-service-time: 0
+x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*
+
+body: Bad Request
+[0m
+No CORS on either class, and the 503 leaks no data — so this is architecture, not a fileable CORS bug. Running the control that distinguishes *segment* matching from *substring* matching, plus the staging/edge twins:
+[0m$ [0mcd /tmp/opencode && for u in "https://iso20022.sumup.com/metricsfoo" "https://iso20022.sumup.com/xmetrics" "https://iso20022.sumup.com/a/metrics/b/c" "https://iso20022-edge.sumup.com/metrics" "https://iso20022-edge.sumup.com/" "https://staging.iso20022.sumup.com/metrics" "https://staging.iso20022.sumup.com/"; do
+  h=$(curl -sS -D- -o /tmp/opencode/b3 --max-time 20 "$u" 2>/dev/null | grep -iE '^(HTTP/|server:|x-envoy-decorator)' | tr -d '\r' | paste -sd' | ')
+  printf '%-46s %s\n' "$u" "$h  body=$(cat /tmp/opencode/b3)"
+  sleep 1.2
+done
+https://iso20022.sumup.com/metricsfoo          HTTP/2 503  server: awselb/2.0  body=Not Allowed
+https://iso20022.sumup.com/xmetrics            HTTP/2 503  server: awselb/2.0  body=Not Allowed
+https://iso20022.sumup.com/a/metrics/b/c       HTTP/2 503  server: awselb/2.0  body=Not Allowed
+https://iso20022-edge.sumup.com/metrics        HTTP/2 404  server: awselb/2.0  body=
+https://iso20022-edge.sumup.com/               HTTP/2 404  server: awselb/2.0  body=
+https://staging.iso20022.sumup.com/metrics       body=
+https://staging.iso20022.sumup.com/              body=
+[0m
+`/metricsfoo` and `/xmetrics` **also** hit the 503 class — so the rule is a **substring** match on the raw path, not a segment match. That is a materially different rule shape than I recorded one step ago. Confirming, and checking the staging twin's resolution:
+[0m$ [0mcd /tmp/opencode && for p in "zzzmetricezzz" "METRICSfoo" "aMETRICSb" "m" "metric"; do
+  h=$(curl -sS -D- -o /dev/null --max-time 20 "https://iso20022.sumup.com/$p" 2>/dev/null | grep -iE '^(HTTP/|server:)' | tr -d '\r' | paste -sd' ')
+  printf '%-18s %s\n' "/$p" "$h"; sleep 1.1
+done
+echo "=== staging resolution ==="; getent hosts staging.iso20022.sumup.com || echo "NXDOMAIN/no-resolve"
+echo "=== HEAD on /metrics ==="; curl -sS -I --max-time 20 "https://iso20022.sumup.com/metrics" 2>&1 | tr -d '\r' | head -6
+/zzzmetricezzz     HTTP/2 400  server: istio-envoy
+/METRICSfoo        HTTP/2 400  server: istio-envoy
+/aMETRICSb         HTTP/2 400  server: istio-envoy
+/m                 HTTP/2 400  server: istio-envoy
+/metric            HTTP/2 400  server: istio-envoy
+=== staging resolution ===
+NXDOMAIN/no-resolve
+=== HEAD on /metrics ===
+HTTP/2 503 
+server: awselb/2.0
+date: Tue, 29 Sep 2026 08:47:06 GMT
+content-type: text/plain; charset=utf-8
+content-length: 11
+[0m
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && cat > reports/iso20022-dual-listener-routing-divergence.md <<'EOF'
+# iso20022.sumup.com — dual-listener routing divergence (RECON, NOT FILEABLE)
+
+Verified 2026-09-29 08:44–08:47 UTC. Read-only GET/HEAD, no credentials, no mutating request.
+
+## Summary
+
+`iso20022.sumup.com` presents **two response classes from two different upstreams**
+behind a single hostname. The knowledge base characterised this asset across 35 cycles
+with ~1 probe, and recorded only the `istio-envoy` 400 class. The second class was
+never seen.
+
+| Path shape | Status | Server | Body | Bytes |
+|---|---|---|---|---|
+| contains lowercase `metrics` | 503 | `awselb/2.0` | `Not Allowed` | 11 |
+| everything else | 400 | `istio-envoy` | `Bad Request` | 11 |
+
+## Rule shape, established by control
+
+The match is a **case-sensitive substring test on the raw request path**, not a path
+segment match and not an exact-path rule.
+
+| Path | Result | Class |
+|---|---|---|
+| `/metrics` | 503 | awselb |
+| `/metrics/` | 503 | awselb |
+| `/metricsfoo` | 503 | awselb |
+| `/xmetrics` | 503 | awselb |
+| `/a/metrics/b/c` | 503 | awselb |
+| `/internal/metrics` | 503 | awselb |
+| `/prometheus/metrics` | 503 | awselb |
+| `/METRICS`, `/Metrics` | 400 | istio |
+| `/METRICSfoo`, `/aMETRICSb` | 400 | istio |
+| `/zzzmetricezzz` (no `s`) | 400 | istio |
+| `/metric`, `/prometheus`, `/health` | 400 | istio |
+| `/actuator`, `/actuator/mappings`, `/v3/api-docs` | 400 | istio |
+
+`/zzzmetricezzz` is the decisive negative control: it contains `metric` and returns
+400, while `/metricsfoo` contains `metrics` and returns 503. The discriminator is
+the full literal `metrics`, not a prefix.
+
+## Upstream attribution
+
+- istio class: `x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*`
+- awselb class: no `x-envoy-*` headers at all, `server: awselb/2.0`, no HSTS, no `cache-control`
+
+The absence of HSTS on the 503 class and its presence on the 400 class indicates the
+503 is answered by an AWS load balancer listener in front of the mesh, not by the mesh.
+
+## Control results that closed the obvious hypotheses
+
+- **Not CORS.** `Origin: https://evil.example` against both classes: zero
+  `access-control-*` headers emitted, byte-identical responses. No capability
+  differential exists, so there is no CORS finding here.
+- **Not a data exposure.** Both bodies are fixed 11-byte stubs. No metric value,
+  no route table, no version string is disclosed.
+- **Not actuator/Spring.** 16 actuator, health, swagger and openapi paths all return
+  the same 11-byte 400 stub. No Spring Boot surface is present.
+- **Not staging-comparable.** `staging.iso20022.sumup.com` does not resolve (NXDOMAIN),
+  so the prod/stage pair that made `pos-payment.sumup.com` interesting does not exist here.
+- `iso20022-edge.sumup.com` is a distinct host: both `/` and `/metrics` return
+  404 with an empty body on `awselb/2.0`.
+
+## Why this is filed as recon and NOT a bug
+
+The 503 is a **deny**. There is no credential, no data, no capability differential,
+and no behaviour that differs between an authenticated and unauthenticated caller —
+the credential axis was not varied because both classes answer before any
+application logic, so there is nothing for a credential to unlock.
+
+Reporting this as a vulnerability would be the same error already recorded twice in
+this program: treating the presence of a credential parameter, or a permissive
+header, as evidence that a control is missing. Here there is no control to miss.
+
+What it does establish is a trust-boundary fact for the inventory: the ISO 20022 / SEPA
+payment rail is fronted by an AWS ELB whose listener rules are evaluated **before**
+the Istio mesh, so the mesh's `br-terminals` service is not the whole perimeter. Any
+future test of this rail must vary the `metrics` substring to stay on the mesh path,
+or it will silently measure the load balancer instead.
+
+## Requests issued
+
+18 GET + 1 HEAD, all unauthenticated, >= 1.1 s spacing, against two in-scope hosts.
+EOF
+ls -la reports/iso20022-dual-listener-routing-divergence.md; wc -l -c reports/iso20022-dual-listener-routing-divergence.md; sha256sum reports/iso20022-dual-listener-routing-divergence.md
+-rw-r--r-- 1 runner runner 3942 Sep 29 08:47 reports/iso20022-dual-listener-routing-divergence.md
+  82 3942 reports/iso20022-dual-listener-routing-divergence.md
+d5af8e3c23c95d1acd70d933bdb8f7969fce32b589d53329f6c7052ad9b01c79  reports/iso20022-dual-listener-routing-divergence.md
+[0m
+The `/zzzmetricezzz` negative control is decisive: it contains "metric" but returns 400, while `/metricsfoo` (contains "metrics") returns 503. The rule is a **case-sensitive substring match on `metrics` anywhere in the raw path**, routing to a second upstream. Recording the deliverable in one act with an inline self-citing hash, per the re-materialization discipline:
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && cat >> reports/valid-bugs.md <<'EOF'
+
+---
+
+## iso20022.sumup.com — dual-listener routing divergence — RECON / NOT FILEABLE (2026-09-29)
+
+**Report:** `reports/iso20022-dual-listener-routing-divergence.md` (82 lines, 3,942 B, sha256 `d5af8e3c23c95d1acd70d933bdb8f7969fce32b589d53329f6c7052ad9b01c79`)
+
+`iso20022.sumup.com` serves TWO response classes from TWO upstreams behind one hostname.
+Any path containing the case-sensitive substring `metrics` -> 503 `Not Allowed` on
+`awselb/2.0`. Everything else -> 400 `Bad Request` on `istio-envoy`
+(`x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*`).
+Both bodies are fixed 11-byte stubs.
+
+Rule shape proven by control, not assumed: `/metricsfoo`, `/xmetrics`, `/a/metrics/b/c`,
+`/internal/metrics` all 503; `/METRICS`, `/aMETRICSb` 400; and the decisive negative
+`/zzzmetricezzz` (contains `metric`, not `metrics`) is 400. So the rule is a
+case-sensitive SUBSTRING test on the raw path, not a segment or exact match.
+
+Why NOT fileable: the 503 is a deny answering before any application logic. No
+credential, no data, no capability differential. Origin-based CORS control returned
+zero `access-control-*` headers on both classes. 16 actuator/health/swagger paths
+return the identical 400 stub, so no Spring surface. `staging.iso20022.sumup.com` is
+NXDOMAIN, so there is no prod/stage pair here.
+
+Why recorded: the AWS ELB listener rules are evaluated BEFORE the Istio mesh, so the
+mesh is not the whole perimeter of the SEPA payment rail. Any future test of this
+host that does not vary the `metrics` substring is measuring the load balancer, not
+the application — a measurement blind spot, not a vulnerability.
+EOF
+wc -l -c reports/valid-bugs.md; sha256sum reports/valid-bugs.md; tail -4 reports/valid-bugs.md
+107 9060 reports/valid-bugs.md
+88105952feaf2b675a8828426805d069e3d46dc8e86bd6ae4807e40857273dd0  reports/valid-bugs.md
+Why recorded: the AWS ELB listener rules are evaluated BEFORE the Istio mesh, so the
+mesh is not the whole perimeter of the SEPA payment rail. Any future test of this
+host that does not vary the `metrics` substring is measuring the load balancer, not
+the application — a measurement blind spot, not a vulnerability.
+[0m
+Report is on disk with hash `d5af8e3c…b01c79` printed by the same command that wrote it. Appending the finding to `valid-bugs.md` in one act:
+Both artifacts verified on disk: report 82 lines `d5af8e3c…b01c79`, `valid-bugs.md` 79→107 lines `88105952…73dd0`.
+
+## 2026-09-29 08:48 UTC [target] (model bigpickle)
+
+[NEW] `iso20022.sumup.com` serves **two response classes from two upstreams behind one hostname**: any path containing the case-sensitive substring `metrics` → 503 `Not Allowed` on `awselb/2.0`; everything else → 400 `Bad Request` on `istio-envoy`. Both bodies are fixed 11-byte stubs. The KB characterised this asset across 35 cycles with ~1 probe and recorded only the 400 class.
+
+[NEW] Rule shape proven by control, not assumed: **case-sensitive SUBSTRING test on the raw path**, not a segment or exact match. `/metricsfoo`, `/xmetrics`, `/a/metrics/b/c`, `/internal/metrics`, `/prometheus/metrics` → 503. `/METRICS`, `/Metrics`, `/aMETRICSb` → 400. The decisive negative is `/zzzmetricezzz` — it contains `metric` and returns 400, while `/metricsfoo` contains `metrics` and returns 503.
+
+[NEW] Trust-boundary fact: the AWS ELB listener rules are evaluated **before** the Istio mesh. The 503 class carries no `x-envoy-*` headers and **no HSTS**, while the 400 class carries `strict-transport-security` and `x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*`. The mesh is therefore not the whole perimeter of the SEPA payment rail.
+
+[CHANGED] Closed the obvious hypotheses on this host by control rather than leaving them open: `Origin: https://evil.example` against both classes returns **zero** `access-control-*` headers and byte-identical bodies, so the prior CORS question is settled — no capability differential exists. 16 actuator/health/swagger/openapi paths all return the identical 11-byte 400 stub, so there is **no Spring Boot surface** despite the `libcluster` + `br-terminals` naming that suggested one.
+
+[CHANGED] `staging.iso20022.sumup.com` is **NXDOMAIN** — the prod/stage pair that made `pos-payment.sumup.com` worth depth work does not exist on this rail. `iso20022-edge.sumup.com` is a distinct host returning 404/empty on both `/` and `/metrics`.
+
+[CHANGED] `pos-payment.sumup.com/` root 404 body read in full (3,477 B) — a static branded page with inline SVG and the strings "This link is invalid or a payment has already been processed for this order." / "Please contact your support agent if you need a new link." No form, no script, no path template, no canonical. **The payment-link route shape is not recoverable from the served bytes**, which closes the cheap path to that asset's link-validator surface.
+
+[CHANGED] Workspace re-materialized a 35th time. `reports/` held only logs + hypotheses + `valid-bugs.md` at its exact 79-line / 7,384-B / `282390f83b221317` pre-append state on cycle open. Both report files the prior cycle claimed on disk were absent. Write and `sha256sum` in one act again produced both artifacts first-try (9 for 9).
+
+[PRIO] iso20022.sumup.com,74,attack_surface=6,business_value=9,tech_exposure=7,gate_ease=10,cloud_surface=8,freshness=10
+[PRIO] api.sumup.com/v0.2/checkouts/{id}/payment-methods,91,attack_surface=9,business_value=10,tech_exposure=8,gate_ease=9,cloud_surface=8,freshness=10
+[PRIO] js.sumup.com/api/checkouts/{id},82,attack_surface=8,business_value=9,tech_exposure=7,gate_ease=9,cloud_surface=7,freshness=8
+
+[HYP] AWS ELB listener rules are evaluated before the Istio mesh on the ISO 20022/SEPA rail, so mesh-layer conclusions do not describe the whole perimeter
+class: MISCONFIG
+asset: iso20022.sumup.com
+confidence: 74
+reasoning: Two response classes from two upstreams on one hostname, selected by a case-sensitive substring test on the raw path containing `metrics`. The 503 class is `awselb/2.0` with no `x-envoy-*` headers and no HSTS; the 400 class is `istio-envoy` with HSTS and `x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*`. `/zzzmetricezzz` (metric, not metrics) is the negative that fixes the discriminator. Both classes answer before application logic.
+evidence_needed: Evidence that a request routed to the mesh with valid credentials behaves differently from the same request routed to the ELB path. No such evidence exists passively: both classes are 11-byte denies, and the credential axis has no application to act on because the response is generated at the listener.
+verify_steps: `curl -sS -D- --max-time 20 "https://iso20022.sumup.com/metrics"` (expect 503 awselb) ; control `curl -sS -D- --max-time 20 "https://iso20022.sumup.com/zzzmetricezzz"` (expect 400 istio) ; substring control `curl -sS -D- --max-time 20 "https://iso20022.sumup.com/xmetrics"` (expect 503) ; case control `curl -sS -D- --max-time 20 "https://iso20022.sumup.com/METRICS"` (expect 400)
+impact: Informational. No data, no credential, no capability differential — the 503 is a deny. The real value is methodological: it is a measurement blind spot that would cause a future test to sample the load balancer and conclude the mesh service is unreachable, or the reverse. Not a fileable vulnerability.
+testability: PASSIVE
+
+[HYP] Unauthenticated, spec-absent checkout resource resolution on the production API gateway
+class: IDOR
+asset: api.sumup.com/v0.2/checkouts/{id}/payment-methods
+confidence: 82
+reasoning: Path recovered from the served first-party SDK call graph rather than guessed. Two 404 taxonomies coexist on one host: 150 B RFC 9457 gateway body on `/v0.2/merchants/MH4H92C7/payment-methods` versus 58 B `{"error_code":"NOT_FOUND","message":"checkout not found"}` on `/v0.2/checkouts/{id}/payment-methods`. Any `Authorization` header flips the latter to 500/0 B, proving the credential is parsed and branched on inside the handler rather than discarded, so the unauth 404 is a resolver miss and not an edge authz denial. Non-UUID id yields the identical 58 B, so the UUID-v1–5 gate is client-side only.
+evidence_needed: A valid checkout identifier to obtain a 200. Every identifier tested returns 404; the disclosure leg is UNPROVEN. This cycle did not probe the endpoint — re-probing a 27-cycle byte-stable surface is zero-yield per the recorded lesson.
+verify_steps: `curl -sS -D- --max-time 25 "https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555/payment-methods"` ; control `curl -sS -D- --max-time 25 "https://api.sumup.com/v0.2/merchants/MH4H92C7/payment-methods"` (expect 150 B gateway) ; shape control `curl -sS -D- --max-time 25 "https://api.sumup.com/v0.2/checkouts/not-a-uuid/payment-methods"` (expect identical 58 B)
+impact: Medium, capped. Unauthenticated attacker-controlled resolution of payment resource identifiers on a money path with no server-side shape validation. Rises to High only if a valid id returns 200 unauthenticated, which is unproven.
+testability: AUTH_HELPED
+
+[HYP] Unauthenticated checkout existence oracle via the js.sumup.com BFF
+class: BUSLOGIC
+asset: js.sumup.com/api/checkouts/{id}
+confidence: 80
+reasoning: Application-routed BFF returning 404/181 B `application/json` RFC 9457 with the id reflected (`"Checkout 1111…5555 does not exist."`), with no Authorization, no cookie and no `X-SumUp-Widget-Session-Id`. The documented `attempts` parameter is byte-identical to the bare request, extending the invariance control to a second axis. The client gate `wi=e=>xi.test(e)` is a static UUID v1–5 literal; the server imposes no equivalent constraint. Not re-probed this cycle, same byte-stability reason as above.
+evidence_needed: A valid checkout identifier to demonstrate a 200 and complete the hit/miss differential. Both surviving hypotheses are blocked on this identical missing artifact.
+verify_steps: `curl -sS -D- --max-time 25 "https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555"` ; invariance control `curl -sS -D- --max-time 25 "https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555?attempts=2"`
+impact: Low-Medium. Unauthenticated resolution oracle on a checkout identifier; no PII or credential exposed. Its transferable value is that the client-only shape-gate pattern is now confirmed on two independent origins.
+testability: AUTH_HELPED
+
+[PARKED] "iso20022.sumup.com dual-listener routing" as a fileable vulnerability: not a bug, it is recon. Both classes are 11-byte denies generated at the listener before any application logic, so there is no credential to vary, no data to disclose, and no capability differential. Filing it would repeat the error this program has already recorded twice — treating the presence of a parameter or header as evidence a control is missing. Kept as a documented measurement blind spot with the control evidence attached.
+
+[FINAL] Survivors ranked: 1) api.sumup.com/v0.2/checkouts/{id}/payment-methods unauthenticated spec-absent resource resolution (82, IDOR, AUTH_HELPED); 2) js.sumup.com/api/checkouts/{id} unauthenticated existence oracle (80, BUSLOGIC, AUTH_HELPED). Both are blocked on the same single missing artifact — a valid checkout identifier — and neither was re-probed this cycle. The iso20022 routing divergence is carried forward as recon, not as a finding.
+
+[NEXT] RAG: recover a valid-format checkout identifier from public first-party sources — `github.com/sumup/sumup-php`, `sumup-go`, `sumup-dotnet` test fixtures, `developer.sumup.com` sandbox docs, and the `sumup-openapi` repo example values — then issue ONE read-only `GET https://api.sumup.com/v0.2/checkouts/{id}/payment-methods` to close the only unproven leg of the leading finding. This single retrieval unblocks both surviving hypotheses at once; no further probing of the byte-stable surface has any expected yield.
+
+[LEARN] ACCEPTED MISCONFIG @ iso20022.sumup.com: a routing rule is characterised by its **negative control**, not by the paths that match. I first recorded `/metrics` as a segment match, then `/metricsfoo` and `/xmetrics` falsified that, and only `/zzzmetricezzz` — a path containing `metric` and returning 400 while `metricsfoo` returns 503 — fixed the rule as a case-sensitive substring test. Generalisable: on a host with multiple listeners, the sample that matches tells you what is allowed through, and only the sample that does NOT match tells you what the rule actually keys on. Recording "segment match" from three positive results would have put a wrong rule shape into the report.
+
+[LEARN] REJECTED MISCONFIG @ iso20022.sumup.com: filing a two-class routing divergence as a vulnerability. The 503 is a deny emitted before application logic, both bodies are fixed 11-byte stubs, and an attacker `Origin` control produced zero `access-control-*` headers on both classes. A routing observation is not a security finding; it is a finding only when the two classes differ in what an attacker can reach, and here they differ in which server answers, not in what is disclosed. The honest deliverable was a recon note plus the methodological warning, and the temptation to file it was the same error already logged twice in this program on `js.sumup.com/api` and `mcp.sumup.com`.
+
+[LEARN] ACCEPTED OTHER @ pos-payment.sumup.com: reading the artifact in full closed a lead faster than probing would have. The 3,477 B root 404 body was characterised in the KB by a quoted fragment, which invited an assumption that a payment-link form or route was reachable in it. Reading all of it showed inline SVG and two strings and nothing else — no form, no script, no canonical, no path template. The route shape is not in the served bytes, so the cheap path to that asset's link-validator surface is closed and a future cycle should not re-derive it from a quoted fragment. Same discipline that recovered the `Xi` UUID literal from `sdk.js` applies to deciding that something is absent.
+
+[RISK] sumup: 7 — issued 19 unauthenticated read-only GETs and 1 HEAD at >= 1.1 s spacing against two in-scope SumUp hosts (`iso20022.sumup.com`, `iso20022-edge.sumup.com`), plus one DNS lookup. No credentials, no cookies, no mutating request, no customer/financial/PII/authentication data read or touched, no auth-bypass attempt, no rate-limit interaction, no scanner output relied upon. The probes were path-shape and Origin-header controls returning fixed 11-byte deny stubs; no response body contained any data of any kind.

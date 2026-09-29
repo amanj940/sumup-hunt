@@ -3219,3 +3219,27 @@
 - LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
 - LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
 - LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob
+
+## RANKED HYPOTHESES 2026-09-29 08:48:19 UTC
+- [92] api.sumup.com/v0.2/checkouts/{id}/payment-methods: api.sumup.com/v0.2/checkouts/{id}/payment-methods unauthenticated checkout payment-methods resolver (from art/lead_nemotron3.txt)
+- [74] iso20022.sumup.com: AWS ELB listener rules are evaluated before the Istio mesh on the ISO 20022/SEPA rail, so mesh-layer conclusions do not describe the whole perimeter (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): RAG: recover a valid-format checkout identifier from public first-party sources — `github.com/sumup/sumup-php`, `sumup-go`, `sumup-dotnet` test fixtures, `devel
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555/payment-methods + GET with `Authorization: Bearer invalid` to re-verify cre
+- LEARN: ACCEPTED MISCONFIG @ iso20022.sumup.com: a routing rule is characterised by its **negative control**, not by the paths that match. I first recorded `/metrics` a
+- LEARN: REJECTED MISCONFIG @ iso20022.sumup.com: filing a two-class routing divergence as a vulnerability. The 503 is a deny emitted before application logic, both bodi
+- LEARN: ACCEPTED OTHER @ pos-payment.sumup.com: reading the artifact in full closed a lead faster than probing would have. The 3,477 B root 404 body was characterised i
+- LEARN: ACCEPTED IDOR @ api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: a "uniformly gated host" claim is falsified by a control pair, not by a longer enumeratio
+- LEARN: ACCEPTED IDOR @ api.sumup.com/v0.2/checkouts/{id}/payment-methods: the decisive control was varying the CREDENTIAL, not the identifier. Every identifier returne
+- LEARN: REJECTED MISCONFIG @ api.sumup.com/v0.1/internal/analytics: inferring an endpoint's auth posture from the client call that reaches it. The SDK posts this with o
+- LEARN: REJECTED OTHER @ workspace: 34 cycles of re-materialization now make the open-with-`ls` step mandatory rather than prudent — it is the only way to know which pr
+- LEARN: ACCEPTED OTHER @ reports/ and workspace: file-creation streak root cause is **workspace re-materialized between cycles** — uniform mtimes, no stray copies, vali
+- LEARN: ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (`t.postMessage(e, n||"*")`); inbound 
+- LEARN: REJECTED OTHER @ gateway.sumup.com/hosted.js: "unrecoverable runtime pattern" gate — three cycles recorded checkoutId check as `new RegExp(a.pattern)`; one retr
+- LEARN: ACCEPTED MISCONFIG @ js.sumup.com/api: finding came from recovering call shape (sdk.js) not guessing path shapes; prefix sweep structurally incapable of hitting
+- LEARN: REJECTED MISCONFIG @ js.sumup.com/api: access-control-allow-origin:* + access-control-allow-credentials:true is hardening-only — withCredentials set only when o
+- LEARN: ACCEPTED OTHER @ mcp.sumup.com: RFC 9728 resource-server metadata LIVE on prod MCP at two paths publishing scopes_supported:["offline_access","email"] — KB only
+- LEARN: REJECTED AUTH @ mcp.sumup.com/mcp: JWT alg:none and RS256→HS256 key confusion both explicitly refused by prod verifier; allowlist exactly {RS256, EdDSA} (RS384/
+- LEARN: ACCEPTED OATH @ auth.sumup.com: client_id=dashboard ACCEPTS email (302 login_challenge), completing consent set {openid, classic, offline, readers.read, termina
+- LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
+- LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
+- LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob
