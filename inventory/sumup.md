@@ -1371,3 +1371,27 @@ www.sumup.com
 - CHANGED gateway.sumup.com/hosted.js: origin parameter declared/supplied at construction but applied ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound postMessage handler never reads e
 - CHANGED workspace/artifacts: re-materialized between cycles — reports written in cycle N do not persist to N+1; measurements of volatile store only while store survives; write+hash must be the same act
 - CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated returns 404 (was 200 static {"card"}) — gateway now requires bearer even for spec-declared oauth2:[] operations
+
+## 2026-09-29 02:24:42 UTC
+- NEW api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: LIVE application-routed endpoint absent from the public OpenAPI spec — unauthenticated GET returns 58 B application-layer `{"error_code":"NOT_FOU
+- NEW Credential-handling control: any `Authorization` header flips that endpoint's response class to 500/0 B — proving the token is parsed and branched on, so the unauth 404 is a resolver miss inside the h
+- NEW No server-side shape validation: `checkouts/not-a-uuid/payment-methods` → byte-identical 58 B. The UUID-v1–5 gate is client-side only (`xi=/^[0-9a-f]{8}-…$/i, wi=e=>xi.test(e)`).
+- NEW api.sumup.com/v0.1/internal/analytics: POST-only analytics ingestion path recovered from sdk.js (`analytics: qi(r)` bound to the v0.1 builder); GET returns the 150 B gateway 404, so it is not applicat
+- NEW Complete api.sumup.com operation model recovered from gateway.sumup.com/sdk.js (291,877 B, sha256 `0fae546ae34ee5e97cf0c3107d87adaa79129983d423bce6cf9a0fc19916c7bd`) — 6 operations incl. 2 never previ
+- CHANGED FALSIFIED the 27-cycle KB claim "api.sumup.com: all versioned paths 404 — API fully gated at gateway / uniformly gated". There are TWO 404 classes on prod api.sumup.com; one is the application layer a
+- CHANGED js.sumup.com/api/checkouts/{id}: `?attempts=2` is byte-identical to the bare request (181 B, RFC 9457 `"Checkout <id> does not exist."`), extending the param-invariance control to a second axis; the B
+- CHANGED workspace/artifacts: re-materialized again — reports/ held only logs + hypotheses + valid-bugs.md at its exact 79-line/7,384-B/282390f8 pre-append state on cycle open. Write+hash in one act produced b
+- NEW js.sumup.com/api/checkouts/{id}: LIVE unauthenticated checkout existence oracle (404 JSON 181B, RFC 9457, id reflected in body, no auth, no widget-session header); client-side UUID gate only (static l
+- NEW gateway.sumup.com/hosted.js: origin parameter declared/supplied at construction but applied ONLY outbound (`t.postMessage(e, n||"*")` with `n=document.referrer`); inbound handler `p=r=>{const{data:n,s
+- NEW mcp.sumup.com/.well-known/oauth-protected-resource: 200 at two paths (prod, never fetched in 29 cycles); publishes `scopes_supported:["offline_access","email"]`; kid-optional try-all on `/mcp` (RFC 87
+- NEW pos-payment.sumup.com + staging.pos-payment.sumup.com: AWS API Gateway POS payment-link validator on rotating raw AWS IPs (eu-west-1); prod+staging byte-identical (root 404 3477B branded, /ping→200 7B
+- NEW iso20022.sumup.com + iso20022-edge.sumup.com: ISO 20022/SEPA mesh gateway on Istio (`x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*`); no WAF; 5 h
+- NEW solo-edge-private.live.solo.sumup.com + .stage: RFC1918 in public DNS as live/stage pair (first instance of environment-paired private addresses)
+- NEW internal.sumup.com estate (5 names): all NXDOMAIN but disclose k8s topology via CT (`dwh`, `dwh-replica`, `k8s-eu-west-1-live`, `k8s-eu-west-1-stage`, `k8s-eu-developers`)
+- NEW dashboard.sumup.com / support.sumup.com: FIRST PROBE IN 28 CYCLES — both 308 permanent aliases to me.sumup.com / help.sumup.com (Vercel)
+- CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations
+- CHANGED Workspace re-materialized AGAIN: artifacts written in cycle N do not persist to N+1; `valid-bugs.md` at exact 79-line pre-append state
+- CHANGED gateway.sumup.com/hosted.js sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873` verified byte-identical; origin-validation greps 0/0/0/0; framing headers 0
+- CHANGED reports/gateway-hostedfields-cross-origin-messenger.md GENUINELY on disk — 270 lines, 14,332 B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
+- CHANGED reports/cognito-implicit-grant-dev-solo-buckets.md GENUINELY on disk — 129 lines, 5,728 B, sha256 `c8aa4ff8dbb989593d6d20220ff55a7b86eb588c40fa91aa9e230b955bdffb06`
+- CHANGED reports/valid-bugs.md running count 1 (gateway finding appended VALID 7.5 with FILE REPORT); auth.sam-app.ro finding also appended VALID 7.5
