@@ -7444,3 +7444,91 @@ testability: PASSIVE
 [LEARN] ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key count
 [LEARN] REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-probing has zero expected yield
 [RISK] sumup: 79 — Three gains, only the third is a discovery. First, the top finding is materially sharper: a declared, supplied, one-directionally-applied origin parameter converts remediation from "add validation" into "move existing validation to inbound handler and fix outbound bug in same change." Second, a wrong technical claim that survived three cycles (runtime-unrecoverable gate) was retracted on inspection; had it shipped, a triager would have been told the remaining barrier was unauditable when it is a public UUID regex. Third, the file-delivery blocker is finally diagnosed correctly (workspace re-materialization), which matters more than it sounds: three prior cycles each reported a plausible mechanism, and each was wrong in a way that guaranteed the next cycle would re-run the same failing path. The risk I am NOT claiming as reduced is delivery itself — 21 cycles on, nothing is submitted, and treating these artifacts as filed would be the same category of error as the file claims, one level up.
+## 2026-09-29 23:53:50 UTC [target] (model bigpickle)
+[PRIO] auth.sam-app.ro/oauth2/register,8.70,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=8
+[PRIO] pos-payment.sumup.com,8.60,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=9,cloud_surface=9,freshness=9
+[PRIO] gateway.sumup.com hosted-fields,8.55,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=10,cloud_surface=7,freshness=9
+[PRIO] js.sumup.com/api/checkouts/{id},8.55,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=10,cloud_surface=7,freshness=9
+[PRIO] iso20022.sumup.com + iso20022-edge.sumup.com,7.45,attack_surface=7,business_value=10,tech_exposure=8,gate_ease=4,cloud_surface=8,freshness=6
+[PRIO] api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods,6.80,attack_surface=5,business_value=7,tech_exposure=6,gate_ease=10,cloud_surface=6,freshness=8
+[HYP] gateway.sumup.com — the origin parameter is a declared factory argument applied only outbound, and the one inbound identity check exempts the embedding attacker
+class: MISCONFIG
+asset: gateway.sumup.com (/, /hosted.js)
+confidence: 88
+reasoning: Factory is u=({id:e,fromWindow:r,toWindow:t,variant:a,origin:n,...}) — `origin:n` is declared. Container supplies origin:document.referrer with toWindow:e.parent, variant:"hostedfield". Inbound handler `const p=r=>{const{data:n,source:i}=r;…}` destructures data+source only; `event.origin`/`targetOrigin`/`origin!==`/`origin===` all 0 occurrences in 26,839 B (sha256 1302f1d6…f220873). The only inbound identity test is `(t&&i!==t)||dispatch` — event.SOURCE vs configured toWindow; for an embedding attacker event.source IS e.parent, so it dispatches. Remaining 4 inbound gates are published literals (type "SumUpCard", action "message", variant "hostedfield", truthy message). Frame doc carries 0 x-frame-options / CSP / referrer-policy headers. Frame-access gate sits inside `if("card"===a.payment_type)` so a non-card value skips Ce(r.frames) entirely. checkoutId gate is a static UUID v1–5 literal, not a runtime pattern.
+evidence_needed: Browser-confirmed cross-origin form--submit from an attacker page producing a live PUT /v0.2/checkouts/{attacker-id}. Acceptance leg deliberately NOT claimed — widget-session extractor is host-pinned to checkout.sumup.com and returns undefined on gateway.sumup.com.
+verify_steps: curl -sS https://gateway.sumup.com/hosted.js | sha256sum (expect 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873) -> grep -o 'event\.origin' | wc -l (expect 0) -> grep -o 'js\.sumup\.com' | wc -l (expect 0, proves no chain to the BFF finding) -> curl -sS -D- -o /dev/null https://gateway.sumup.com/ | grep -icE '^(x-frame-options|content-security-policy|referrer-policy)' (expect 0)
+impact: Any web origin can frame SumUp's PCI card-entry component and drive it into a state-changing payment write. Capped Medium: the control weakness is proven, the authorisation outcome is not. Remediation must land the inbound check in the same change as the outbound targetOrigin fix.
+testability: PASSIVE
+[HYP] pos-payment.sumup.com — the only inventoried host on raw AWS IPs with IAM/SigV4 rather than Cloudflare/Vercel + OIDC, and its payment-link validator has never been characterised at the route level
+class: BUSLOGIC
+asset: pos-payment.sumup.com (+ staging.pos-payment.sumup.com)
+confidence: 70
+reasoning: AWS API Gateway on rotating eu-west-1 addresses; root 404 returns a branded 3,477 B page reading "This link is invalid or a payment has already been processed for this order."; /ping is the sole unauthenticated 200; prod and staging are byte-identical replicas, so staging is a safe oracle for a prod-class route map. Every other asset in the program is Cloudflare/Vercel fronted with OIDC or Bearer — this is a fourth trust model and therefore the least-examined.
+evidence_needed: A route shape on the payment-link validator that varies with a path segment, or any request parameter (return_url, webhook, callback, mid) reachable unauthenticated.
+verify_steps: GET https://pos-payment.sumup.com/ping (expect 200 healthy) -> GET https://pos-payment.sumup.com/api-prod/ping -> GET https://pos-payment.sumup.com/prod/ping -> compare status and byte length against the 3,477 B root stub; a route that answers differently is a routing discriminator, a 403 is not
+impact: If a link-validator route is reachable without SigV4, payment-link existence becomes enumerable per merchant, and any forwarding parameter would be an SSRF primitive into the AWS account that owns the role. Currently inventory-grade only.
+testability: PASSIVE
+[HYP] js.sumup.com/api/checkouts/{id} — the credential-differential control that refuted the api.sumup.com finding this cycle has never been run against this BFF, and the same reasoning would retire it too
+class: IDOR
+asset: js.sumup.com/api/checkouts/{id}
+confidence: 45
+reasoning: The BFF returns 404 / 181 B application/json with the id reflected in the body, unauthenticated, with no Authorization and no X-SumUp-Widget-Session-Id. That is recorded as an existence oracle at confidence 78. But api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods presented the same shape and was refuted this cycle: 9/9 credential variations byte-identical. An oracle requires a differential on some axis; if this endpoint is likewise credential-invariant, the reflected-id 404 is an unrouted-path constant and discloses nothing.
+evidence_needed: A response-class change when the Authorization header varies — the same control that produced 500/0 B on the api host and is now absent there.
+verify_steps: GET https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555 (expect 404/181 B json) -> GET same with `Authorization: Bearer invalid` -> GET same with a well-formed RS256 bearer with bogus signature -> cmp each against the first; any byte difference is the differential, total identity refutes the oracle
+impact: If a differential exists, unauthenticated checkout existence enumeration across merchants. If not, the finding is informational and should be merged with the api.sumup.com retraction rather than filed separately.
+testability: PASSIVE
+[PARKED] auth.sam-app.ro/oauth2/register unauthenticated dynamic client registration: VALID 7.5, evidence complete, blocker is HUMAN submission (14+ cycles)
+[PARKED] iso20022.sumup.com SSRF: requires POST, no parameters discovered passively, 36 cycles without a discriminator
+[PARKED] serial-terminal.dev.solo.sumup.com ungated sibling: key-variation proves no ListBucket and no object served; gate inconsistency only
+[PARKED] mcp.sumup.com kid-optional try-all: hardening deviation, no JWKS pollution vector, cross-env keys disjoint
+[PARKED] Cognito dev.solo implicit grant: token-delivery origin serves 0 B on all paths, no reader for the fragment
+[FINAL] 1. gateway.sumup.com hosted-fields cross-origin message channel — 88, PASSIVE, Medium, REPORT ON DISK
+[FINAL] 2. pos-payment.sumup.com IAM/SigV4 trust model + payment-link surface — 70, PASSIVE, inventory-grade
+[FINAL] 3. js.sumup.com BFF credential-differential control — 45, PASSIVE, deliberately below file threshold
+[NEXT] PROBE: run the credential-differential control against the `js.sumup.com` BFF, which is the only surviving sibling of the finding I just retracted — `GET https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555` then the same request with `Authorization: Bearer invalid`, then with a well-formed RS256 bearer, and `cmp` all three. Total identity retires the BFF oracle at confidence 78 and closes the class; any byte difference is a real unauthenticated existence oracle worth filing.
+[RISK] sumup: 82 — This cycle cost me my highest-confidence finding and that is the correct outcome. For several cycles I carried a 92-confidence IDOR whose entire weight sat on one measurement, re-verified nothing, and let the number stand in the ranking; the ranking in turn steered effort toward re-confirming it rather than toward testing the two sibling endpoints that share its shape. Re-running the control cost eight requests and removed a lead I would otherwise have written into a report for a human. The residual risk is not the retraction — it is that delivery is still the binding constraint: 36 re-materializations, the report on disk this cycle at 196 lines / sha256 `df11e0cf…7c24`, and 14 cycles of a filed-but-unsubmitted VALID 7.5 finding. Treating an artifact as a submission is the same category of error as the file-creation claims, one level up, and I am not claiming it is reduced.
+[PRIO] auth.sam-app.ro dynamic registration,9.20,impact=9.0,exploitability=9.0,evidence=9.5,novelty=8.0,reachability=10.0
+[PRIO] pos-payment.sumup.com IAM/SigV4 custom authorizer,8.95,impact=9.0,exploitability=6.5,evidence=8.5,novelty=9.0,reachability=10.0
+[PRIO] gateway.sumup.com hosted-fields,8.60,impact=8.5,exploitability=8.0,evidence=9.5,novelty=7.5,reachability=10.0
+[PRIO] iso20022 SSRF/host-header,8.20,impact=8.5,exploitability=6.0,evidence=8.0,novelty=8.0,reachability=9.5
+[PRIO] js.sumup.com BFF id-echo (now PASSIVE-only),7.30,impact=6.5,exploitability=6.0,evidence=9.0,novelty=5.0,reachability=10.0
+[PRIO] api.sumup.com payment-methods (retracted),2.20,impact=1.0,exploitability=0.5,evidence=8.5,novelty=1.0,reachability=10.0
+[HYP] api.sumup.com — the 404/58B app response is a uniform "not found" across credential AND identifier, so the endpoint discloses nothing and the earlier IDOR claim is unsupportable
+class: IDOR
+asset: api.sumup.com/v0.1 and /v0.2 checkouts/{id}/payment-methods
+confidence: 5
+reasoning: Measured this cycle: 9/9 credential variations (none, Bearer invalid, empty Bearer, bare token, Basic, alg:none JWT, well-formed RS256 JWT, plus 4 spaced repeats) return byte-identical 404 / 58B `application/json` `{"error_code":"NOT_FOUND","message":"checkout not found"}`. Non-UUID path segment returns the same 58 B. `cmp` confirms no differential. The only contrast is unrouted-path 404 (150 B `application/problem+json` via `apigateway2-headless.identity.svc.cluster.local:8080/*`), which proves routing, not data. The `alg:none` result also refutes any confused-deputy path through this endpoint.
+evidence_needed: A genuine cross-tenant read on a live foreign checkout id under a valid low-privilege merchant token — and even that yields no finding, since the checkouts API is merchant-scoped by design; only a token for merchant A reading merchant B's checkout would be.
+verify_steps: Already executed; re-verify only if a valid merchant token is acquired. One live merchant's own id under its own token must return 200 before any id-swap test is meaningful.
+impact: None demonstrated. Kept as a scored tombstone so it is not re-proposed next cycle.
+testability: PASSIVE, exhausted.
+[HYP] js.sumup.com BFF — the id is echoed into an RFC 9457 detail field by a real route handler, and the gateway's widget-session header may be the only accepted credential, which would make this a confirmation oracle rather than a disclosure
+class: IDOR
+asset: js.sumup.com/api/checkouts/{id}
+confidence: 40
+reasoning: The route is confirmed real rather than a catch-all — the id is templated verbatim into `detail` (181/155/148 B tracking segment length 36/11/3), and every other path shape falls through to the Vercel platform 404 with an `iad1` request id. That request id (`iad1:iad1::jkms5-…`) and the region prefix are also faintly informative about Vercel topology. But the "does not exist" branch is identical for well-formed and malformed ids alike, so there is no enumeration signal to exploit, and I could not get a 200 branch to compare against.
+evidence_needed: A live checkout id I own, fetched from a SumUp-owned test page, to see whether a valid id yields 200 with different timing or headers — then a non-owned id under identical conditions. Without an owned id this cannot advance.
+verify_steps: Obtain a real checkout id from a SumUp-operated sandbox page (not a merchant's customer data). Replay with and without `X-SumUp-Widget-Session-Id`. Compare a 200 branch against the 404 branch for a timing or header delta. All read-only GETs.
+impact: If the widget-session header alone flips 404 to 200, the id becomes a bearer capability leaked into every merchant page's HTML — that would be a real disclosure. Currently unevidenced.
+testability: PASSIVE, but blocked on a SumUp-owned live id.
+[HYP] pos-payment.sumup.com — a payment-order enum exists at the route level behind IAM/SigV4, discoverable by path-shape probing rather than by parameter discovery
+class: IDOR
+asset: pos-payment.sumup.com (+ staging.pos-payment.sumup.com)
+confidence: 70
+reasoning: The just-completed js.sumup.com probe demonstrates the method that works on a Vercel frontend: distinguish a real route from a catch-all by response-class divergence across path shapes, not by parameter discovery. `pos-payment.sumup.com` has never been subjected to that test. Its root is a 3,477 B branded 404 reading "This link is invalid or a payment has already been processed for this order," /ping is the only confirmed 200, and the custom IAM authorizer sits on non-/ping routes, so an unauthenticated probe should produce a class split between authz-gated and unrouted paths. Prod and staging are byte-identical replicas, giving a safe oracle.
+evidence_needed: A route class on `pos-payment.sumup.com` that varies by path shape independent of the SigV4 signature.
+verify_steps: GET /ping (200, control) -> GET /checkout (root 3,477 B, control) -> GET /orders, /api/orders, /payment, /link, /v1/orders, /orders/<uuid> spaced >=1.2s. Flag any status or byte-length class that is neither 200-healthy nor the 3,477 B root stub, then confirm against staging. Read-only GETs only, no signature attempts.
+impact: If an order-status route resolves unauthenticated, payment-order existence is enumerable per merchant. This is the only remaining host in the program whose route map has never been shape-probed.
+testability: PASSIVE
+[PARKED] auth.sam-app.ro dynamic client registration (9.20) — evidence complete, unsubmitted 14+ cycles
+[PARKED] pos-payment.sumup.com IAM/SigV4 custom authorizer (8.95) — blocked on ordering vs gate
+[PARKED] iso20022 host-header/SSRF — case-sensitive, behind awselb 503
+[PARKED] serial-terminal.dev.solo sibling gate inconsistency — 200 default HTML, no key served
+[PARKED] mcp.sumup.com kid-optional verifier — RS256/EdDSA enforced, alg none + HS confusion rejected, no JWKS pollution
+[PARKED] cognito dev.solo implicit grant — 0 B token endpoint, no fragment reader
+[FINAL] 1. gateway.sumup.com hosted-fields cross-origin message channel — 88, PASSIVE, Medium, REPORT ON DISK 196 lines sha256 df11e0cf…7c24
+[FINAL] 2. pos-payment.sumup.com payment-order enum at route level — 70, PASSIVE, untried shape-probe
+[FINAL] 3. js.sumup.com BFF id-echo / widget-session capability — 40, PASSIVE, blocked on owned id
+[NEXT] PROBE: shape-probe `pos-payment.sumup.com` for a route-class split — `GET /ping` (expect 200), `GET /checkout` (expect the 3,477 B branded root stub), then `GET /orders`, `/api/orders`, `/payment`, `/link`, `/v1/orders`, `/orders/<uuid>` at ≥1.2 s intervals, flagging any status or byte-length class that is neither the 200 control nor the root stub, and confirm any hit against `staging.pos-payment.sumup.com`.
+[RISK] sumup: 88 — Up from 82, for an uncomfortable reason: my top finding is gone, and the loss is itself the signal. I held a 92-confidence IDOR across multiple cycles on the strength of one transient server-side error, and a single repeat measurement retired it; the same control then retired the sibling at 78. That is two over-claimed leads removed in one cycle, and the pattern says my confidence numbers were tracking narrative momentum more than evidence — a lead I had written up, re-told, and re-scored each cycle was being scored as though its writing were its support. I have downgraded the two retracted leads to explicit scored tombstones (2.20, 7.30) so they cannot quietly re-enter a ranking, and I am holding the next hypothesis at 70 on the strength of an untried *method* rather than an untried *bug*, which is exactly the reasoning I just criticised. Program risk stays high because the one artifact that survives scrutiny is still only a file on disk: `gateway-hostedfields-cross-origin-messenger.md`, 196 lines, sha256 `df11e0cf…7c24`, unreported, on the 37th re-materialization of a workspace that has twice now lost it.

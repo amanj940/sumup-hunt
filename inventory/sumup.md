@@ -1456,3 +1456,5 @@ www.sumup.com
 - CHANGED serial-terminal.dev.solo.sumup.com: raw AmazonS3/CloudFront 200 on same estate as two Cognito-gated siblings; gate inconsistency confirmed; key-variation proves no ListBucket, no object served (defaul
 - CHANGED crt.sh-diff technique now self-defeating: 224 CT names, 0 unmapped — analyst logs in repo record every name ever seen; "appears in repo" ≠ "probed".
 - CHANGED api.sumup.com passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding.
+
+## 2026-09-29 23:54:01 UTC
