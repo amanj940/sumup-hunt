@@ -7374,3 +7374,12 @@ testability: AUTH_HELPED
 [LEARN] REJECTED MISCONFIG @ iso20022.sumup.com: filing a two-class routing divergence as a vulnerability. The 503 is a deny emitted before application logic, both bodies are fixed 11-byte stubs, and an attacker `Origin` control produced zero `access-control-*` headers on both classes. A routing observation is not a security finding; it is a finding only when the two classes differ in what an attacker can reach, and here they differ in which server answers, not in what is disclosed. The honest deliverable was a recon note plus the methodological warning, and the temptation to file it was the same error already logged twice in this program on `js.sumup.com/api` and `mcp.sumup.com`.
 [LEARN] ACCEPTED OTHER @ pos-payment.sumup.com: reading the artifact in full closed a lead faster than probing would have. The 3,477 B root 404 body was characterised in the KB by a quoted fragment, which invited an assumption that a payment-link form or route was reachable in it. Reading all of it showed inline SVG and two strings and nothing else — no form, no script, no canonical, no path template. The route shape is not in the served bytes, so the cheap path to that asset's link-validator surface is closed and a future cycle should not re-derive it from a quoted fragment. Same discipline that recovered the `Xi` UUID literal from `sdk.js` applies to deciding that something is absent.
 [RISK] sumup: 7 — issued 19 unauthenticated read-only GETs and 1 HEAD at >= 1.1 s spacing against two in-scope SumUp hosts (`iso20022.sumup.com`, `iso20022-edge.sumup.com`), plus one DNS lookup. No credentials, no cookies, no mutating request, no customer/financial/PII/authentication data read or touched, no auth-bypass attempt, no rate-limit interaction, no scanner output relied upon. The probes were path-shape and Origin-header controls returning fixed 11-byte deny stubs; no response body contained any data of any kind.
+## 2026-09-29 15:41:01 UTC [target] (model bigpickle)
+[NEW]
+[CHANGED]
+[PRIO]
+[PARKED]
+[FINAL]
+[NEXT]
+[LEARN]
+[RISK]

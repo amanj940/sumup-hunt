@@ -1415,3 +1415,25 @@ www.sumup.com
 - CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` GENUINELY on disk — 270 lines, 14,332B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
 - CHANGED `reports/cognito-implicit-grant-dev-solo-buckets.md` GENUINELY on disk — 129 lines, 5,728B, sha256 `c8aa4ff8dbb989593d6d20220ff55a7b86eb588c40fa91aa9e230b955bdffb06`
 - CHANGED `reports/valid-bugs.md` running count 1 (gateway finding appended VALID 7.5 with FILE REPORT); auth.sam-app.ro finding also appended VALID 7.5
+
+## 2026-09-29 15:42:16 UTC
+- NEW api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: LIVE application-routed endpoint absent from public OpenAPI spec — unauthenticated GET returns 58B `{"error_code":"NOT_FOUND"}`; any `Authorizati
+- NEW iso20022.sumup.com serves two response classes from two upstreams behind one hostname: case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `ist
+- NEW pos-payment.sumup.com root 404 body read in full (3,477 B) — static branded page with inline SVG, strings "This link is invalid or a payment has already been processed for this order." / "The payment 
+- NEW staging.iso20022.sumup.com is NXDOMAIN — prod/stage pair that made pos-payment.sumup.com worth depth work does not exist on this rail; iso20022-edge.sumup.com is distinct host returning 400 on all pat
+- CHANGED Workspace re-materialized 35th time — `reports/` held only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state on cycle open; both report files claimed in prior cycl
+- CHANGED gateway.sumup.com/hosted.js sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873` verified byte-identical; origin-validation greps 0/0/0/0; framing headers 0
+- CHANGED reports/gateway-hostedfields-cross-origin-messenger.md GENUINELY on disk — 270 lines, 14,332B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
+- CHANGED reports/cognito-implicit-grant-dev-solo-buckets.md GENUINELY on disk — 129 lines, 5,728B, sha256 `c8aa4ff8dbb989593d6d20220ff55a7b86eb588c40fa91aa9e230b955bdffb06`
+- CHANGED reports/valid-bugs.md running count 1 (gateway finding appended VALID 7.5 with FILE REPORT); auth.sam-app.ro finding also appended VALID 7.5
+- CHANGED js.sumup.com/api/checkouts/{id}: `?attempts=2` byte-identical to bare request (181B RFC 9457), extending param-invariance control to second axis
+- CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations
+- CHANGED auth.sam-app.ro/oauth2/register: POST 201 unauthenticated RFC 7591 confirmed LIVE; mints JWTs (empty `scp`, attacker-controlled `aud`); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, Z
+- CHANGED mcp.sumup.com/.well-known/oauth-protected-resource: 200 at two paths (prod, never fetched in 29 cycles); publishes `scopes_supported:["offline_access","email"]`; kid-optional try-all on `/mcp` (RFC 87
+- CHANGED client_id=dashboard ACCEPTS `email` scope (302 `login_challenge`) on modern auth.sumup.com — completes consent set `{openid, classic, offline, readers.read, terminals.read, email}`; `offline_access` r
+- CHANGED dashboard.sumup.com / support.sumup.com: FIRST PROBE IN 28 CYCLES — both 308 permanent aliases to me.sumup.com / help.sumup.com (Vercel)
+- CHANGED redirect_uri allowlist widening refuted on modern auth.sumup.com for dashboard client by 6 controlled negatives — all `invalid_request` (exact URI match proven by host-root rejection)
+- CHANGED Legacy callback sweep used wrong path for dashboard candidate (`/callback` instead of registered `/api/sso/callback`) — "0 HITs" conclusion invalid; re-tested with correct path: still `invalid_request
+- CHANGED serial-terminal.dev.solo.sumup.com: raw AmazonS3/CloudFront 200 on same estate as two Cognito-gated siblings; gate inconsistency confirmed; key-variation proves no ListBucket, no object served (defaul
+- CHANGED crt.sh-diff technique now self-defeating: 224 CT names, 0 unmapped — analyst logs in repo record every name ever seen; "appears in repo" ≠ "probed"
+- CHANGED api.sumup.com passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding
