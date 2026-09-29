@@ -1,9 +1,61 @@
-## 2026-09-29 15:41:01 UTC [target] (model bigpickle)
-[NEW]
-[CHANGED]
-[PRIO]
-[PARKED]
-[FINAL]
-[NEXT]
-[LEARN]
-[RISK]
+## 2026-09-29 20:18:16 UTC [target] (model bigpickle)
+[PRIO] pos-payment.sumup.com,8.85,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=9,cloud_surface=9,freshness=9
+[PRIO] auth.sam-app.ro/oauth2/register,8.70,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=8
+[PRIO] js.sumup.com/api/checkouts/{id},8.55,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=10,cloud_surface=7,freshness=9
+[PRIO] mcp.sumup.com/mcp,8.05,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=9,cloud_surface=7,freshness=9
+[PRIO] iso20022.sumup.com + iso20022-edge.sumup.com,7.45,attack_surface=7,business_value=10,tech_exposure=8,gate_ease=4,cloud_surface=8,freshness=6
+[PRIO] serial-terminal.dev.solo.sumup.com,6.70,attack_surface=6,business_value=5,tech_exposure=6,gate_ease=10,cloud_surface=8,freshness=7
+[HYP] api.sumup.com/v0.2/checkouts/{id}/payment-methods unauthenticated checkout payment-methods resolver
+class: IDOR
+asset: api.sumup.com/v0.2/checkouts/{id}/payment-methods
+confidence: 92
+reasoning: Endpoint absent from public OpenAPI spec, recovered from gateway.sumup.com/sdk.js builder. Unauthenticated GET returns 58B application-layer `{"error_code":"NOT_FOUND"}` (distinct from 150B gateway 404). Supplying any `Authorization` header (even invalid) flips response to 500/0B — proves token is parsed and branched on inside handler. No server-side UUID validation (`not-a-uuid` → same 58B). UUID gate is client-side only (`xi=/^[0-9a-f]{8}-…$/i` in `sdk.js`). Falsifies 27-cycle KB claim "all versioned paths 404 — API fully gated at gateway".
+evidence_needed: Valid merchant bearer token + owned checkout_id to test BOLA (cross-merchant payment-methods enumeration); or valid token + foreign checkout_id to confirm resolver reaches domain layer
+verify_steps: GET https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555/payment-methods (expect 58B app 404) -> GET same with `Authorization: Bearer invalid` (expect 500/0B) -> GET https://api.sumup.com/v0.1/checkouts/{id}/payment-methods (v0.1 twin) -> GET https://api.sumup.com/v0.2/checkouts/not-a-uuid/payment-methods (shape invariance)
+impact: Unauthenticated checkout existence oracle (58B vs 500/0B credential differential proves resolver reaches domain layer). With AUTH_HELPED: cross-merchant payment-methods enumeration (BOLA), potential payment instrument disclosure. Severity: Medium (unauth info disclosure) → High (with valid token)
+testability: PASSIVE (unauth differential proven); AUTH_HELPED for BOLA confirmation
+[HYP] gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control
+class: MISCONFIG
+asset: gateway.sumup.com (/, /hosted.js postMessage API) → api.sumup.com/v0.2/checkouts
+confidence: 88
+reasoning: Messenger factory accepts `origin:n`; container passes `origin:document.referrer`; sole use is outbound `t.postMessage(e,n||"*")`. Inbound handler `p=r=>{const{data:n,source:i}=r}` never reads `event.origin`; greps `event.origin`/`origin===`/`origin!==`/`targetOrigin` all 0. Inbound gates are four attacker-controlled JSON strings (`type`,`action`,`variant`,`message`) plus self-echo check on `event.source`; all constants ship in public bundle. Frame ships no XFO, no CSP `frame-ancestors`, no `Referrer-Policy`; root 200/546B. Frame-access gate `if((d=Ce(r.frames)),!d.length)return` sits inside `if("card"===a.payment_type)` — non-card `payment_type` skips it entirely. Remaining gate is static public literal `ue/le` (UUID v1–5 regex, recovered from served bytes: `ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i`, `le=e=>ue.test(e)`). Outbound: `Re` throws (full-URL referrer), `Ue`/`M` use literal `"*"` → wildcard delivery LIVE. `fe` is host-pinned widget-session extractor (`checkout.sumup.com/pay/{id}`), returns undefined on `gateway.sumup.com` → attacker-sent PUT lacks `product_origin` and `session_id`.
+evidence_needed: Browser-confirmed cross-origin `form--submit` from attacker page producing live `PUT /v0.2/checkouts/{attacker-chosen-id}` — obtained via netlog + iframe console. Acceptance leg NOT claimed (needs real customer checkout id).
+verify_steps: curl -sS https://gateway.sumup.com/hosted.js | sha256sum (expect 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873) -> curl -sS https://gateway.sumup.com/hosted.js | grep -c 'event\.origin' (expect 0) -> curl -sS -D- -o /dev/null https://gateway.sumup.com/ | grep -icE '^(x-frame-options|content-security-policy)' (expect 0)
+impact: Proven: any origin can drive PCI card-entry frame to emit state-changing payment write with attacker-chosen id and body. Capped Medium — missing-authorization posture proven, authorization outcome not. Remediation must land inbound `event.origin` check together with outbound `targetOrigin` bug fix (guard held by malformed value disappears when corrected).
+testability: PASSIVE
+[HYP] pos-payment.sumup.com IAM/SigV4 trust model divergence enables payment-link enumeration and SSRF via callback/webhook parameters
+class: SSRF
+asset: pos-payment.sumup.com (AWS API Gateway, rotating raw AWS IPs eu-west-1)
+confidence: 75
+reasoning: Only SumUp asset on raw AWS IP with IAM/SigV4 auth (vs Cloudflare/Vercel+OIDC/Bearer everywhere else). Root 404 returns branded payment-link page ("This link is invalid or a payment link has expired"). `/ping` → 200 healthy. Staging replica byte-identical. No webhook/callback/return_url parameters discovered passively; AWS API Gateway often exposes Lambda proxy integrations with request forwarding.
+evidence_needed: Discovery of webhook/callback/return_url parameters on payment-link flow; SSRF to 169.254.169.254 via parameter injection
+verify_steps: GET https://pos-payment.sumup.com/ (branded 404) -> GET https://pos-payment.sumup.com/ping -> enumerate paths via CT-mapped names (225 names, 34 mapped → 190 unmapped) and common API Gateway patterns (/prod/, /v1/, /pay/, /link/, /webhook/, /callback/) -> probe discovered params with 169.254.169.254 payloads
+impact: If webhook/callback param exists, SSRF to AWS metadata yields IAM role credentials; payment-link enumeration could leak merchant transaction data
+testability: PASSIVE
+[PARKED] auth.sam-app.ro/oauth2/register unauthenticated dynamic client registration → mintable JWTs on staging: confidence 85 but fileable as staging posture only (VALID 7.5 per triage); zero prod sync evidence after 30 cycles; blocker is HUMAN submission (13+ cycles)
+[PARKED] js.sumup.com/api/checkouts/{id} unauthenticated checkout existence oracle: confidence 78, info-disclosure (merchant checkout enumeration); client-side UUID gate only, server accepts any string
+[PARKED] iso20022.sumup.com SSRF: confidence 50, requires POST (AUTH_HELPED), no parameters discovered passively, 36 cycles without discriminator
+[PARKED] serial-terminal.dev.solo.sumup.com ungated sibling: no object readable, ListBucket denied, exposure leg refuted by key-variation; kept at gate inconsistency only (Low hardening)
+[PARKED] mcp.sumup.com kid-optional try-all: confidence 75 but exploitation purely theoretical — no JWKS pollution vector, no cross-env key reuse (ZERO kid overlap), HS256/none explicitly rejected; hardening deviation only
+[PARKED] PUT /v0.2/checkouts/{id}/apple-pay-session SSRF: requires AUTH_HELPED (valid merchant token + owned checkout_id)
+[PARKED] Cognito dev.solo implicit grant: response_type=token enabled but token delivery origin serves NO content (all paths 302/0B); no reader for fragment → leak unproven; capped Low
+[FINAL] 1. api.sumup.com/v0.2/checkouts/{id}/payment-methods unauthenticated checkout payment-methods resolver — 92, PASSIVE, Medium→High
+[FINAL] 2. gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control — 88, PASSIVE, Medium
+[FINAL] 3. pos-payment.sumup.com IAM/SigV4 trust model + payment-link surface — 75, PASSIVE, high-value net-new asset class
+[NEXT] PROBE: GET https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555/payment-methods + GET with `Authorization: Bearer invalid` to re-verify credential differential (58B app 404 vs 500/0B) — read-only, unauthenticated, establishes handler-level resolver
+[LEARN] ACCEPTED IDOR @ api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: a "uniformly gated host" claim is falsified by a control pair, not by a longer enumeration. Every path the KB probed returned the same 150B gateway body, so "all versioned paths 404" was read as proof of an edge gate — but a new path was recovered from the client's own call graph rather than from path guessing, and it returned a different error producer on the same host, same method, same status.
+[LEARN] ACCEPTED IDOR @ api.sumup.com/v0.2/checkouts/{id}/payment-methods: the decisive control was varying the CREDENTIAL, not the identifier. Every identifier returned 404, so identifier variation alone could never distinguish "authz denial" from "resource does not exist" — but supplying a deliberately invalid `Authorization` header produced a 500/0B, proving the token is parsed and branched on inside the handler.
+[LEARN] REJECTED MISCONFIG @ api.sumup.com/v0.1/internal/analytics: inferring an endpoint's auth posture from the client call that reaches it. The SDK posts this with only `X-SumUp-Widget-Session-Id` and no bearer, which looks like an unauthenticated ingestion point — but `Bi` injects that header into EVERY request, money endpoints included, so its presence carries zero information about whether a credential is enforced.
+[LEARN] REJECTED OTHER @ workspace: 34 cycles of re-materialization now make the open-with-`ls` step mandatory rather than prudent — it is the only way to know which prior `[NEW]` claims, if any, refer to files that exist.
+[LEARN] ACCEPTED OTHER @ reports/ and workspace: file-creation streak root cause is **workspace re-materialized between cycles** — uniform mtimes, no stray copies, valid-bugs.md at exact pre-append state; artifacts written in cycle N do not persist to N+1; measurement of volatile store only evidence while store survives
+[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (`t.postMessage(e, n||"*")`); inbound handler never reads `event.origin`; guard exists but applied backwards — developer fixing outbound `targetOrigin` will find `origin` in scope and assume inbound handled
+[LEARN] REJECTED OTHER @ gateway.sumup.com/hosted.js: "unrecoverable runtime pattern" gate — three cycles recorded checkoutId check as `new RegExp(a.pattern)`; one retracted entirely. Both wrong — constructor builds card-IIN brand table; actual gate is static UUID v1–v5 literal. Reading code around citation catches this; re-deriving from summary never will
+[LEARN] ACCEPTED MISCONFIG @ js.sumup.com/api: finding came from recovering call shape (sdk.js) not guessing path shapes; prefix sweep structurally incapable of hitting real paths (client only issues request when id matches UUID regex). Exhaustive sweep only exhaustive over values actually sent
+[LEARN] REJECTED MISCONFIG @ js.sumup.com/api: access-control-allow-origin:* + access-control-allow-credentials:true is hardening-only — withCredentials set only when opts.credentials==="include", fetchCheckout passes {method:"GET"} → cookieless, browsers reject * for credentialed requests. Resource requires NO credential → permissive CORS grants no capability differential
+[LEARN] ACCEPTED OTHER @ mcp.sumup.com: RFC 9728 resource-server metadata LIVE on prod MCP at two paths publishing scopes_supported:["offline_access","email"] — KB only probed /.well-known/mcp.json 404
+[LEARN] REJECTED AUTH @ mcp.sumup.com/mcp: JWT alg:none and RS256→HS256 key confusion both explicitly refused by prod verifier; allowlist exactly {RS256, EdDSA} (RS384/RS512/PS256/ES256 → no applicable key)
+[LEARN] ACCEPTED OATH @ auth.sumup.com: client_id=dashboard ACCEPTS email (302 login_challenge), completing consent set {openid, classic, offline, readers.read, terminals.read, email} while offline_access rejected (303 invalid_scope) — KB's "readers.read/terminals.read ONLY scopes" was measurement gap
+[LEARN] REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared — no stale/rotated-but-trusted/rogue signing key in prod trust store; staging loadtesting key absent
+[LEARN] ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key count
+[LEARN] REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-probing has zero expected yield
+[RISK] sumup: 79 — Three gains, only the third is a discovery. First, the top finding is materially sharper: a declared, supplied, one-directionally-applied origin parameter converts remediation from "add validation" into "move existing validation to inbound handler and fix outbound bug in same change." Second, a wrong technical claim that survived three cycles (runtime-unrecoverable gate) was retracted on inspection; had it shipped, a triager would have been told the remaining barrier was unauditable when it is a public UUID regex. Third, the file-delivery blocker is finally diagnosed correctly (workspace re-materialization), which matters more than it sounds: three prior cycles each reported a plausible mechanism, and each was wrong in a way that guaranteed the next cycle would re-run the same failing path. The risk I am NOT claiming as reduced is delivery itself — 21 cycles on, nothing is submitted, and treating these artifacts as filed would be the same category of error as the file claims, one level up.

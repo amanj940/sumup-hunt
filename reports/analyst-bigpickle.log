@@ -54507,3 +54507,585 @@ Resolve the remaining documented identifiers against their own documented endpoi
 - Residual probe risk: ~8 requests, all read-only GET at <=1rps, no enumeration, no mutation. Low. The real risk this cycle is disclosure handling, not traffic.
 - Workspace volatility: reports/ was re-materialised again this cycle (36th time). valid-bugs.md opened at exactly the 79-line / 7384 B / sha256 282390f8 pre-append state and the prior cycle's report files were absent. The new report and the append are written and hashed now but will likely be gone next cycle - expect to re-derive, and do not trust any [NEW] filename claim without ls.
 ```
+===== ANALYST bigpickle 2026-09-29 20:18:26 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll start by opening the workspace to establish ground truth before composing any claims.
+[0m$ [0mls -la && echo "--- reports ---" && ls -la reports/ 2>/dev/null | head -50
+total 1024
+drwxr-xr-x 12 runner runner   4096 Sep 29 20:13 .
+drwxr-xr-x  3 runner runner   4096 Sep 29 20:13 ..
+drwxr-xr-x  7 runner runner   4096 Sep 29 20:13 .git
+drwxr-xr-x  3 runner runner   4096 Sep 29 20:13 .github
+-rw-r--r--  1 runner runner   1885 Sep 29 20:13 README.md
+-rw-r--r--  1 runner runner    123 Sep 29 20:13 analyst-out.txt
+-rw-r--r--  1 runner runner 440171 Sep 29 20:13 analyst-prompt.txt
+-rw-r--r--  1 runner runner 436285 Sep 29 20:13 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Sep 29 20:13 inventory
+drwxr-xr-x  2 runner runner   4096 Sep 29 20:13 knowledge
+drwxr-xr-x  2 runner runner   4096 Sep 29 20:13 leads
+-rw-r--r--  1 runner runner  73129 Sep 29 20:13 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Sep 29 20:13 recon-notes
+drwxr-xr-x  2 runner runner   4096 Sep 29 20:13 reports
+drwxr-xr-x  2 runner runner   4096 Sep 29 20:13 reposcan-raw
+-rw-r--r--  1 runner runner   3299 Sep 29 20:13 scope.yml
+drwxr-xr-x  2 runner runner   4096 Sep 29 20:13 scripts
+-rw-r--r--  1 runner runner     33 Sep 29 20:13 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Sep 29 20:13 state_laguna.json
+-rw-r--r--  1 runner runner     33 Sep 29 20:13 state_ling3.json
+-rw-r--r--  1 runner runner     33 Sep 29 20:13 state_longcat.json
+-rw-r--r--  1 runner runner     33 Sep 29 20:13 state_mimo.json
+-rw-r--r--  1 runner runner     33 Sep 29 20:13 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Sep 29 20:13 triage
+--- reports ---
+total 7368
+drwxr-xr-x  2 runner runner    4096 Sep 29 20:13 .
+drwxr-xr-x 12 runner runner    4096 Sep 29 20:13 ..
+-rw-r--r--  1 runner runner 4314366 Sep 29 20:13 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   35805 Sep 29 20:13 analyst-laguna.log
+-rw-r--r--  1 runner runner   35640 Sep 29 20:13 analyst-ling3.log
+-rw-r--r--  1 runner runner   35970 Sep 29 20:13 analyst-longcat.log
+-rw-r--r--  1 runner runner 2540879 Sep 29 20:13 analyst-nemotron3.log
+-rw-r--r--  1 runner runner     116 Sep 29 20:13 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Sep 29 20:13 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Sep 29 20:13 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Sep 29 20:13 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   18432 Sep 29 20:13 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  506486 Sep 29 20:13 hypotheses.md
+-rw-r--r--  1 runner runner    9173 Sep 29 20:13 reposcan-findings.md
+-rw-r--r--  1 runner runner    7384 Sep 29 20:13 valid-bugs.md
+[0m
+[0m$ [0mdate -u && echo "---" && ls art/ 2>/dev/null | head -30
+Tue Sep 29 20:13:47 UTC 2026
+---
+[0m
+[0m$ [0mtail -60 reports/hypotheses-nemotron3.txt
+[PRIO] pos-payment.sumup.com,8.85,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=9,cloud_surface=9,freshness=9
+[PRIO] auth.sam-app.ro/oauth2/register,8.70,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=8
+[PRIO] js.sumup.com/api/checkouts/{id},8.55,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=10,cloud_surface=7,freshness=9
+[PRIO] mcp.sumup.com/mcp,8.05,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=9,cloud_surface=7,freshness=9
+[PRIO] iso20022.sumup.com + iso20022-edge.sumup.com,7.45,attack_surface=7,business_value=10,tech_exposure=8,gate_ease=4,cloud_surface=8,freshness=6
+[PRIO] serial-terminal.dev.solo.sumup.com,6.70,attack_surface=6,business_value=5,tech_exposure=6,gate_ease=10,cloud_surface=8,freshness=7
+[HYP] api.sumup.com/v0.2/checkouts/{id}/payment-methods unauthenticated checkout payment-methods resolver
+class: IDOR
+asset: api.sumup.com/v0.2/checkouts/{id}/payment-methods
+confidence: 92
+reasoning: Endpoint absent from public OpenAPI spec, recovered from gateway.sumup.com/sdk.js builder. Unauthenticated GET returns 58B application-layer `{"error_code":"NOT_FOUND"}` (distinct from 150B gateway 404). Supplying any `Authorization` header (even invalid) flips response to 500/0B — proves token is parsed and branched on inside handler. No server-side UUID validation (`not-a-uuid` → same 58B). UUID gate is client-side only (`xi=/^[0-9a-f]{8}-…$/i` in `sdk.js`). Falsifies 27-cycle KB claim "all versioned paths 404 — API fully gated at gateway".
+evidence_needed: Valid merchant bearer token + owned checkout_id to test BOLA (cross-merchant payment-methods enumeration); or valid token + foreign checkout_id to confirm resolver reaches domain layer
+verify_steps: GET https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555/payment-methods (expect 58B app 404) -> GET same with `Authorization: Bearer invalid` (expect 500/0B) -> GET https://api.sumup.com/v0.1/checkouts/{id}/payment-methods (v0.1 twin) -> GET https://api.sumup.com/v0.2/checkouts/not-a-uuid/payment-methods (shape invariance)
+impact: Unauthenticated checkout existence oracle (58B vs 500/0B credential differential proves resolver reaches domain layer). With AUTH_HELPED: cross-merchant payment-methods enumeration (BOLA), potential payment instrument disclosure. Severity: Medium (unauth info disclosure) → High (with valid token)
+testability: PASSIVE (unauth differential proven); AUTH_HELPED for BOLA confirmation
+[HYP] gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control
+class: MISCONFIG
+asset: gateway.sumup.com (/, /hosted.js postMessage API) → api.sumup.com/v0.2/checkouts
+confidence: 88
+reasoning: Messenger factory accepts `origin:n`; container passes `origin:document.referrer`; sole use is outbound `t.postMessage(e,n||"*")`. Inbound handler `p=r=>{const{data:n,source:i}=r}` never reads `event.origin`; greps `event.origin`/`origin===`/`origin!==`/`targetOrigin` all 0. Inbound gates are four attacker-controlled JSON strings (`type`,`action`,`variant`,`message`) plus self-echo check on `event.source`; all constants ship in public bundle. Frame ships no XFO, no CSP `frame-ancestors`, no `Referrer-Policy`; root 200/546B. Frame-access gate `if((d=Ce(r.frames)),!d.length)return` sits inside `if("card"===a.payment_type)` — non-card `payment_type` skips it entirely. Remaining gate is static public literal `ue/le` (UUID v1–5 regex, recovered from served bytes: `ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i`, `le=e=>ue.test(e)`). Outbound: `Re` throws (full-URL referrer), `Ue`/`M` use literal `"*"` → wildcard delivery LIVE. `fe` is host-pinned widget-session extractor (`checkout.sumup.com/pay/{id}`), returns undefined on `gateway.sumup.com` → attacker-sent PUT lacks `product_origin` and `session_id`.
+evidence_needed: Browser-confirmed cross-origin `form--submit` from attacker page producing live `PUT /v0.2/checkouts/{attacker-chosen-id}` — obtained via netlog + iframe console. Acceptance leg NOT claimed (needs real customer checkout id).
+verify_steps: curl -sS https://gateway.sumup.com/hosted.js | sha256sum (expect 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873) -> curl -sS https://gateway.sumup.com/hosted.js | grep -c 'event\.origin' (expect 0) -> curl -sS -D- -o /dev/null https://gateway.sumup.com/ | grep -icE '^(x-frame-options|content-security-policy)' (expect 0)
+impact: Proven: any origin can drive PCI card-entry frame to emit state-changing payment write with attacker-chosen id and body. Capped Medium — missing-authorization posture proven, authorization outcome not. Remediation must land inbound `event.origin` check together with outbound `targetOrigin` bug fix (guard held by malformed value disappears when corrected).
+testability: PASSIVE
+[HYP] pos-payment.sumup.com IAM/SigV4 trust model divergence enables payment-link enumeration and SSRF via callback/webhook parameters
+class: SSRF
+asset: pos-payment.sumup.com (AWS API Gateway, rotating raw AWS IPs eu-west-1)
+confidence: 75
+reasoning: Only SumUp asset on raw AWS IP with IAM/SigV4 auth (vs Cloudflare/Vercel+OIDC/Bearer everywhere else). Root 404 returns branded payment-link page ("This link is invalid or a payment link has expired"). `/ping` → 200 healthy. Staging replica byte-identical. No webhook/callback/return_url parameters discovered passively; AWS API Gateway often exposes Lambda proxy integrations with request forwarding.
+evidence_needed: Discovery of webhook/callback/return_url parameters on payment-link flow; SSRF to 169.254.169.254 via parameter injection
+verify_steps: GET https://pos-payment.sumup.com/ (branded 404) -> GET https://pos-payment.sumup.com/ping -> enumerate paths via CT-mapped names (225 names, 34 mapped → 190 unmapped) and common API Gateway patterns (/prod/, /v1/, /pay/, /link/, /webhook/, /callback/) -> probe discovered params with 169.254.169.254 payloads
+impact: If webhook/callback param exists, SSRF to AWS metadata yields IAM role credentials; payment-link enumeration could leak merchant transaction data
+testability: PASSIVE
+[PARKED] auth.sam-app.ro/oauth2/register unauthenticated dynamic client registration → mintable JWTs on staging: confidence 85 but fileable as staging posture only (VALID 7.5 per triage); zero prod sync evidence after 30 cycles; blocker is HUMAN submission (13+ cycles)
+[PARKED] js.sumup.com/api/checkouts/{id} unauthenticated checkout existence oracle: confidence 78, info-disclosure (merchant checkout enumeration); client-side UUID gate only, server accepts any string
+[PARKED] iso20022.sumup.com SSRF: confidence 50, requires POST (AUTH_HELPED), no parameters discovered passively, 36 cycles without discriminator
+[PARKED] serial-terminal.dev.solo.sumup.com ungated sibling: no object readable, ListBucket denied, exposure leg refuted by key-variation; kept at gate inconsistency only (Low hardening)
+[PARKED] mcp.sumup.com kid-optional try-all: confidence 75 but exploitation purely theoretical — no JWKS pollution vector, no cross-env key reuse (ZERO kid overlap), HS256/none explicitly rejected; hardening deviation only
+[PARKED] PUT /v0.2/checkouts/{id}/apple-pay-session SSRF: requires AUTH_HELPED (valid merchant token + owned checkout_id)
+[PARKED] Cognito dev.solo implicit grant: response_type=token enabled but token delivery origin serves NO content (all paths 302/0B); no reader for fragment → leak unproven; capped Low
+[FINAL] 1. api.sumup.com/v0.2/checkouts/{id}/payment-methods unauthenticated checkout payment-methods resolver — 92, PASSIVE, Medium→High
+[FINAL] 2. gateway.sumup.com hosted-fields cross-origin postMessage → production payment API control — 88, PASSIVE, Medium
+[FINAL] 3. pos-payment.sumup.com IAM/SigV4 trust model + payment-link surface — 75, PASSIVE, high-value net-new asset class
+[NEXT] PROBE: GET https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555/payment-methods + GET with `Authorization: Bearer invalid` to re-verify credential differential (58B app 404 vs 500/0B) — read-only, unauthenticated, establishes handler-level resolver
+[LEARN] ACCEPTED IDOR @ api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: a "uniformly gated host" claim is falsified by a control pair, not by a longer enumeration. Every path the KB probed returned the same 150B gateway body, so "all versioned paths 404" was read as proof of an edge gate — but a new path was recovered from the client's own call graph rather than from path guessing, and it returned a different error producer on the same host, same method, same status.
+[LEARN] ACCEPTED IDOR @ api.sumup.com/v0.2/checkouts/{id}/payment-methods: the decisive control was varying the CREDENTIAL, not the identifier. Every identifier returned 404, so identifier variation alone could never distinguish "authz denial" from "resource does not exist" — but supplying a deliberately invalid `Authorization` header produced a 500/0B, proving the token is parsed and branched on inside the handler.
+[LEARN] REJECTED MISCONFIG @ api.sumup.com/v0.1/internal/analytics: inferring an endpoint's auth posture from the client call that reaches it. The SDK posts this with only `X-SumUp-Widget-Session-Id` and no bearer, which looks like an unauthenticated ingestion point — but `Bi` injects that header into EVERY request, money endpoints included, so its presence carries zero information about whether a credential is enforced.
+[LEARN] REJECTED OTHER @ workspace: 34 cycles of re-materialization now make the open-with-`ls` step mandatory rather than prudent — it is the only way to know which prior `[NEW]` claims, if any, refer to files that exist.
+[LEARN] ACCEPTED OTHER @ reports/ and workspace: file-creation streak root cause is **workspace re-materialized between cycles** — uniform mtimes, no stray copies, valid-bugs.md at exact pre-append state; artifacts written in cycle N do not persist to N+1; measurement of volatile store only evidence while store survives
+[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (`t.postMessage(e, n||"*")`); inbound handler never reads `event.origin`; guard exists but applied backwards — developer fixing outbound `targetOrigin` will find `origin` in scope and assume inbound handled
+[LEARN] REJECTED OTHER @ gateway.sumup.com/hosted.js: "unrecoverable runtime pattern" gate — three cycles recorded checkoutId check as `new RegExp(a.pattern)`; one retracted entirely. Both wrong — constructor builds card-IIN brand table; actual gate is static UUID v1–v5 literal. Reading code around citation catches this; re-deriving from summary never will
+[LEARN] ACCEPTED MISCONFIG @ js.sumup.com/api: finding came from recovering call shape (sdk.js) not guessing path shapes; prefix sweep structurally incapable of hitting real paths (client only issues request when id matches UUID regex). Exhaustive sweep only exhaustive over values actually sent
+[LEARN] REJECTED MISCONFIG @ js.sumup.com/api: access-control-allow-origin:* + access-control-allow-credentials:true is hardening-only — withCredentials set only when opts.credentials==="include", fetchCheckout passes {method:"GET"} → cookieless, browsers reject * for credentialed requests. Resource requires NO credential → permissive CORS grants no capability differential
+[LEARN] ACCEPTED OTHER @ mcp.sumup.com: RFC 9728 resource-server metadata LIVE on prod MCP at two paths publishing scopes_supported:["offline_access","email"] — KB only probed /.well-known/mcp.json 404
+[LEARN] REJECTED AUTH @ mcp.sumup.com/mcp: JWT alg:none and RS256→HS256 key confusion both explicitly refused by prod verifier; allowlist exactly {RS256, EdDSA} (RS384/RS512/PS256/ES256 → no applicable key)
+[LEARN] ACCEPTED OATH @ auth.sumup.com: client_id=dashboard ACCEPTS email (302 login_challenge), completing consent set {openid, classic, offline, readers.read, terminals.read, email} while offline_access rejected (303 invalid_scope) — KB's "readers.read/terminals.read ONLY scopes" was measurement gap
+[LEARN] REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared — no stale/rotated-but-trusted/rogue signing key in prod trust store; staging loadtesting key absent
+[LEARN] ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key count
+[LEARN] REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-probing has zero expected yield
+[RISK] sumup: 79 — Three gains, only the third is a discovery. First, the top finding is materially sharper: a declared, supplied, one-directionally-applied origin parameter converts remediation from "add validation" into "move existing validation to inbound handler and fix outbound bug in same change." Second, a wrong technical claim that survived three cycles (runtime-unrecoverable gate) was retracted on inspection; had it shipped, a triager would have been told the remaining barrier was unauditable when it is a public UUID regex. Third, the file-delivery blocker is finally diagnosed correctly (workspace re-materialization), which matters more than it sounds: three prior cycles each reported a plausible mechanism, and each was wrong in a way that guaranteed the next cycle would re-run the same failing path. The risk I am NOT claiming as reduced is delivery itself — 21 cycles on, nothing is submitted, and treating these artifacts as filed would be the same category of error as the file claims, one level up.
+[0m
+[0m$ [0mwc -l reports/valid-bugs.md && sha256sum reports/valid-bugs.md && head -20 reports/valid-bugs.md && echo "=== TAIL ===" && tail -25 reports/valid-bugs.md
+79 reports/valid-bugs.md
+282390f83b2213178c41f92857bb9df779abc3deaaefb81fb9b8f8c886ae6369  reports/valid-bugs.md
+# Validated findings (running count 0)
+
+- 1 lead(s) marked VALID at 2026-09-04 06:02:58 UTC
+  - | Q4 Provable non-invasively? | **NO** — all unauthenticated paths return 404; requires valid merchant OAuth token to test. Probe results confirm 404 on every enumerated path (v0/v0.1/v1/v2/merchants/
+
+- 7 lead(s) marked VALID at 2026-09-06 21:30:02 UTC
+  - **Verdict: VALID**
+  - | Impact | Attacker-controlled OAuth clients on staging; mintable JWTs (empty scope blocks resources but token is valid at gateway). Staging environments often lack prod hardening. |
+  - **Verdict: VALID**
+  - **Verdict: VALID**
+  - | 1 | `auth.sam-app.ro` unauthenticated dynamic client registration | **VALID** | 7.5 |
+  - | 2 | `api.sumup.com/authorize` client-ID oracle + wildcard CORS | **VALID** | 5.3 |
+  - | 3 | `mcp.sumup.com` wildcard CORS on Bearer-protected endpoint | **VALID** | 5.3 |
+
+- 3 lead(s) marked VALID at 2026-09-09 15:21:03 UTC
+  - **Verdict: VALID**
+  - | Q3 | Real security impact? | Low — error taxonomy (`invalid_client` vs `invalid_request`) is a standard OAuth error pattern; wildcard CORS on an authorize endpoint that only redirects to error pages
+  - | 1 | help.sumup.com Contentful Preview Token Leak | **VALID** | 5.3 (Medium) | **FILE REPORT** |
+
+- 3 lead(s) marked VALID at 2026-09-10 16:19:46 UTC
+=== TAIL ===
+  - | Q3 Real impact? | LOW — error taxonomy (`invalid_client` vs `invalid_request`) is standard OAuth error behavior. Wildcard CORS exists but the endpoint only redirects to error pages; no code/token le
+  - | Q5 Novel/unreported? | ALREADY REPORTED — marked VALID in valid-bugs.md (2026-09-10) |
+  - | Q3 Real impact? | LOW — wildcard CORS + `Authorization: Bearer` header-only auth. No cookies ambient creds. Hardening-only config. Already marked VALID in valid-bugs.md. |
+  - | Q2 Attacker reachable? | Partially — all unauthenticated paths return 404. Requires valid merchant OAuth token. |
+  - | Q4 Provable non-invasively? | **NO** — requires valid merchant OAuth token with dashboard scopes. All unauthenticated paths 404. Cannot test passively. |
+  - | Q2 Attacker reachable? | Partially — OIDC discovery is public, but actual token flow requires valid client registration |
+  - **Verdict: HOLD** — Interesting theoretical vector but insufficient proof. redirect_uri strict allowlist + PAR unrouted + no public client registration = mitigated. Could be VALID if a public client r
+  - **Verdict: HOLD** — Valid code issue (private key material in log output) but in a development tool, not production infrastructure. May be accepted as informational. Needs scoping clarification.
+  - | 1 | Contentful Preview Token Leak (help.sumup.com) | **HOLD** | 5.3 | Re-verify token liveness; if live → VALID, FILE REPORT |
+  - | 2 | auth.sam-app.ro unauthenticated client registration → JWTs | **VALID** | 7.5 | FILE REPORT |
+
+- 13 lead(s) marked VALID at 2026-09-18 01:28:35 UTC
+  - | Q3 | Real impact? | **YES** — attacker-controlled OAuth clients mint real JWT access tokens via `client_credentials` grant. Tokens valid at `api.sam-app.ro` gateway (structured error response). Stag
+  - | Q5 | Novel/unreported? | **YES** — not in `valid-bugs.md` as filed report. |
+  - | Q7 | Reasonable triager? | **YES** — unauthenticated client registration on staging auth server with mintable tokens is a valid finding. |
+  - **Verdict: VALID**
+  - | Q5 | Novel/unreported? | **ALREADY REPORTED** — marked VALID in `valid-bugs.md` (2026-09-10). |
+  - | Q7 | Reasonable triager? | **YES, but low bounty** — valid information disclosure, but standard OAuth errors. Already filed. |
+  - | Q5 | Novel/unreported? | **ALREADY REPORTED** — marked VALID in `valid-bugs.md`. |
+  - | Q5 | Novel/unreported? | **YES at time of discovery** — marked VALID 2026-09-09. |
+  - | Q2 | Attacker reachable? | **NO** — all unauthenticated paths return 404. Requires valid merchant OAuth token. |
+  - | Q4 | Provable non-invasively? | **NO** — requires valid merchant OAuth token with dashboard scopes to test ID-swapping. AUTH_HELPED. |
+  - | Q3 | Real impact? | **NO** — OPTIONS returns 204 (no content), wildcard CORS on a token endpoint that rejects all POST requests with `invalid_client` (no valid client credentials known). The `x-envo
+  - | Q5 | Novel/unreported? | **Possibly novel** — not in `valid-bugs.md`. |
+  - | 1 | `auth.sam-app.ro` unauth dynamic client registration → JWTs | **VALID** | 7.5 | FILE REPORT |
+[0m
+Workspace re-materialized again (36th cycle). Both prior report files absent; `valid-bugs.md` at its exact pre-append 7,384 B state. Let me ground-truth the leading finding before composing anything.
+Ground truth established. `valid-bugs.md` = 79 lines / `282390f8` (exact pre-append state) — both prior report files absent, 36th re-materialization.
+
+My last `[NEXT]` was RAG for a checkout ID, and nemotron3's was a re-probe of a surface the KB explicitly records as zero-yield. Both are wrong moves. The KB's own repeated lesson is that the productive move is **recovering call shapes from the first-party bundle rather than guessing or re-probing** — and the BFF route table has never been fully enumerated. Starting there.
+[0m$ [0mmkdir -p /tmp/opencode/cy36 && cd /tmp/opencode/cy36 && curl -sS --max-time 60 -o sdk.js -w "http=%{http_code} size=%{size_download} type=%{content_type}\n" https://gateway.sumup.com/sdk.js && sha256sum sdk.js
+http=200 size=291877 type=application/javascript; charset=utf-8
+0fae546ae34ee5e97cf0c3107d87adaa79129983d423bce6cf9a0fc19916c7bd  sdk.js
+[0m
+[0m$ [0mcd /tmp/opencode/cy36 && echo "=== literal backtick path templates ===" && grep -oE '`/[a-zA-Z0-9._/$\{\}-]*`' sdk.js | sort -u
+=== literal backtick path templates ===
+[0m
+[0m$ [0mcd /tmp/opencode/cy36 && echo "=== quoted path strings ===" && grep -oE '"/[a-zA-Z0-9._/-]{2,}"' sdk.js | sort -u
+=== quoted path strings ===
+"/apple-pay-session"
+"/payment-methods"
+"/redirect.html"
+[0m
+Byte-identical to the recorded hash — KB citations are grounded in served bytes. Now extracting the **complete** path inventory rather than sampling it.
+Paths are assembled, not literal. Let me find the builder functions and the version/segment concatenation.
+[0m$ [0mcd /tmp/opencode/cy36 && echo "=== v0.x occurrences w/ context ===" && grep -oE '.{160}v0\.[12].{160}' sdk.js | head -40
+=== v0.x occurrences w/ context ===
+nst e in c.headers)n.setRequestHeader(e,c.headers[e]);n.send(c.body||null)}))).then(i);var s,c}});function Fi(e,t,n=Ai(window.location.href)){const r=Bi(e,t,n,"v0.1",(e=>e.text())),i=Bi(e,t,n,"v0.2",ni);return{checkouts:Di(i,n),paymentMethods:Ei(i),analytics:qi(r)}}function zi(e,t,n=Ai(window.location.href)){return functio
+[0m
+[0m$ [0mcd /tmp/opencode/cy36 && echo "=== checkouts segment context ===" && grep -oE '.{200}checkouts.{200}' sdk.js | head -30
+=== checkouts segment context ===
+ion.href);if(Ni(n)||!n)return Promise.resolve([ki]);if(!wi(n))return Ci(n);const i=new URLSearchParams;return"Hosted Checkout"===(null==r?void 0:r.origin)&&i.set("hosted_checkout","true"),e.endpoint("checkouts/".concat(n,"/payment-methods").concat("".concat(i)?"?".concat(i):"")).then(_i)}}}const Ri=e=>{if(e.next_step){const{next_step:t}=e,n=(t.mechanism||[]).includes("iframe"),r=(t.mechanism||[]).includes(
+i);if(!r)throw new Error("Unable to process checkout without a valid checkoutId");return Ni(r)?Ti(a):wi(r)?(o&&(a.sca_experience=o),t&&(a.product_origin=t.origin,a.session_id=t.sessionId),e.endpoint("checkouts/".concat(r),{method:"PUT",headers:{"Content-Type":"application/json","X-Sumup-Correlation-Id":r},body:JSON.stringify(a)}).then(Mi).then(Ri).then(Li)):Ci(r)},createAppleSession:t=>{let{checkoutId:n,pa
+.headers)n.setRequestHeader(e,c.headers[e]);n.send(c.body||null)}))).then(i);var s,c}});function Fi(e,t,n=Ai(window.location.href)){const r=Bi(e,t,n,"v0.1",(e=>e.text())),i=Bi(e,t,n,"v0.2",ni);return{checkouts:Di(i,n),paymentMethods:Ei(i),analytics:qi(r)}}function zi(e,t,n=Ai(window.location.href)){return function(e){return{checkouts:{fetchCheckout:(t,n)=>function(e,t,n,r){return new(n||(n=Promise))((funct
+chant_country:"demo",merchant_sandbox:Ii(t),purpose:"CHECKOUT"};if(!wi(t))throw zr(`Unable to fetch checkout. checkoutId: ${t} is not valid.`),new Error(`Invalid checkoutId: ${t}`);return e.endpoint(`checkouts/${t}${n?`?attempts=${n}`:""}`,{method:"GET"})})),fetchFeesByCheckout:(t,n)=>e.endpoint(`checkouts/${t}/fee-calculation`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(
+=>e.endsWith(t))))||void 0===t?void 0:t[1];var e,t}))[0];const ro=F(void 0),io=({api:e,apiBFF:t,checkoutId:n,children:r})=>{const[i,o]=ie(),[a,s]=ie(!0),c=!no(),{sessionId:l,events:d}=Yi();ae((()=>{t.checkouts.fetchCheckout(n).then((e=>{c&&delete e.lxn_session_token,o(e),d.triggerCheckoutLoadedEvent({sessionId:l,checkoutId:e.id,purpose:e.purpose,country:e.merchant_country,timestamp:Date.now().toString()})}
+))}catch(e){o(e)}}function c(e){var t;e.done?i(e.value):(t=e.value,t instanceof n?t:new n((function(e){e(t)}))).then(a,s)}c((r=r.apply(e,t||[])).next())}))}(void 0,void 0,void 0,(function*(){return e.checkouts.processCheckout({checkoutId:(null==i?void 0:i.id)||n,payload:t,redirectMechanism:Qi(r)})})),fetchCheckout:u}},{children:!a&&r}))};function oo(e){return function(t){return U(ro.Consumer,{children:({ch
+y"),s(!0),n("fail",{message:"Session timed out."})},onError:e=>{Fr(e,"Failed apple pay"),n("fail",{message:e.message})},onCancel:()=>{n("cancelled",{message:"Process cancelled."})},createSession:e=>t.checkouts.createAppleSession({checkoutId:c.id,payload:e}),onCompletePayment:(e,t)=>{n("success",t)}}).begin()})()},isVisible:r}),m(Xc,{isTimeoutMessageVisible:a,"data-testid":"timeout-session-error-message"},m
+de((()=>function(e=60){let t,n=1;function r(){clearTimeout(t)}return{start:function i(o){return t=setTimeout((()=>{if(n>e)return r();o(n),n+=1,i(o)}),5e3),r},clear:r}}(i)),[]);ae((()=>(a.start((e=>{n.checkouts.fetchCheckout(r,e).then((e=>{e.status!==Jp&&a.clear(),o&&o(e)}))})),()=>{a.clear()})),[]);const s=t.find((t=>t.id===e.payment_method));return U("div",Object.assign({"data-testid":"pending-screen"},{c
+[0m
+Two distinct client facades recovered: `Fi` → `api.sumup.com` (v0.1/v0.2) and `zi` → the BFF. The BFF return object is the breadth question — let me extract it in full rather than trusting the two operations the KB recorded.
+[0m$ [0mcd /tmp/opencode/cy36 && python3 - <<'PY'
+import re
+s=open('sdk.js').read()
+i=s.find('function zi(e,t,n=Ai(window.location.href))')
+print("zi at",i)
+# take a generous window and pretty-print the top-level keys of the returned object
+seg=s[i:i+6000]
+# find each `name:` at a plausible depth
+for m in re.finditer(r'([A-Za-z_$][A-Za-z0-9_$]*)\s*:\s*(?:\(|function|[A-Za-z_$])', seg):
+    print(f"{m.start():6d}  {m.group(1)}")
+PY
+zi at 119224
+    81  fetchCheckout
+   319  t
+   561  merchant_sandbox
+   650  checkoutId
+   702  checkoutId
+   799  fetchFeesByCheckout
+   929  body
+  1194  api
+  1247  apiBFF
+  1423  children
+  1482  value
+  1501  children
+  1772  t
+  1981  triggerOnce
+  1996  events
+  2015  sessionId
+  2027  checkoutId
+  2040  children
+  2061  api
+  2102  triggerWidgetMountEvent
+  2186  userAgent
+  2312  userAgent
+  2324  screenWidth
+  2339  timestamp
+  2403  triggerPaymentMethodsLoadedEvent
+  2557  triggerCheckoutLoadedEvent
+  2698  triggerPaymentMethodSelectedEvent
+  2854  triggerPaymentAttemptedEvent
+  2999  triggerFormInteractionEvent
+  3142  triggerRedirectedEvent
+  3274  triggerRedirectComplete
+  3414  triggerCardTokenizationPrivacyPolicyViewedEvent
+  3640  timestamp
+  3659  triggerCardTokenizationConsent
+  3868  sessionId
+  3880  checkoutId
+  3893  events
+  3902  triggerOnce
+  3920  children
+  4010  e
+  4594  api
+  4600  apiBFF
+  4609  checkoutId
+  4622  children
+  4675  sessionId
+  4687  events
+  4815  sessionId
+  4827  checkoutId
+  4843  purpose
+  4861  country
+  4888  timestamp
+  4981  fetchCheckout
+  5053  checkoutId
+  5066  checkoutInfo
+  5081  processCheckout
+  5321  t
+  5466  checkoutId
+  5502  payload
+  5512  redirectMechanism
+  5541  fetchCheckout
+  5635  children
+  5646  checkoutId
+  5659  checkoutInfo
+  5674  processCheckout
+  5751  checkoutId
+  5764  checkoutInfo
+  5779  processCheckout
+[0m
+BFF client facade closed at exactly 2 network operations (`fetchCheckout`, `fetchFeesByCheckout`) — everything else is React wiring. Now the `api.sumup.com` facade groups `Di`/`Ei`/`qi` and the `Bi` base builder.
+[0m$ [0mcd /tmp/opencode/cy36 && python3 - <<'PY'
+import re
+s=open('sdk.js').read()
+for fn in ['function Bi(','function Di(','function Ei(','function qi(']:
+    i=s.find(fn)
+    if i<0: print("MISSING",fn); continue
+    print("="*70); print(fn, "at", i)
+    print(s[i:i+1400])
+    print()
+PY
+MISSING function Bi(
+======================================================================
+function Di( at 116806
+function Di(e,t){return{processCheckout:n=>{let{checkoutId:r,payload:i,redirectMechanism:o}=n;const a=$i(i);if(!r)throw new Error("Unable to process checkout without a valid checkoutId");return Ni(r)?Ti(a):wi(r)?(o&&(a.sca_experience=o),t&&(a.product_origin=t.origin,a.session_id=t.sessionId),e.endpoint("checkouts/".concat(r),{method:"PUT",headers:{"Content-Type":"application/json","X-Sumup-Correlation-Id":r},body:JSON.stringify(a)}).then(Mi).then(Ri).then(Li)):Ci(r)},createAppleSession:t=>{let{checkoutId:n,payload:r}=t;const i=$i(r);return wi(n)?e.endpoint("checkouts/".concat(n,"/apple-pay-session"),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(i)}):Ci(n)}}}var Vi=function(e,t,n,r){return new(n||(n=Promise))((function(i,o){function a(e){try{c(r.next(e))}catch(e){o(e)}}function s(e){try{c(r.throw(e))}catch(e){o(e)}}function c(e){var t;e.done?i(e.value):(t=e.value,t instanceof n?t:new n((function(e){e(t)}))).then(a,s)}c((r=r.apply(e,t||[])).next())}))};function qi(e){return{sendEvent:(t,n)=>Vi(this,void 0,void 0,(function*(){try{yield e.endpoint("internal/analytics",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_type:t,contents:n},((e,t)=>void 0===t?null:t))})}catch(e){Fr(e)}}))}}const Bi=(e,t,n,r,i=ni)=>({host:e,endpoint:(o,a={})=>{return a.headers=Object.assign(Object.assign({},a.headers),{"X-SumUp-Widget-Se
+
+======================================================================
+function Ei( at 114022
+function Ei(e){return{fetchByCheckout:t=>{let{checkoutId:n}=t;const r=Ai(window.location.href);if(Ni(n)||!n)return Promise.resolve([ki]);if(!wi(n))return Ci(n);const i=new URLSearchParams;return"Hosted Checkout"===(null==r?void 0:r.origin)&&i.set("hosted_checkout","true"),e.endpoint("checkouts/".concat(n,"/payment-methods").concat("".concat(i)?"?".concat(i):"")).then(_i)}}}const Ri=e=>{if(e.next_step){const{next_step:t}=e,n=(t.mechanism||[]).includes("iframe"),r=(t.mechanism||[]).includes("browser");return{iframe_redirect:n&&!r,next_step:t}}return e},Li=e=>{if("pix"in e){const{pix:t,...n}=e;return{...n,payment_method:"pix",pix:t,artefacts:[{name:"instructions",content_type:"text",content:"instructions",created_at:"not used"},...t.artefacts||[]]}}if("qr_code_pix"in e){const{qr_code_pix:t,...n}=e;return{...n,payment_method:"qr_code_pix",qr_code_pix:t,artefacts:[{name:"instructions",content_type:"text",content:"instructions",created_at:"not used"},...t.artefacts||[]]}}if("boleto"in e){const{boleto:t,...n}=e;return{...n,payment_method:"boleto",boleto:t,artefacts:[{name:"invoice",content_type:"application/pdf",content:t.url,created_at:"not used"},{name:"code",content_type:"text/plain",content:t.barcode,created_at:"not used"},{name:"disclaimer",content_type:"text/plain",content:"disclaimer",created_at:"not used"},...t.artefacts||[]]}}return e},ji=e=>Object.keys(e).reduce(((t,n)=>{con
+
+======================================================================
+function qi( at 117803
+function qi(e){return{sendEvent:(t,n)=>Vi(this,void 0,void 0,(function*(){try{yield e.endpoint("internal/analytics",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_type:t,contents:n},((e,t)=>void 0===t?null:t))})}catch(e){Fr(e)}}))}}const Bi=(e,t,n,r,i=ni)=>({host:e,endpoint:(o,a={})=>{return a.headers=Object.assign(Object.assign({},a.headers),{"X-SumUp-Widget-Session-Id":t}),n&&(a.headers["Sumup-Product-Origin"]=n.origin),(s=`${e}/${r?`${r}/`:""}${o}`,c=a,c=c||{},new Promise(((e,t)=>{const n=new XMLHttpRequest,r=[],i={},o=()=>({ok:2==(n.status/100|0),statusText:n.statusText,status:n.status,url:n.responseURL,text:()=>Promise.resolve(n.responseText),json:()=>Promise.resolve(n.responseText).then(JSON.parse),blob:()=>Promise.resolve(new Blob([n.response])),clone:o,headers:{keys:()=>r,entries:()=>r.map((e=>[e,n.getResponseHeader(e)])),get:e=>n.getResponseHeader(e),has:e=>null!=n.getResponseHeader(e)}});n.open(c.method||"get",s,!0),n.onload=()=>{n.getAllResponseHeaders().toLowerCase().replace(/^(.+?):/gm,((e,t)=>{i[t]||r.push(i[t]=t)})),e(o())},n.onerror=t,n.withCredentials="include"==c.credentials;for(const e in c.headers)n.setRequestHeader(e,c.headers[e]);n.send(c.body||null)}))).then(i);var s,c}});function Fi(e,t,n=Ai(window.location.href)){const r=Bi(e,t,n,"v0.1",(e=>e.text())),i=Bi(e,t,n,"v0.2",ni);return{checkouts:Di(i,n),paymentMethods:Ei
+[0m
+`Bi` reveals the URL template `${host}/${version}/${path}` and — critically — `Ei.fetchByCheckout` sets a **single query parameter the KB has never sent**: `?hosted_checkout=true`, gated on the widget-session extractor's origin. This is the same shape as the `payment_type` discriminator that produced the gateway finding. Let me pin the branch functions before probing.
+[0m$ [0mcd /tmp/opencode/cy36 && python3 - <<'PY'
+import re
+s=open('sdk.js').read()
+for pat in [r'const ni=',r'ki=',r'Ni=',r'wi=',r'Ci=',r'const Ai=',r'Ai=']:
+    for m in re.finditer(pat,s):
+        i=m.start()
+        print("="*66); print(pat,"at",i)
+        print(s[max(0,i-260):i+320].replace('\n',' '))
+        print()
+        break
+PY
+==================================================================
+const ni= at 103951
+acy:"error_code",alternative:"type"}),Xr[t]},get message(){return Qr({legacy:"message",alternative:"detail"}),"".concat(n.title,": ").concat(n.detail)},param:n.param||n.failed_constraints&&n.failed_constraints[0]&&n.failed_constraints[0].reference,status:t})};const ni=e=>function(e,t,n,r){return new(n||(n=Promise))((function(i,o){function a(e){try{c(r.next(e))}catch(e){o(e)}}function s(e){try{c(r.throw(e))}catch(e){o(e)}}function c(e){var t;e.done?i(e.value):(t=e.value,t instanceof n?t:new n((function(e){e(t)}))).then(a,s)}c((r=r.apply(e,t||[])).next())}))}(void 0,void 0,vo
+
+==================================================================
+ki= at 113389
+con":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function _i(e){return e.map((e=>({...e,metadata:i[e.id]}))).filter((e=>e.metadata))}const xi=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,wi=e=>xi.test(e),ki={id:"card",name:"Card",metadata:ri};class Si extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const Ci=e=>Promise.reject(new Si("Invalid UUID checkout: ".concat(e))),Ai=e=>{try{const t=new URL(e),n=new URL("https://checkout.sumup.com");return t.host===n.host?(e=>{var t;con
+
+==================================================================
+wi= at 113372
+quired":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function _i(e){return e.map((e=>({...e,metadata:i[e.id]}))).filter((e=>e.metadata))}const xi=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,wi=e=>xi.test(e),ki={id:"card",name:"Card",metadata:ri};class Si extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const Ci=e=>Promise.reject(new Si("Invalid UUID checkout: ".concat(e))),Ai=e=>{try{const t=new URL(e),n=new URL("https://checkout.sumup.com");return t.host===n.ho
+
+==================================================================
+Ci= at 113536
+tadata))}const xi=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,wi=e=>xi.test(e),ki={id:"card",name:"Card",metadata:ri};class Si extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const Ci=e=>Promise.reject(new Si("Invalid UUID checkout: ".concat(e))),Ai=e=>{try{const t=new URL(e),n=new URL("https://checkout.sumup.com");return t.host===n.host?(e=>{var t;const n=null===(t=e.pathname.match(/\/pay\/([^?/#]+)/))||void 0===t?void 0:t[1];return n?{origin:"Hosted Checkout",sessionId:n}:void 0})(t):void 0}cat
+
+==================================================================
+Ai= at 113602
+b][0-9a-f]{3}-[0-9a-f]{12}$/i,wi=e=>xi.test(e),ki={id:"card",name:"Card",metadata:ri};class Si extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const Ci=e=>Promise.reject(new Si("Invalid UUID checkout: ".concat(e))),Ai=e=>{try{const t=new URL(e),n=new URL("https://checkout.sumup.com");return t.host===n.host?(e=>{var t;const n=null===(t=e.pathname.match(/\/pay\/([^?/#]+)/))||void 0===t?void 0:t[1];return n?{origin:"Hosted Checkout",sessionId:n}:void 0})(t):void 0}catch(e){return}},Oi="demo",Pi="demo-sandbox";function Ni(e){return[O
+[0m
+## Objective
+- Continue the SumUp bug-bounty hunt in POC phase and produce the required eight structured analysis blocks.
+- Prioritize checkout IDOR/business-logic hypotheses while avoiding re-probing byte-stable surfaces.
+
+## Important Details
+- Live testing must remain passive-first, GET/HEAD/OPTIONS only, ≤1 request/second, with no customer data, credentials, or mutating requests.
+- Facts and hypotheses must be separated; drop confidence <40, rejected classes, and hypotheses without concrete verification steps.
+- Workspace is re-materialized between cycles; `reports/` artifacts do not persist reliably. Verify paths before relying on prior `[NEW]` claims.
+- Leading API hypothesis: unauthenticated `GET https://api.sumup.com/v0.2/checkouts/{id}/payment-methods` returns 58 B `{"error_code":"NOT_FOUND","message":"checkout not found"}`; malformed `Authorization` changes it to 500/0 B, proving credential parsing inside the handler.
+- Endpoint is absent from the public OpenAPI spec, recovered from `gateway.sumup.com/sdk.js`; UUID validation exists client-side only. Disclosure impact remains unproven without a live checkout ID.
+- Sibling hypothesis: `GET https://js.sumup.com/api/checkouts/{id}` returns an unauthenticated application-layer 404 with the identifier reflected; no valid-ID 200 has been obtained.
+- Prior public SDK fixture ID may still be useful, but production checkout IDs are unlikely to exist in test fixtures.
+- No live HTTP request has been made in the current cycle yet.
+
+## Work State
+### Completed
+- Opened workspace and confirmed another re-materialization: prior report files are absent.
+- Verified `reports/valid-bugs.md`: 79 lines, 7,384 B, SHA-256 `282390f83b2213178c41f92857bb9df779abc3deaaefb81fb9b8f8c886ae6369`, running count 0.
+- Read the leading hypothesis from `reports/hypotheses-nemotron3.txt`.
+- Reconsidered the prior valid-checkout-ID RAG as low-yield and planned to recover exact BFF call shapes from first-party code instead.
+
+### Active
+- Investigating `https://gateway.sumup.com/sdk.js` to extract the complete `js.sumup.com/api` call graph and identify any routes beyond `GET /api/checkouts/{id}`.
+- Leading ranked asset remains `api.sumup.com/v0.2/checkouts/{id}/payment-methods`, with sibling `js.sumup.com/api/checkouts/{id}`.
+
+### Blocked
+- No valid production checkout identifier; therefore the 200/disclosure leg for both checkout-resolution hypotheses is unproven.
+- The prior exhaustive `api.sumup.com` GET/OPTIONS quartet is byte-stable and should not be re-probed without a new discriminator.
+
+## Next Move
+1. Fetch `https://gateway.sumup.com/sdk.js` once and extract every builder/reference for `https://js.sumup.com/api`, including null-version path shapes; do not guess prefixes.
+2. Probe only newly recovered GET routes at ≥1-second spacing with identifier and credential controls; if none emerge, RAG first-party fixtures/docs for a live-format checkout ID and issue one GET to `https://api.sumup.com/v0.2/checkouts/{id}/payment-methods`.
+
+## Relevant Files
+- `scope.yml`: authoritative program scope and exclusions.
+- `inventory/sumup.md`: SumUp asset inventory.
+- `knowledge/`: accumulated findings and rejected classes.
+- `leads/`: prior leads and prioritization context.
+- `reports/hypotheses-nemotron3.txt`: current leading checkout hypotheses and verification details.
+- `reports/valid-bugs.md`: current validated-finding ledger; verified 79-line pre-append state.
+- `probe-results.md`: prior raw read-only probe results.
+- `ctx.txt`: consolidated current context.
+- `analyst-prompt.txt`: current analyst instructions and knowledge context.
+- `https://gateway.sumup.com/sdk.js`: first-party static SDK containing the BFF call graph and UUID validation literal.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mcd /tmp/opencode/cy36 && python3 - <<'PY'
+import re
+s=open('sdk.js').read()
+m=re.search(r'const xi=/\^.*?\$/i',s)
+print("UUID REGEX:", m.group(0))
+i=s.find('function Ni(e)')
+print("\nNi:", s[i:i+220])
+i=s.find('Oi="demo"')
+print("\nOi/Pi:", s[i-40:i+60])
+PY
+UUID REGEX: const xi=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+Ni: function Ni(e){return[Oi,Pi].includes((e||"").toLowerCase().trim())}function Ii(e){return(e||"").toLowerCase().trim()===Pi}function Ei(e){return{fetchByCheckout:t=>{let{checkoutId:n}=t;const r=Ai(window.location.href);if
+
+Oi/Pi: n}:void 0})(t):void 0}catch(e){return}},Oi="demo",Pi="demo-sandbox";function Ni(e){return[Oi,Pi].inc
+[0m
+Branch semantics are now exact and important: `Ni(e)` returns `["demo","demo-sandbox"]`, so `checkoutId=demo` returns a **hardcoded client-side card list with zero network traffic** — a real control that proves the endpoint is reached only for genuine UUIDs. Let me confirm the exact UUID regex and run the discriminator probe.
+[0m$ [0mcd /tmp/opencode/cy36 && U=d8b3f1a2-4c6e-4b7d-8a9e-0f1c2d3e4a5b && for q in "" "?hosted_checkout=true"; do
+  printf '\n=== GET /v0.2/checkouts/{uuid}/payment-methods%s ===\n' "$q"
+  curl -sS --max-time 25 -D h.txt -o b.txt -w "status=%{http_code} size=%{size_download} type=%{content_type}\n" \
+    "https://api.sumup.com/v0.2/checkouts/$U/payment-methods$q"
+  echo "body: $(cat b.txt)"; echo "sha256: $(sha256sum b.txt | cut -c1-16)"
+  grep -iE '^(x-request-id|x-amzn|content-length|vary|cf-|server|x-cache)' h.txt
+  sleep 1.3
+done
+=== GET /v0.2/checkouts/{uuid}/payment-methods ===
+status=404 size=58 type=application/json
+body: {"error_code":"NOT_FOUND","message":"checkout not found"}
+sha256: e296fc263c549354
+content-length: 58
+server: cloudflare
+x-request-id: 1523f9e3-e365-9e6c-8cce-9a9bcf727dd2
+cf-cache-status: DYNAMIC
+cf-ray: a42daabf5d24615a-ORD
+
+=== GET /v0.2/checkouts/{uuid}/payment-methods?hosted_checkout=true ===
+status=404 size=58 type=application/json
+body: {"error_code":"NOT_FOUND","message":"checkout not found"}
+sha256: e296fc263c549354
+content-length: 58
+server: cloudflare
+x-request-id: 9a724a5d-5897-99db-a794-44b74a5bad48
+cf-cache-status: DYNAMIC
+cf-ray: a42daac89f0a3c96-ORD
+[0m
+[0m$ [0mcd /tmp/opencode/cy36 && python3 - <<'PY'
+import re
+s=open('sdk.js').read()
+i=s.find('function zi(e,t,n=Ai(window.location.href))')
+print(s[i:i+330])
+print("\n--- poll loop driving `attempts` ---")
+j=s.find('timeout-message')
+k=s.rfind('e=60',0,j)
+print(s[k-260:k+240].replace('\n',' '))
+PY
+function zi(e,t,n=Ai(window.location.href)){return function(e){return{checkouts:{fetchCheckout:(t,n)=>function(e,t,n,r){return new(n||(n=Promise))((function(i,o){function a(e){try{c(r.next(e))}catch(e){o(e)}}function s(e){try{c(r.throw(e))}catch(e){o(e)}}function c(e){var t;e.done?i(e.value):(t=e.value,t instanceof n?t:new n((fu
+
+--- poll loop driving `attempts` ---
+nvoice&&m(Wp,{t,payment:n,url:o.invoice.location}),o.disclaimer&&m("p",null,t("apm.payment_methods.".concat(n,".pending.disclaimer"))))})),Jp="PENDING",Yp=({pending:e,paymentMethods:t,apiBFF:n,checkoutId:r,maxAttempts:i,onResult:o})=>{const a=de((()=>function(e=60){let t,n=1;function r(){clearTimeout(t)}return{start:function i(o){return t=setTimeout((()=>{if(n>e)return r();o(n),n+=1,i(o)}),5e3),r},clear:r}}(i)),[]);ae((()=>(a.start((e=>{n.checkouts.fetchCheckout(r,e).then((e=>{e.status!==Jp&&a.c
+[0m
+`?hosted_checkout=true` returns **byte-identical** output (same 58 B, same `e296fc26` body hash) — the discriminator is inert on the unauth 404 path. Clean negative control, and it confirms the KB's 6-operation count exactly.
+
+But this exposes the symmetric gap. The BFF builder `zi.fetchCheckout` carries an equally undocumented parameter the KB has never varied: `?attempts=N`, driven by a client poll loop (`1..60`, every 5 s). Let me confirm its semantics and test it.
+[0m$ [0mcd /tmp/opencode/cy36 && U=d8b3f1a2-4c6e-4b7d-8a9e-0f1c2d3e4a5b && for q in "" "?attempts=1"; do
+  printf '\n=== GET https://js.sumup.com/api/checkouts/{uuid}%s ===\n' "$q"
+  curl -sS --max-time 25 -D h2.txt -o b2.txt -w "status=%{http_code} size=%{size_download} type=%{content_type}\n" \
+    "https://js.sumup.com/api/checkouts/$U$q"
+  echo "body: $(cat b2.txt)"; echo "sha256: $(sha256sum b2.txt | cut -c1-16)"
+  grep -iE '^(x-vercel|x-request-id|content-length|vary|cache-control|server)' h2.txt
+  sleep 1.3
+done
+=== GET https://js.sumup.com/api/checkouts/{uuid} ===
+status=404 size=181 type=application/json; charset=utf-8
+body: {"title":"Not Found","status":404,"detail":"Checkout d8b3f1a2-4c6e-4b7d-8a9e-0f1c2d3e4a5b does not exist.","type":"https://datatracker.ietf.org/doc/html/rfc9110#name-404-not-found"}
+sha256: 6725e39d7d7b7638
+cache-control: public, max-age=0, must-revalidate
+server: Vercel
+x-vercel-cache: MISS
+x-vercel-id: cle1:cle1:cle1::dub1::629j5-1790713032103-89d4733bbfea
+content-length: 181
+
+=== GET https://js.sumup.com/api/checkouts/{uuid}?attempts=1 ===
+status=404 size=181 type=application/json; charset=utf-8
+body: {"title":"Not Found","status":404,"detail":"Checkout d8b3f1a2-4c6e-4b7d-8a9e-0f1c2d3e4a5b does not exist.","type":"https://datatracker.ietf.org/doc/html/rfc9110#name-404-not-found"}
+sha256: 6725e39d7d7b7638
+cache-control: public, max-age=0, must-revalidate
+server: Vercel
+x-vercel-cache: MISS
+x-vercel-id: cle1:cle1:cle1::dub1::h2ntn-1790713033711-6e0ac0f2e191
+content-length: 181
+[0m
+Both discriminators are byte-inert (`attempts=1` → same 181 B, same `6725e39d` hash). And `attempts` is confirmed to be purely a client poll counter (`maxAttempts=60`, 5 s interval, loop halts when `status !== "PENDING"`) — so the server ignoring it is expected, not a finding.
+
+One branch remains untested on both leading surfaces: the **magic value**. `Oi="demo"` / `Pi="demo-sandbox"` are first-party sandbox constants, and the client short-circuits them locally — which is exactly the setup where a server-side magic-value branch tends to exist unnoticed.
+[0m$ [0mcd /tmp/opencode/cy36 && for u in "https://api.sumup.com/v0.2/checkouts/demo/payment-methods" "https://js.sumup.com/api/checkouts/demo"; do
+  printf '\n=== GET %s ===\n' "$u"
+  curl -sS --max-time 25 -D h3.txt -o b3.txt -w "status=%{http_code} size=%{size_download} type=%{content_type}\n" "$u"
+  echo "body: $(head -c 300 b3.txt)"; echo "sha256: $(sha256sum b3.txt | cut -c1-16)"
+  grep -iE '^(content-length|server|x-vercel-cache)' h3.txt
+  sleep 1.3
+done
+=== GET https://api.sumup.com/v0.2/checkouts/demo/payment-methods ===
+status=404 size=58 type=application/json
+body: {"error_code":"NOT_FOUND","message":"checkout not found"}
+sha256: e296fc263c549354
+content-length: 58
+server: cloudflare
+
+=== GET https://js.sumup.com/api/checkouts/demo ===
+status=404 size=149 type=application/json; charset=utf-8
+body: {"title":"Not Found","status":404,"detail":"Checkout demo does not exist.","type":"https://datatracker.ietf.org/doc/html/rfc9110#name-404-not-found"}
+sha256: c3273f7c3c723138
+server: Vercel
+x-vercel-cache: MISS
+content-length: 149
+[0m
+Both magic-value branches are inert too. And the BFF response gives a quantitative result worth recording: **181 B for the 36-char UUID vs 149 B for the 4-char `demo` — a 32-byte delta for a 32-character identifier-length delta.** Exact linear correspondence confirms the body is `f(identifier)` with zero branching: the BFF treats the path segment as an opaque string, substitutes it into a template, and returns a uniform 404. No format validation, no magic-value path, no differential behaviour reachable pre-existence.
+
+Let me confirm I left the validated ledger untouched.
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && ls -la reports/ 2>/dev/null; echo "---"; for f in reports/valid-bugs.md reports/hypotheses-nemotron3.txt; do [ -f "$f" ] && echo "$f: $(wc -l < "$f") lines, $(stat -c%s "$f") B, $(sha256sum "$f" | cut -c1-16)" || echo "$f: ABSENT"; done; echo "--- probes this cycle: 6 GET, unauth, >=1.3s spacing, 0 mutations ---"
+total 7368
+drwxr-xr-x  2 runner runner    4096 Sep 29 20:13 .
+drwxr-xr-x 12 runner runner    4096 Sep 29 20:13 ..
+-rw-r--r--  1 runner runner 4314366 Sep 29 20:13 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   35805 Sep 29 20:13 analyst-laguna.log
+-rw-r--r--  1 runner runner   35640 Sep 29 20:13 analyst-ling3.log
+-rw-r--r--  1 runner runner   35970 Sep 29 20:13 analyst-longcat.log
+-rw-r--r--  1 runner runner 2540879 Sep 29 20:13 analyst-nemotron3.log
+-rw-r--r--  1 runner runner     116 Sep 29 20:13 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Sep 29 20:13 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Sep 29 20:13 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Sep 29 20:13 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   18432 Sep 29 20:13 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  506486 Sep 29 20:13 hypotheses.md
+-rw-r--r--  1 runner runner    9173 Sep 29 20:13 reposcan-findings.md
+-rw-r--r--  1 runner runner    7384 Sep 29 20:13 valid-bugs.md
+---
+reports/valid-bugs.md: 79 lines, 7384 B, 282390f83b221317
+reports/hypotheses-nemotron3.txt: 81 lines, 18432 B, eaa34da80e772c06
+--- probes this cycle: 6 GET, unauth, >=1.3s spacing, 0 mutations ---
+[0m
+Ledger verified untouched: 79 lines / 7384 B / `282390f8` — exact pre-append state, no double-append. Cycle complete.
+
+---
+
+## [SUMMARY]
+No new fileable bug this cycle. I closed the last two untested discriminators on the leading hypotheses, both negative, and completed the first-party call graph. The checkout-IDOR pair remains blocked on one input I cannot obtain passively. Confidence in both hypotheses is **reduced**, not raised.
+
+## [WHAT I DID]
+Discarded both inherited `[NEXT]` actions as logged waste — nemotron3's was a re-probe of a surface the KB records as zero-yield, mine was a fixture RAG already exhausted. Instead applied the KB's own most transferable lesson (recover call shapes from first-party code; vary caller-supplied discriminators) to the `gateway.sumup.com/sdk.js` bundle.
+
+- Fetched `sdk.js`: 291,877 B, sha256 `0fae546a…` — **byte-identical** to the KB hash, so its citations are grounded in served bytes.
+- Extracted the full path inventory; paths are assembled, not literal, so I resolved the builder chain rather than sampling.
+- Ran 6 read-only GETs, unauthenticated, ≥1.3 s apart, zero mutations.
+
+## [FACTS — VERIFIED THIS CYCLE]
+Base builder `Bi(host,session,origin,version)` → URL is `${host}/${version}/${path}`, injecting `X-SumUp-Widget-Session-Id` and optional `Sumup-Product-Origin`. Complete graph = **6 operations**, confirming the KB count:
+
+| Host | Op | Path |
+|---|---|---|
+| api.sumup.com | PUT | `/v0.2/checkouts/{id}` |
+| api.sumup.com | PUT | `/v0.2/checkouts/{id}/apple-pay-session` |
+| api.sumup.com | GET | `/v0.2/checkouts/{id}/payment-methods` |
+| api.sumup.com | POST | `/v0.1/internal/analytics` |
+| js.sumup.com/api | GET | `/checkouts/{id}[?attempts=N]` |
+| js.sumup.com/api | POST | `/checkouts/{id}/fee-calculation` |
+
+- BFF facade `zi` is **closed at exactly 2 network ops**; all other members are React wiring (`children`, `events`, `trigger*`). No hidden BFF route exists.
+- Client UUID gate: `^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i` — version `[0-5]`, variant `[089ab]`, enforced client-side only, before any request.
+- `Ni()` = `["demo","demo-sandbox"].includes(id.toLowerCase().trim())`; on match `fetchByCheckout` returns a hardcoded card list with **zero network traffic** — proving the endpoint is only reached for genuine UUIDs.
+- `attempts` is a client poll counter: `maxAttempts=60`, starts at 1, 5 s interval, halts when `status !== "PENDING"`.
+
+Probes (all `cf-ray`/`x-vercel-id` distinct per request, so no cache artefact):
+
+| Request | Result | Body hash |
+|---|---|---|
+| `/v0.2/checkouts/{uuid}/payment-methods` | 404, 58 B | `e296fc26` |
+| `…?hosted_checkout=true` | 404, 58 B | `e296fc26` **identical** |
+| `GET /api/checkouts/{uuid}` | 404, 181 B | `6725e39d` |
+| `…?attempts=1` | 404, 181 B | `6725e39d` **identical** |
+| `/v0.2/checkouts/demo/payment-methods` | 404, 58 B | `e296fc26` **identical** |
+| `GET /api/checkouts/demo` | 404, 149 B | `c3273f7c` |
+
+Quantitative result: the BFF body is `f(identifier)` — 181 B at 36 chars vs 149 B at 4 chars, a 32-byte delta for a 32-character delta. Exact linear correspondence ⇒ pure template substitution, **zero branching**.
+
+## [HYPOTHESES — SEPARATED FROM FACTS]
+- **H1 — api.sumup.com payment-methods unauth disclosure.** *Confidence reduced.* Every pre-existence discriminator is now exhausted and inert. The malformed-auth 500 remains the only evidence the credential is parsed inside the handler, and that does **not** establish that resource resolution happens after auth. Impact unproven.
+- **H2 — BFF unauth checkout existence oracle.** *Confidence reduced.* The linear-substitution finding cuts both ways: it shows the app reaches its store and reflects the ID, but also that no pre-existence branch distinguishes live from dead checkouts, raising the bar for a bare 200.
+
+Neither is fileable without a valid checkout ID.
+
+## [FILES READ OR MODIFIED]
+- Read: `gateway.sumup.com/sdk.js` (cached to `/tmp/opencode/cy36/sdk.js`, hash-verified).
+- Read: `reports/valid-bugs.md`, `reports/hypotheses-nemotron3.txt`, `reports/`.
+- **Modified: nothing.** `valid-bugs.md` re-verified at 79 lines / 7384 B / `282390f8`.
+
+## [ISSUES ENCOUNTERED]
+Inherited `[NEXT]` actions were both invalid and I overrode them. Workspace re-materialized again (36th time) — prior report artifacts absent. No rejected classes revived; no stable quartet re-probed.
+
+## [NEXT]
+Do **not** re-probe either checkout surface — both are now byte-stable with every documented parameter varied. The sole unblocking action is a valid checkout ID from an authorized source, which needs credentials I must not use. Absent that, checkout-IDOR is exhausted: the 6-operation graph is fully mapped and all branches closed. Pivot to a different in-scope asset class rather than spend another cycle here.
