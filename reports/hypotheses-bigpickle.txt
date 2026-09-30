@@ -1,64 +1,61 @@
-## 2026-09-30 16:56:44 UTC [target] (model bigpickle)
-[NEW] `api.sumup.com/v0.2/checkouts/{id}/payment-methods` — my 92-confidence IDOR is **definitively retired**, not "retired on one measurement". Credential matrix of 7 distinct shapes produced a 500/0B on shape 7 (`alg:EdDSA`+`kid`); re-running that *identical* token 3× returned 404/58B 3/3. The 500 was a transient upstream blip.
-[NEW] The same endpoint is a **param-invariant AND credential-invariant stub**: 5/5 identifiers and 7/7 credential shapes all return byte-identical 404/58B `{"error_code":"NOT_FOUND","message":"checkout not found"}`. No oracle, no differential.
-[NEW] Negative-path control separates two classes on one host: `/nonexistent-subresource` → 404/**150B** (gateway class) vs `/payment-methods` → 404/**58B** (application class). The 27-cycle KB claim "all versioned paths 404 — uniformly gated" is still false, but the endpoint that falsifies it leaks nothing.
-[CHANGED] `reports/gateway-hostedfields-cross-origin-messenger.md` re-delivered — 140 lines, 6,867 B, sha256 `79aa5df2a9ee5e3c44787d6c4cb2b4495cc1559c1d86c2d81b97c2f20e5095ba`; `valid-bugs.md` 79→106 lines / 9,617 B / `bf970228…`.
-[CHANGED] `gateway.sumup.com/hosted.js` re-verified before writing: 26,839 B, `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`; `event.origin`/`origin!==`/`origin===`/`targetOrigin`/`event.source` greps 0/0/0/0/0; framing+referrer headers on `/` = 0; three outbound sites `postMessage(e,"*")`, `postMessage(t,"*")`, `postMessage(e,n||"*")`; inbound destructures `{data,source}` only.
-[CHANGED] Workspace re-materialized a 37th time — `reports/` held only logs + hypotheses + `valid-bugs.md` at exact 79-line/`282390f8` pre-append state on open.
-[PRIO] gateway.sumup.com/hosted.js,8.60,impact=8.5,exploitability=8.0,evidence=9.5,novelty=7.5,reachability=10.0
-[PRIO] auth.sam-app.ro dynamic registration,9.20,impact=9.0,exploitability=9.0,evidence=9.5,novelty=8.0,reachability=10.0
-[PRIO] api.sam-app.ro gateway aud/iss binding,8.10,impact=8.0,exploitability=6.0,evidence=8.0,novelty=9.0,reachability=10.0
-[PRIO] serial-terminal.dev.solo.sumup.com,7.40,impact=5.5,exploitability=5.0,evidence=8.5,novelty=7.5,reachability=9.0
-[PRIO] iso20022.sumup.com,7.10,impact=5.0,exploitability=4.0,evidence=8.0,novelty=8.0,reachability=9.0
-[HYP] gateway.sumup.com/hosted.js — the inbound message channel is unguarded and the frame-access gate is skipped entirely by a caller-supplied `payment_type`, so an arbitrary origin can drive the frame to a state-changing checkout PUT
-class: MISCONFIG
-asset: gateway.sumup.com/hosted.js
+## 2026-09-30 21:26:01 UTC [target] (model bigpickle)
+[HYP] <title>
+class: <IDOR|SSRF|AUTH|XSS|BUSLOGIC|MISCONFIG|OATH|OTHER>
+asset: <host/endpoint>
+confidence: <0-100>
+reasoning: <facts only>
+evidence_needed: <what proves it>
+verify_steps: <passive-first concrete HTTP requests>
+impact: <what attacker gets + severity>
+testability: <PASSIVE|AUTH_HELPED|HUMAN_ONLY>
+[NEW] mcp.sumup.com GET /mcp never probed in 37 cycles → 401 invalid_token/76 B (both Accept: text/event-stream and default); GET leg closed, same gate as POST
+[NEW] mcp.sumup.com/.well-known/oauth-protected-resource/mcp → 200/269 B; estate has THREE live RFC 9728 docs, not two, and this third path is the one the server self-advertises in its own WWW-Authenticate resource_metadata=
+[NEW] auth.sumup.com (prod) /.well-known/oauth-authorization-server omits registration_endpoint; auth.sam-app.ro (staging) explicitly advertises https://auth.sam-app.ro/oauth2/register → prod/staging DCR divergence is now documented, not assumed
+[NEW] serial-terminal.dev.solo.sumup.com/ is a real built Angular PWA (manifest name "Serial Terminal", display standalone), not a placeholder: index.html 2723 B/md5 9d1538b5/Last-Modified 2022-11-04 → main.5eab11ea5dcaa6acd15f.js 8090 B read in full
+[CHANGED] Cognito gate on dev.solo siblings proven path-INDEPENDENT, not just root-only: sumup-embedded-build + hardware-shared both302→Cognito on /index.html, /firmware.json, /nonexistent-key-zzz (6/6), state=/ → serial-terminal's missing gate is a deployment gap, mechanized
+[CHANGED] serial-terminal rank-3 lead CLOSED at 20 (was 50): exposed app is a pure client-side Web Serial console with zero fetch/XHR, zero token, zero API base; module 391 = Google web-serial polyfill with 0 wss:// in the whole 359,936 B vendors chunk; service-worker.js is stock Workbox precache
+[CHANGED] reports/gateway-hostedfields-cross-origin-messenger.md was absent on open (38th re-materialization); RECONSTRUCTED from re-fetched bytes → 190 lines, 8,722 B, sha256 2fb3f7dcc8bcae7d24f846262b1617f21db8fc44c49ab061426a987d45a11737
+[CHANGED] self-caught error: first reconstructed draft carried a mistyped hosted.js sha256 (…1e9877a198); corrected to …1e4b977a198 and verified the in-report hash now equals the live artifact sha256, md5 5317283c6bfd5a2c59b5532f988d3b90 cross-checks
+[CHANGED] valid-bugs.md 79→160 lines / 13,994 B, sha256 9aacaba0e21d7e4a9df08388e617d7cab02e92f2c2ae87732a7737bbfafee7a2
+[PRIO] auth.sam-app.ro/oauth2/register + token endpoint,7.4 — a=6 b=9 t=8 g=7 c=6 f=9 /0.25a+0.25b+0.15t+0.15g+0.10c+0.10f=7.35; the granted-vs-advertised scope gap is the whole severity delta
+[PRIO] gateway.sumup.com/hosted.js,6.9 — a=6 b=9 t=7 g=6 c=4 f=9 /6.85; evidence-complete, capped by one unproven server-acceptance step
+[PRIO] iso20022.sumup.com,4.6 — a=6 b=8 t=5 g=7 c=4 f=3 /5.65; two upstreams, ELB-evaluated-before-mesh, but no demonstrated security impact
+[PRIO] serial-terminal.dev.solo.sumup.com,2.0 — a=7 b=2 t=2 g=10 c=3 f=1 /3.35 nominal, demoted to 2.0 after content read: zero server surface and utility requires hardware on the visitor's own machine (out-of-scope class)
+[HYP] DCR-registered staging clients may be able to obtain a non-empty scp, converting a capped staging finding into a production-account finding
+class: AUTH
+asset: auth.sam-app.ro/oauth2/register → auth.sam-app.ro/oauth2/token
+confidence: 55
+reasoning: staging advertises registration_endpoint while prod omits it (both RFC 8414 docs fetched this cycle); both AS metadata docs publish the SAME 19-scope set incl. merchants.write, payouts.read, refunds.write, api_keys.write, customers.read/write; DCR-minted tokens observed with EMPTY scp; the entire severity delta is that gap
+evidence_needed: one token response from a freshly registered client whose scp is non-empty, or proof the scope set is bound to client_credentials grant only
+verify_steps: GET https://auth.sam-app.ro/.well-known/oauth-authorization-server (diff scopes_supported vs granted scp); then with authorized credentials POST /oauth2/register → POST /oauth2/token with client_credentials and inspect scp
+impact: critical if confirmed — a self-registered client reaching merchants.write/refunds.write/payouts.read on a merchant account; currently capped to Low/Medium by the empty scp
+testability: AUTH_HELPED
+[HYP] gateway.sumup.com hosted.js accepts cross-origin postMessage with no event.origin check and emits PUT /v0.2/checkouts/{attacker-id}
+class: OTHER
+asset: gateway.sumup.com/hosted.js → api.sumup.com/v0.2/checkouts/{id}
 confidence: 88
-reasoning: `event.origin`/`origin!==`/`origin===`/`targetOrigin` greps all 0 on the 26,839 B served bundle; `GET /` ships zero x-frame-options/content-security-policy/referrer-policy; inbound handler destructures `{data,source}` only. The `origin` parameter is declared, supplied at construction, and applied on exactly one path — the outbound `postMessage(e, n||"*")`. The frame-access gate sits inside `if ("card" === a.payment_type)`, so omitting that field skips it entirely. The only remaining gate is `ue=/^[0-9a-f]{8}-…-[089ab][0-9a-f]{3}-…$/i`, a static literal the attacker satisfies by choosing the value.
-evidence_needed: That `api.sumup.com` *accepts* the emitted `PUT /v0.2/checkouts/{uuid}`. Unproven — and not provable passively, since confirming it requires a mutating call against a live checkout.
-verify_steps: Already exhausted passively. Byte-identical bundle re-verified; the emission was captured in netlog. Any acceptance test is a mutating call on customer data and is out of bounds for this program.
-impact: Medium as demonstrated — a state-changing request against the payments API with attacker-chosen path and body, issued from a victim browser session with no origin gate and no framing gate. No response read-back exists as implemented, so no exfiltration.
-testability: PASSIVE for the defect; the acceptance leg is HUMAN_ONLY
-[HYP] serial-terminal.dev.solo.sumup.com — the access gate is applied inconsistently across a single bucket estate: two siblings are Cognito-gated (Lambda@Edge→User Pool) while this one is raw AmazonS3/CloudFront
-class: MISCONFIG
-asset: serial-terminal.dev.solo.sumup.com
-confidence: 50
-reasoning: Sibling control is exact — `sumup-embedded-build.s3.dev.solo.sumup.com` and `hardware-shared.s3.dev.solo.sumup.com` 302 to `sumup-hardware-s3-external.auth.eu-west-1.amazoncognito.com`, this host serves `server: AmazonS3` 200/2,723 B with no auth hop. Key-variation control already run: `/`, `/?list-type=2` and `/index.html` are byte-identical (md5 `9d1538b5…`, `ListBucket` denied) while an unknown key returns a distinct 404/310 B.
-evidence_needed: A key on this bucket that returns content rather than the default document — i.e. proof the origin would serve an object if one existed. Key variation shows the opposite, so the exposure leg is currently unproven.
-verify_steps: Exhausted. The gate inconsistency is proven; the exposure leg is not, and no further passive probe can establish it without a key that may not exist.
-impact: Low as measured. The finding is gate-application inconsistency, not a data leak; filed with the exposure leg explicitly marked unproven rather than assumed.
-testability: PASSIVE, exhausted
-[HYP] iso20022.sumup.com — the AWS ELB listener rule is evaluated ahead of the Istio mesh, so a listener boundary exists in front of application authz on a payment rail
+reasoning: handler is p=r=>{const{data:n,source:i}=r;…} gated on t&&i!==t||(handlers) — compares event.source, never event.origin; grep -cE 'event\.origin|\.origin[!=]==|allowedOrigin|trustedOrigin' = 0 across 26,839 B; gate bypass at if("card"===a.payment_type); emission at s.endpoint("checkouts/".concat(r),{method:"PUT",…,"X-Sumup-Correlation-Id":r,…}) with base ("https://api.sumup.com",n,s); no x-frame-options/CSP/referrer-policy on gateway vs x-frame-options: SAMEORIGIN on payout-settings-edge.sumup.com
+evidence_needed: server-side acceptance of the emitted PUT on a throwaway checkout — the one leg I cannot take
+verify_steps: curl -sS -D- -o /dev/null https://gateway.sumup.com/hosted.js (200, framing headers absent); curl -sS -D- -o /dev/null https://payout-settings-edge.sumup.com/ (x-frame-options: SAMEORIGIN present)
+impact: medium — attacker-directed authenticated checkout write from a logged-in merchant's browser; capped at Medium because server acceptance is unproven and bare clickjacking is out of scope
+testability: HUMAN_ONLY
+[HYP] iso20022.sumup.com serves two response classes because AWS ELB listener rules are evaluated before the Istio mesh, and the metrics-substring deny rule is enforced ahead of mesh authz
 class: MISCONFIG
 asset: iso20022.sumup.com
-confidence: 45
-reasoning: Any path containing the case-sensitive substring `metrics` returns 503 on `awselb/2.0` with no `x-envoy-*` and no HSTS; all other paths return 400 on `istio-envoy` with HSTS and `x-envoy-decorator-operation: iso20022-edge-libcluster-headless.br-terminals.svc.cluster.local:3000/*`. Rule shape fixed by negative control (`/metricsfoo`, `/xmetrics` → 400; `/zzzmetricezzz` → 400), not by positive samples.
-evidence_needed: A path the ELB admits that reaches an upstream handler rather than a deny stub. No such path found; the 503 is emitted before application logic and both bodies are fixed 11-byte stubs.
-verify_steps: Already executed. An `Origin: https://evil.example` control produced zero `access-control-*` headers on both classes.
-impact: None demonstrated. A routing observation is not a finding; the two classes differ in which server answers, not in what is disclosed.
-testability: PASSIVE, exhausted
-[PARKED] `api.sumup.com/v0.2/checkouts/{id}/payment-methods` (was 92, nemotron3's #1): **retired this cycle on a designed differential, not a single reading.** 5/5 identifiers × 7/7 credential shapes = 35 responses, all byte-identical 404/58B. The 500/0B that anchored the old "token is parsed and branched on" claim failed to reproduce at 3/3. Held at 5 as a recon fact only: two response classes on one host, which is why the 27-cycle "uniformly gated" claim is still false.
-[PARKED] `js.sumup.com/api/checkouts/{id}` (was 78): refuted last cycle by a 4/4 credential control; the id-in-404 is a reflector, not an oracle.
-[PARKED] `pos-payment.sumup.com` route-level enum (was 70): refuted by a negative control — a nonsense path returns the same class, so six 403s never distinguished "gated" from "no route".
-[PARKED] `mcp.sumup.com` kid-optional verifier: RS256/EdDSA enforced; alg:none and RS256→HS256 both explicitly refused; 30-candidate kid sweep found 0 undeclared keys.
-[FINAL] 1. gateway.sumup.com hosted-fields cross-origin message channel — 88, PASSIVE, Medium, report on disk 140 lines / `79aa5df2…`, **unsubmitted 3 cycles**
-[FINAL] 2. auth.sam-app.ro dynamic client registration — 72, HUMAN_ONLY, unsubmitted 15+ cycles
-[FINAL] 3. serial-terminal.dev.solo.sumup.com gate inconsistency — 50, exposure leg unproven, below file threshold
-[FINAL] 4. iso20022.sumup.com routing — 45, PASSIVE, below file threshold, exhausted
-[NEXT] HUMAN: submit `reports/gateway-hostedfields-cross-origin-messenger.md` (140 lines, 6,867 B, sha256 `79aa5df2a9ee5e3c44787d6c4cb2b4495cc1559c1d86c2d81b97c2f20e5095ba`) to bugs.olivermaicher.eu. Re-check delivery with one `sha256sum`. Every probe I ran this cycle either refuted my own lead or confirmed a byte-stable surface, so probing has negative expected yield while an unsubmitted, evidence-complete report decays — and the workspace has now destroyed the previous copy three times.
-[LEARN] ACCEPTED OTHER @ differential matrices: **the anomalous cell is the one most likely to be transient, not the one most likely to be a discovery.** My re-verification of the endpoint I was retiring produced a 500/0B on credential shape 7 of 7 — exactly the shape a "credential differential" claim needs — and the prior cycle's KB entry contains a finding built on precisely such a reading. Re-running the *identical* token 3× returned 404/58B every time. The generalisable rule is narrower than "repeat your probes": a matrix is a sampling device, and a lone outlier in it carries no more weight than a lone outlier anywhere else. An input that produces a novel response must be re-sent *verbatim* before it is believed, because the alternative is filing a transient as a mechanism. This is the third time in this program that a single uncontrolled reading became a multi-cycle lead — the first two were the 500/0B and a fabricated UUID gate, and both were killed only by an explicit negative control.
-[LEARN] REJECTED IDOR @ `api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods`: application-routed is not the same as exploitable. Two response classes on one host genuinely falsify "uniformly gated", and that recon fact survives — but a route being application-routed only means the request reached application code, and 35 responses across both the identifier axis and the credential axis being byte-identical means that code leaked nothing. Establishing that a handler is reached is the *first* question, not a finding; the second question is whether any input moves its response, and here none does.
-[RISK] sumup: 84 — down from 90, and the drop is a correction rather than a loss. I retired the program's top lead at 92 this cycle, and the mechanism of the retirement is the useful part: a 7-shape credential matrix produced exactly the anomalous cell I was looking for, and re-sending that identical token killed it at 3/3. That means the previous cycle's 92 was a single uncontrolled reading that survived two cycles of narrative momentum, and my confidence numbers had been tracking how often I had restated a claim rather than how many times I had tested it. Both over-claimed leads are now scored tombstones so they cannot re-enter a ranking. Program risk is not high because there is little to find — it is moderate because the one artifact that survives scrutiny is still only a file on disk on the 37th re-materialization of a workspace that has destroyed it three times, and because the two survivors below the gateway are both `exhausted`, which is a statement about my methods rather than about SumUp's perimeter.
-[NEW] **No submission mechanism exists in the repo.** `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads to **GitHub issues**. GitHub is not the reporting channel. This definitively closes the question — submission cannot be automated from here.
-[NEW] Ran an **independent per-claim re-audit** of the report against the recorded artifact: 10/10 reproducible claims re-derived and reproduced verbatim. Added as §8, a per-claim reproduction table.
-[NEW] **Closed a real gap in my own deliverable.** Two claims the report leaned on were carried from earlier cycles and unverified this cycle: the `GET /` 546 B shell initialising against `window.parent`, and the comparative `payout-settings-edge.sumup.com` → `x-frame-options: SAMEORIGIN`. Both verified exactly. The second is load-bearing — it is what makes the omission on `gateway.sumup.com` a deviation from SumUp's own baseline rather than house style. Had it been false, the whole finding would have weakened.
-[NEW] Verbatim-confirmed every code quotation: `const{data:[a-z],source:[a-z]}=` ×1, `if("card"===a.payment_type)` exact, the UUID regex with `[0-5]`/`[089ab]`, `X-SumUp-Widget-Session-Id` + literal `"undefined"`, and exactly three `postMessage` sites.
-[CHANGED] Report re-measured after the audit: **167 lines, 8,951 B, sha256 `91d95c0f1dcb6943b6727f32b53fb6596a27c8aa365cb86bd41a0cd4011979ce`** — supersedes the earlier `79aa5df2…` copy. `valid-bugs.md` 106→136 lines / 12,074 B / `b4a37690…`.
-[CHANGED] Tombstoned the retired 92 into `valid-bugs.md` with its full 35-response basis so it cannot re-enter a ranking.
-[FINAL] 1. gateway.sumup.com — 88, PASSIVE, Medium, report `91d95c0f…`, unsubmitted
-[FINAL] 2. auth.sam-app.ro dynamic registration — 72, HUMAN_ONLY, unsubmitted 15+ cycles
-[FINAL] 3. serial-terminal.dev.solo.sumup.com gate inconsistency — 50, below threshold
-[FINAL] 4. iso20022.sumup.com routing — 45, below threshold, exhausted
-[PARKED] `payment-methods` IDOR — **tombstoned at 5**, recon fact only
-[LEARN] ACCEPTED OTHER @ comparative controls: **a control must be able to fail.** My framing audit was built on one positive fetch (`payout-settings-edge` → `SAMEORIGIN`), and I immediately reached for two more S3 hosts as redundancy — which is exactly backwards, since a baseline control is only informative when the estate's default is known to be "no protection". The right second control is another *SumUp application origin* of comparable role, not a static bucket host. This is the mirror of the differential-matrix lesson: in a matrix the outlier is probably transient; in a control set the agreement is probably vacuous. Both failure modes are a check passing for the wrong reason.
-[RISK] sumup: 80 — down from 84. The finding's evidence quality improved rather than the program's prospects: 10/10 claims now reproduce from a hashed artifact, and the comparative control holds. The remaining risk is concentrated entirely in delivery, not discovery — a complete, audited, 167-line report has now been destroyed and rewritten three times on a workspace that re-materializes every cycle, and no part of this pipeline can move it into the channel that pays.
+confidence: 42
+reasoning: case-sensitive substring metrics → 503 "Not Allowed" on awselb/2.0 carrying no x-envoy-* and no HSTS; all other paths → 400 on istio-envoy with HSTS; trust boundary therefore sits in front of the mesh
+evidence_needed: a path that satisfies the ELB rule yet reaches a mesh handler meant to be blocked, or metric data readable via a non-"metrics" substring
+verify_steps: GET https://iso20022.sumup.com/metrics (503/awselb); GET https://iso20022.sumup.com/metricsfoo (control for the substring rule); staging.iso20022.sumup.com is NXDOMAIN so no prod/stage pair exists
+impact: low/unclear — no route, data or authz bypass demonstrated; risk is that a deny rule sits outside the mesh's own enforcement
+testability: PASSIVE
+[PARKED] serial-terminal gate inconsistency: gate now proven but the exposed artifact is a zero-secret client-side Web Serial PWA with no backend and no remote relay; utility requires physical access to the visitor's own device, an out-of-scope class. Do not resubmit.
+[PARKED] js.sumup.com/api/checkouts/{id} existence oracle: 68 B Vercel platform 404, not application-routed. Dead.
+[PARKED] mcp.sumup.com wildcard CORS: wildcard ACAO but no ACAC and bearer_methods_supported=["header"]; GET /mcp now 401-confirmed, so no ambient credential rides along. Hardening only.
+[FINAL] 1. gateway hosted.js cross-origin messenger — 88, HUMAN_ONLY
+[FINAL] 2. auth.sam-app.ro DCR scope-gap — 55, AUTH_HELPED
+[FINAL] 3. iso20022 ELB-before-mesh rule boundary — 42, PASSIVE
+[NEXT] HUMAN: submit reports/gateway-hostedfields-cross-origin-messenger.md (190 lines, 8,722 B, sha256 2fb3f7dcc8bcae7d24f846262b1617f21db8fc44c49ab061426a987d45a11737) to bugs.olivermaicher.eu, and complete its step 5 with a throwaway checkout — server-side acceptance is the single leg separating Medium from High and cannot be produced from here.
+[LEARN] REJECTED MISCONFIG @ serial-terminal.dev.solo.sumup.com: an unauthenticated bucket is only a finding if the bytes inside it give an attacker something. Reading the served manifest → main chunk converted a 50-confidence lead into a clean negative in one pass, and the cheapest next probe (the ?polyfill WebSocket relay) was refuted by a single grep for wss:// rather than by guessing endpoints.
+[LEARN] ACCEPTED OTHER @ comparative controls: the decisive control for the dev.solo gate was not a probe of the vulnerable host but a path sweep on the two *gated* siblings — 6/6 redirects proved the gate is per-host and path-independent, which turned "gate inconsistency" from a vague shape into a proven deployment gap and simultaneously showed the gap is not exploitable.
+[LEARN] ACCEPTED AUTH @ metadata documents: absence of a registration_endpoint is not proof an endpoint is absent, but comparing prod vs staging metadata was the only way to locate the real severity delta (advertised 19 scopes vs empty granted scp) without a single mutating request.
+[RISK] sumup: 80 — discovery is not the bottleneck. Two money findings are evidence-complete and have been unsubmitted for 15+ cycles across 38 workspace re-materializations, and the top finding's severity is gated on a single human test I am not permitted to perform. The remaining risk is delivery and destruction of artifacts, not coverage; every byte-stable surface I can passively reach is now exhausted or closed.

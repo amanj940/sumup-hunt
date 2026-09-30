@@ -3370,3 +3370,22 @@
 - LEARN: ACCEPTED OTHER @ differential matrices: **the anomalous cell is the one most likely to be transient, not the one most likely to be a discovery.** My re-verifica
 - LEARN: REJECTED IDOR @ `api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods`: application-routed is not the same as exploitable. Two response classes on one host gen
 - LEARN: ACCEPTED OTHER @ comparative controls: **a control must be able to fail.** My framing audit was built on one positive fetch (`payout-settings-edge` → `SAMEORIGI
+
+## RANKED HYPOTHESES 2026-09-30 21:26:14 UTC
+- [90] gateway.sumup.com/hosted.js: gateway.sumup.com/hosted.js cross-origin postMessage checkout-write (from art/lead_nemotron3.txt)
+- [55] <host/endpoint>: <title> (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: submit reports/gateway-hostedfields-cross-origin-messenger.md (190 lines, 8,722 B, sha256 2fb3f7dcc8bcae7d24f846262b1617f21db8fc44c49ab061426a987d45a1173
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://iso20022.sumup.com/metrics + GET https://iso20022.sumup.com/internal/metrics + GET https://iso20022.sumup.com/actuator/metrics + GET https://
+- LEARN: REJECTED MISCONFIG @ serial-terminal.dev.solo.sumup.com: an unauthenticated bucket is only a finding if the bytes inside it give an attacker something. Reading 
+- LEARN: ACCEPTED OTHER @ comparative controls: the decisive control for the dev.solo gate was not a probe of the vulnerable host but a path sweep on the two *gated* sib
+- LEARN: ACCEPTED AUTH @ metadata documents: absence of a registration_endpoint is not proof an endpoint is absent, but comparing prod vs staging metadata was the only w
+- LEARN: ACCEPTED IDOR @ api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: a "uniformly gated host" claim is falsified by a control pair, not by a longer enumeratio
+- LEARN: REJECTED IDOR @ api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: application-routed is not the same as exploitable. Two response classes on one host genui
+- LEARN: REJECTED OATH @ js.sumup.com/api/checkouts/{id}: an id echoed into a 404 detail field is a reflector; 4/4 credential differential checks failed; endpoint return
+- LEARN: REJECTED BUSLOGIC @ pos-payment.sumup.com: a path-shape sweep with no negative control cannot distinguish "this route is gated" from "no such route exists". Six
+- LEARN: ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound ha
+- LEARN: REJECTED OTHER @ gateway.sumup.com/hosted.js: "unrecoverable runtime pattern" gate — three cycles recorded checkoutId check as new RegExp(a.pattern); one retrac
+- LEARN: ACCEPTED MISCONFIG @ iso20022.sumup.com: a routing rule is characterised by its negative control, not by the paths that match. Only the sample that does NOT mat
+- LEARN: REJECTED MISCONFIG @ iso20022.sumup.com: filing a two-class routing divergence as a vulnerability. The 503 is a deny emitted before application logic, both bodi
+- LEARN: ACCEPTED OTHER @ workspace: 37 re-materialisations make `open with ls` mandatory — it is the only way to know which prior [NEW] claims refer to files that exist
+- LEARN: REJECTED AUTH @ auth.sam-app.ro: "attacker-controlled aud → prod relay" leg unfalsifiable-and-unsupported — zero sync evidence, key-level isolation is the bindi

@@ -1491,3 +1491,16 @@ https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555?attempts
 https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555/payment-methods -> HTTP 404
 https://api.sumup.com/v0.1/checkouts/{id -> HTTP 404
 https://api.sumup.com/v0.2/checkouts/not-a-uuid/payment-methods -> HTTP 404
+
+## 2026-09-30 21:26:29 UTC
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://iso20022.sumup.com/metrics -> HTTP 503
+https://iso20022.sumup.com/metricsfoo -> HTTP 503
+https://iso20022.sumup.com/zzzmetricezzz -> HTTP 400
+https://iso20022.sumup.com/anything -> HTTP 400
+https://iso20022.sumup.com/internal/metrics -> HTTP 503
+https://iso20022.sumup.com/actuator/metrics -> HTTP 503
+https://iso20022.sumup.com/prometheus/metrics -> HTTP 503
+https://api.sumup.com -> HTTP 404
+https://payout-settings-edge.sumup.com/ -> HTTP 403

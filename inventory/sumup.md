@@ -1517,3 +1517,24 @@ www.sumup.com
 - CHANGED `reports/valid-bugs.md` 79→153 lines / 12,275 B, sha256 `b4db6825b3a261b2b7d94960213d8be2b9f2b7c3e5d8a1f4c6e7b8d9a0f1e2d3c`.
 - CHANGED gateway.sumup.com finding re-verified from served bytes before writing: hosted.js 26,839 B, sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`; origin-validation greps 0/0/0/0; 
 - CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations.
+
+## 2026-09-30 21:26:14 UTC
+- NEW mcp.sumup.com GET /mcp never probed in 37 cycles → 401 invalid_token/76 B (both Accept: text/event-stream and default); GET leg closed, same gate as POST
+- NEW mcp.sumup.com/.well-known/oauth-protected-resource/mcp → 200/269 B; estate has THREE live RFC 9728 docs, not two, and this third path is the one the server self-advertises in its own WWW-Authenticate 
+- NEW auth.sumup.com (prod) /.well-known/oauth-authorization-server omits registration_endpoint; auth.sam-app.ro (staging) explicitly advertises https://auth.sam-app.ro/oauth2/register → prod/staging DCR di
+- NEW serial-terminal.dev.solo.sumup.com/ is a real built Angular PWA (manifest name "Serial Terminal", display standalone), not a placeholder: index.html 2723 B/md5 9d1538b5/Last-Modified 2022-11-04 → main
+- CHANGED Cognito gate on dev.solo siblings proven path-INDEPENDENT, not just root-only: sumup-embedded-build + hardware-shared both302→Cognito on /index.html, /firmware.json, /nonexistent-key-zzz (6/6), state=
+- CHANGED serial-terminal rank-3 lead CLOSED at 20 (was 50): exposed app is a pure client-side Web Serial console with zero fetch/XHR, zero token, zero API base; module 391 = Google web-serial polyfill with 0 w
+- CHANGED reports/gateway-hostedfields-cross-origin-messenger.md was absent on open (38th re-materialization); RECONSTRUCTED from re-fetched bytes → 190 lines, 8,722 B, sha256 2fb3f7dcc8bcae7d24f846262b1617f21d
+- CHANGED self-caught error: first reconstructed draft carried a mistyped hosted.js sha256 (…1e9877a198); corrected to …1e4b977a198 and verified the in-report hash now equals the live artifact sha256, md5 53172
+- CHANGED valid-bugs.md 79→160 lines / 13,994 B, sha256 9aacaba0e21d7e4a9df08388e617d7cab02e92f2c2ae87732a7737bbfafee7a2
+- NEW api.sumup.com/v0.2/checkouts/{id}/payment-methods: 92-confidence IDOR RETIRED — credential matrix (7 shapes × 5 IDs) all return byte-identical 404/58B `{"error_code":"NOT_FOUND","message":"checkout no
+- NEW js.sumup.com/api/checkouts/{id}: BFF existence-oracle claim REFUTED — 4/4 credential differential checks failed; endpoint returns 68B Vercel platform 404, not application-routed.
+- NEW pos-payment.sumup.com: route-level enum hypothesis REFUTED by negative control — nonsense path returns identical 403 IAM; no route discrimination.
+- NEW iso20022.sumup.com: serves two response classes from two upstreams behind one hostname — case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `i
+- NEW staging.iso20022.sumup.com is NXDOMAIN — prod/stage pair that made pos-payment.sumup.com worth depth work does not exist on this rail.
+- CHANGED Workspace re-materialized 37th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not per
+- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` re-delivered — 140 lines, 6,867 B, sha256 `79aa5df2a9ee5e3c44787d6c4cb2b4495cc1559c1d86c2d81b97c2f20e5095ba`; `valid-bugs.md` 79→136 lines.
+- CHANGED `gateway.sumup.com/hosted.js` re-verified before writing: 26,839 B, `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`; `event.origin`/`origin!==`/`origin===`/`targetOrigin`/`event.sou
+- CHANGED `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations.
+- CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
