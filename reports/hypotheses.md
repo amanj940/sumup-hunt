@@ -3337,3 +3337,28 @@
 - LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
 - LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
 - LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob
+
+## RANKED HYPOTHESES 2026-09-30 11:19:12 UTC
+- [92] api.sumup.com/v0.2/checkouts/{id}/payment-methods: api.sumup.com/v0.2/checkouts/{id}/payment-methods unauthenticated checkout payment-methods resolver (from art/lead_nemotron3.txt)
+- [88] gateway.sumup.com/hosted.js: gateway.sumup.com — the wildcard outbound fallback is live on two of three messenger sites, and the inbound channel that drives the money call is unguarded; fixing the outbound alone would silently (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: submit reports/gateway-hostedfields-cross-origin-messenger.md (215 lines, sha256 cf997909f114d86102124e9c2a9efb10c6f8ae6ed554366b3c703090ab314635) to bug
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555/payment-methods + GET with Authorization: Bearer invalid to re-verify crede
+- LEARN: REJECTED IDOR @ js.sumup.com/api/checkouts/{id}: an id echoed into a 404 detail field is a reflector
+- LEARN: REJECTED BUSLOGIC @ pos-payment.sumup.com: a path-shape sweep with no negative control cannot  distinguish "this route is gated" from "no such route exists". Si
+- LEARN: ACCEPTED OTHER @ workspace: 36 re-materialisations make `open with ls` mandatory rather than prudent,
+- LEARN: ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: presence of a credential parameter is not evidence
+- LEARN: ACCEPTED IDOR @ api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: a "uniformly gated host" claim is falsified by a control pair, not by a longer enumeratio
+- LEARN: ACCEPTED IDOR @ api.sumup.com/v0.2/checkouts/{id}/payment-methods: the decisive control was varying the CREDENTIAL, not the identifier. Every identifier returne
+- LEARN: REJECTED MISCONFIG @ api.sumup.com/v0.1/internal/analytics: inferring an endpoint's auth posture from the client call that reaches it. The SDK posts this with o
+- LEARN: REJECTED OTHER @ workspace: 35 cycles of re-materialization now make the open-with-ls step mandatory rather than prudent — it is the only way to know which prio
+- LEARN: ACCEPTED OTHER @ reports/ and workspace: file-creation streak root cause is **workspace re-materialized between cycles** — uniform mtimes, no stray copies, vali
+- LEARN: ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound ha
+- LEARN: REJECTED OTHER @ gateway.sumup.com/hosted.js: "unrecoverable runtime pattern" gate — three cycles recorded checkoutId check as new RegExp(a.pattern); one retrac
+- LEARN: ACCEPTED MISCONFIG @ js.sumup.com/api: finding came from recovering call shape (sdk.js) not guessing path shapes; prefix sweep structurally incapable of hitting
+- LEARN: REJECTED MISCONFIG @ js.sumup.com/api: access-control-allow-origin:* + access-control-allow-credentials:true is hardening-only — withCredentials set only when o
+- LEARN: ACCEPTED OTHER @ mcp.sumup.com: RFC 9728 resource-server metadata LIVE on prod MCP at two paths publishing scopes_supported:["offline_access","email"] — KB only
+- LEARN: REJECTED AUTH @ mcp.sumup.com/mcp: JWT alg:none and RS256→HS256 key confusion both explicitly refused by prod verifier; allowlist exactly {RS256, EdDSA} (RS384/
+- LEARN: ACCEPTED OATH @ auth.sumup.com: client_id=dashboard ACCEPTS email (302 login_challenge), completing consent set {openid, classic, offline, readers.read, termina
+- LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
+- LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
+- LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob

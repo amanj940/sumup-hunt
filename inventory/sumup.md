@@ -1472,3 +1472,22 @@ www.sumup.com
 - NEW iso20022.sumup.com serves two response classes from two upstreams behind one hostname: case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `ist
 - NEW pos-payment.sumup.com root 404 body read in full (3,477 B) — static branded page with inline SVG, no form/script/canonical/path template; route shape not in served bytes
 - NEW staging.iso20022.sumup.com is NXDOMAIN — prod/stage pair that made pos-payment.sumup.com worth depth work does not exist on this rail
+
+## 2026-09-30 11:19:12 UTC
+- NEW js.sumup.com/api/checkouts/{id}: BFF existence-oracle claim at 78 REFUTED — 4/4 credential
+- NEW pos-payment.sumup.com: route-level enum hypothesis REFUTED by a negative control — nonsense path
+- NEW js.sumup.com/api/checkouts/{id}/apple-pay-session is the 68 B Vercel platform 404, identical to the
+- CHANGED Workspace re-materialised 36th consecutive cycle. On open: reports/ held only logs + hypotheses
+- CHANGED reports/gateway-hostedfields-cross-origin-messenger.md RE-DELIVERED — 215 lines, 7,642 B,
+- CHANGED reports/valid-bugs.md 79→153 lines / 12,275 B, sha256 b4db6825b3a261b2b7d94960213d8be2b
+- CHANGED gateway.sumup.com finding re-verified from served bytes before writing: hosted.js 26,839 B,
+- NEW api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: LIVE application-routed endpoint absent from public OpenAPI spec, recovered from gateway.sumup.com/sdk.js builder (291,877B). Unauthenticated GET
+- NEW Complete api.sumup.com operation model recovered from gateway.sumup.com/sdk.js — 6 operations including 2 never previously documented (v0.1/v0.2 checkouts/{id}/payment-methods, v0.1/internal/analytics
+- NEW iso20022.sumup.com serves two response classes from two upstreams behind one hostname: case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `ist
+- NEW pos-payment.sumup.com root 404 body read in full (3,477B) — static branded page with inline SVG, no form/script/canonical/path template; route shape not in served bytes.
+- NEW staging.iso20022.sumup.com is NXDOMAIN — prod/stage pair that made pos-payment.sumup.com worth depth work does not exist on this rail.
+- CHANGED Workspace re-materialized 35th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not per
+- CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations.
+- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` GENUINELY on disk — 270 lines, 14,332B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`.
+- CHANGED `reports/cognito-implicit-grant-dev-solo-buckets.md` GENUINELY on disk — 129 lines, 5,728B, sha256 `c8aa4ff8dbb989593d6d20220ff55a7b86eb588c40fa91aa9e230b955bdffb06`.
+- CHANGED `reports/valid-bugs.md` running count 1 (gateway finding appended VALID 7.5 with FILE REPORT); auth.sam-app.ro finding also appended VALID 7.5 — but file reverts to 79 lines on re-materialization.

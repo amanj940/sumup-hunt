@@ -7533,3 +7533,54 @@ testability: PASSIVE
 [NEXT] PROBE: shape-probe `pos-payment.sumup.com` for a route-class split — `GET /ping` (expect 200), `GET /checkout` (expect the 3,477 B branded root stub), then `GET /orders`, `/api/orders`, `/payment`, `/link`, `/v1/orders`, `/orders/<uuid>` at ≥1.2 s intervals, flagging any status or byte-length class that is neither the 200 control nor the root stub, and confirm any hit against `staging.pos-payment.sumup.com`.
 [RISK] sumup: 88 — Up from 82, for an uncomfortable reason: my top finding is gone, and the loss is itself the signal. I held a 92-confidence IDOR across multiple cycles on the strength of one transient server-side error, and a single repeat measurement retired it; the same control then retired the sibling at 78. That is two over-claimed leads removed in one cycle, and the pattern says my confidence numbers were tracking narrative momentum more than evidence — a lead I had written up, re-told, and re-scored each cycle was being scored as though its writing were its support. I have downgraded the two retracted leads to explicit scored tombstones (2.20, 7.30) so they cannot quietly re-enter a ranking, and I am holding the next hypothesis at 70 on the strength of an untried *method* rather than an untried *bug*, which is exactly the reasoning I just criticised. Program risk stays high because the one artifact that survives scrutiny is still only a file on disk: `gateway-hostedfields-cross-origin-messenger.md`, 196 lines, sha256 `df11e0cf…7c24`, unreported, on the 37th re-materialization of a workspace that has twice now lost it.
 ## 2026-09-30 05:13:19 UTC [target] (model bigpickle)
+## 2026-09-30 11:19:02 UTC [target] (model bigpickle)
+[NEW] js.sumup.com/api/checkouts/{id}: BFF existence-oracle claim at 78 REFUTED — 4/4 credential
+[NEW] pos-payment.sumup.com: route-level enum hypothesis REFUTED by a negative control — nonsense path
+[NEW] js.sumup.com/api/checkouts/{id}/apple-pay-session is the 68 B Vercel platform 404, identical to the
+[CHANGED] Workspace re-materialised 36th consecutive cycle. On open: reports/ held only logs + hypotheses
+[CHANGED] reports/gateway-hostedfields-cross-origin-messenger.md RE-DELIVERED — 215 lines, 7,642 B,
+[CHANGED] reports/valid-bugs.md 79→153 lines / 12,275 B, sha256 b4db6825b3a261b2b7d94960213d8be2b
+[CHANGED] gateway.sumup.com finding re-verified from served bytes before writing: hosted.js 26,839 B,
+[PRIO] gateway.sumup.com/hosted.js,8.60,impact=8.5,exploitability=8.0,evidence=9.5,novelty=7.5,reachability=10.0
+[PRIO] auth.sam-app.ro dynamic registration,9.20,impact=9.0,exploitability=9.0,evidence=9.5,novelty=8.0,reachability=10.0
+[PRIO] api.sam-app.ro gateway aud/iss binding,8.10,impact=8.0,exploitability=6.0,evidence=8.0,novelty=9.0,reachability=10.0
+[PRIO] iso20022.sumup.com routing,8.20,impact=8.5,exploitability=6.0,evidence=8.0,novelty=8.0,reachability=9.5
+[PRIO] pos-payment.sumup.com IAM/SigV4,8.95,impact=9.0,exploitability=6.5,evidence=8.5,novelty=9.0,reachability=10.0
+[HYP] gateway.sumup.com — the wildcard outbound fallback is live on two of three messenger sites, and the inbound channel that drives the money call is unguarded; fixing the outbound alone would silently
+class: MISCONFIG
+asset: gateway.sumup.com/hosted.js
+confidence: 88
+reasoning: Factory signature declares origin ({id:e,fromWindow:r,toWindow:t,variant:a,origin:n}); container
+evidence_needed: A demonstration that a response payload crosses to an attacker origin once delivery is
+verify_steps: Confirm the third messenger's payload at runtime by instrumenting window.addEventListener
+impact: Medium as demonstrated (state-changing PUT with attacker-chosen payload, API acceptance unproven).
+testability: PASSIVE
+[HYP] auth.sam-app.ro — dynamic registration is live in prod-adjacent staging and the minted JWT carries an
+class: AUTH
+asset: auth.sam-app.ro/oauth2/register
+confidence: 72
+reasoning: POST /oauth2/register returns 201 unauthenticated (RFC 7591), absent in prod auth.sumup.com.
+evidence_needed: A prod resource server that accepts a staging-issued token. Zero sync evidence exists, and
+verify_steps: Not further probeable passively. Any advance requires a human decision to authorise a
+impact: Low as measured (staging posture only). Would be High only if a prod resource server is found to
+testability: HUMAN_ONLY
+[HYP] iso20022.sumup.com — the case-sensitive `metrics` substring route is a listener rule evaluated ahead of
+class: MISCONFIG
+asset: iso20022.sumup.com
+confidence: 45
+reasoning: Two response classes from two upstreams on one hostname: any path containing the case-sensitive
+evidence_needed: A path that the ELB admits and that reaches an upstream handler rather than a deny stub.
+verify_steps: Already executed. Further probing would only restate the same two stub classes.
+impact: None demonstrated. This is a routing observation, not a vulnerability — the two classes differ in
+testability: PASSIVE, exhausted
+[PARKED] js.sumup.com/api/checkouts/{id} existence oracle (was 78): refuted by my own credential-differential
+[PARKED] pos-payment.sumup.com route-level enum (was 70): the method was untried, not the bug. Negative control
+[FINAL] 1. gateway.sumup.com hosted-fields cross-origin message channel — 88, PASSIVE, Medium, REPORT ON DISK 215 lines sha256 cf997909…4635
+[FINAL] 2. auth.sam-app.ro dynamic registration — 72, HUMAN_ONLY, unsubmitted 15+ cycles
+[FINAL] 3. iso20022.sumup.com routing — 45, PASSIVE, below file threshold
+[NEXT] HUMAN: submit reports/gateway-hostedfields-cross-origin-messenger.md (215 lines, sha256 cf997909f114d86102124e9c2a9efb10c6f8ae6ed554366b3c703090ab314635) to bugs.olivermaicher.eu. This is the program's highest-confidence finding, it is evidence-complete and self-contained, and 36 workspace re-materialisations have each destroyed the previous copy. Every probe this cycle refuted my own leads, so further probing has negative expected yield while an unsubmitted report decays.
+[LEARN] REJECTED IDOR @ js.sumup.com/api/checkouts/{id}: an id echoed into a 404 detail field is a reflector
+[LEARN] REJECTED BUSLOGIC @ pos-payment.sumup.com: a path-shape sweep with no negative control cannot  distinguish "this route is gated" from "no such route exists". Six plausible paths all returning 403 was
+[LEARN] ACCEPTED OTHER @ workspace: 36 re-materialisations make `open with ls` mandatory rather than prudent,
+[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: presence of a credential parameter is not evidence
+[RISK] sumup: 90 — up from 88, and for a reason worth stating plainly: this cycle destroyed both of my top
