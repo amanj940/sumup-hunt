@@ -1458,3 +1458,17 @@ www.sumup.com
 - CHANGED api.sumup.com passive surface exhausted — 27 stable cycles, only live bearer discriminates aud/iss binding.
 
 ## 2026-09-29 23:54:01 UTC
+
+## 2026-09-30 05:13:31 UTC
+- CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations (confirmed 2026
+- CHANGED Workspace re-materialized 35th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not per
+- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` GENUINELY on disk — 270 lines, 14,332 B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
+- CHANGED `reports/cognito-implicit-grant-dev-solo-buckets.md` GENUINELY on disk — 129 lines, 5,728 B, sha256 `c8aa4ff8dbb989593d6d20220ff55a7b86eb588c40fa91aa9e230b955bdffb06`
+- CHANGED `reports/valid-bugs.md` running count 1 (gateway finding appended VALID 7.5 with FILE REPORT); auth.sam-app.ro finding also appended VALID 7.5
+- NEW api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods: LIVE application-routed endpoint absent from public OpenAPI spec — unauthenticated GET returns 58B `{"error_code":"NOT_FOUND"}`; any `Authorizati
+- NEW Credential differential on api.sumup.com/v0.2/checkouts/{id}/payment-methods: invalid `Authorization` → 500/0B vs no header → 58B app-layer 404; falsifies 27-cycle KB claim "uniformly gated at gateway
+- NEW No server-side UUID validation on checkout id: `checkouts/not-a-uuid/payment-methods` → byte-identical 58B; UUID v1–5 gate is client-side only (`xi` static literal in `sdk.js`)
+- NEW Complete api.sumup.com operation model recovered from `gateway.sumup.com/sdk.js` (291,877B, sha256 `0fae546a…`) — 6 operations including 2 never previously documented
+- NEW iso20022.sumup.com serves two response classes from two upstreams behind one hostname: case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `ist
+- NEW pos-payment.sumup.com root 404 body read in full (3,477 B) — static branded page with inline SVG, no form/script/canonical/path template; route shape not in served bytes
+- NEW staging.iso20022.sumup.com is NXDOMAIN — prod/stage pair that made pos-payment.sumup.com worth depth work does not exist on this rail
