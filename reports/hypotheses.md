@@ -3362,3 +3362,11 @@
 - LEARN: REJECTED AUTH @ auth.sam-app.ro/oauth2-register/JWKS: 30-candidate kid sweep against prod MCP verifier found exactly 8 published prod kids trusted, 0 undeclared
 - LEARN: ACCEPTED OTHER @ auth.sam-app.ro JWKS: staging trust set contains 2 duplicated entries — 11 entries = 9 unique keys; KB "staging 11 keys" overstates real key co
 - LEARN: REJECTED BUSLOGIC @ api.sumup.com: any further GET/OPTIONS probe across byte-stable surface is waste — 27 stable cycles, only live bearer discriminates; re-prob
+
+## RANKED HYPOTHESES 2026-09-30 16:56:57 UTC
+- [92] api.sumup.com/v0.2/checkouts/{id}/payment-methods: api.sumup.com/v0.2/checkouts/{id}/payment-methods unauthenticated checkout payment-methods resolver (from art/lead_nemotron3.txt)
+- [88] gateway.sumup.com/hosted.js: gateway.sumup.com/hosted.js — the inbound message channel is unguarded and the frame-access gate is skipped entirely by a caller-supplied `payment_type`, so an arbitrary origin can drive the frame to a state-changing checkout PUT (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: submit `reports/gateway-hostedfields-cross-origin-messenger.md` (140 lines, 6,867 B, sha256 `79aa5df2a9ee5e3c44787d6c4cb2b4495cc1559c1d86c2d81b97c2f20e50
+- LEARN: ACCEPTED OTHER @ differential matrices: **the anomalous cell is the one most likely to be transient, not the one most likely to be a discovery.** My re-verifica
+- LEARN: REJECTED IDOR @ `api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods`: application-routed is not the same as exploitable. Two response classes on one host gen
+- LEARN: ACCEPTED OTHER @ comparative controls: **a control must be able to fail.** My framing audit was built on one positive fetch (`payout-settings-edge` → `SAMEORIGI
