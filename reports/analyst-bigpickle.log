@@ -61715,3 +61715,1171 @@ My first credential-differential loop was broken shell quoting (`curl: (6) Could
 One caveat worth flagging: the report is unsubmitted. There's no submission mechanism in this repo — `scripts/sync-issues.py` mirrors leads into GitHub issues, and it won't reach `bugs.olivermaicher.eu`. That step is yours.
 
 Want me to commit these artifacts, or leave them uncommitted so you can review the report text before submitting?
+===== ANALYST bigpickle 2026-10-01 14:55:27 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/runner/work/sumup-hunt/sumup-hunt/ 2>&1 | head -30
+total 1092
+drwxr-xr-x 12 runner runner   4096 Oct  1 14:35 .
+drwxr-xr-x  3 runner runner   4096 Oct  1 14:35 ..
+drwxr-xr-x  7 runner runner   4096 Oct  1 14:35 .git
+drwxr-xr-x  3 runner runner   4096 Oct  1 14:35 .github
+-rw-r--r--  1 runner runner   1885 Oct  1 14:35 README.md
+-rw-r--r--  1 runner runner     32 Oct  1 14:35 analyst-out.txt
+-rw-r--r--  1 runner runner 471919 Oct  1 14:35 analyst-prompt.txt
+-rw-r--r--  1 runner runner 468033 Oct  1 14:35 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Oct  1 14:35 inventory
+drwxr-xr-x  2 runner runner   4096 Oct  1 14:35 knowledge
+drwxr-xr-x  2 runner runner   4096 Oct  1 14:35 leads
+-rw-r--r--  1 runner runner  77433 Oct  1 14:35 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Oct  1 14:35 recon-notes
+drwxr-xr-x  2 runner runner   4096 Oct  1 14:35 reports
+drwxr-xr-x  2 runner runner   4096 Oct  1 14:35 reposcan-raw
+-rw-r--r--  1 runner runner   3299 Oct  1 14:35 scope.yml
+drwxr-xr-x  2 runner runner   4096 Oct  1 14:35 scripts
+-rw-r--r--  1 runner runner     33 Oct  1 14:35 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Oct  1 14:35 state_laguna.json
+-rw-r--r--  1 runner runner     33 Oct  1 14:35 state_ling3.json
+-rw-r--r--  1 runner runner     33 Oct  1 14:35 state_longcat.json
+-rw-r--r--  1 runner runner     33 Oct  1 14:35 state_mimo.json
+-rw-r--r--  1 runner runner     33 Oct  1 14:35 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Oct  1 14:35 triage
+[0m
+[0m$ [0mls reports/ 2>&1 | head -10
+analyst-bigpickle.log
+analyst-laguna.log
+analyst-ling3.log
+analyst-longcat.log
+analyst-nemotron3.log
+hypotheses-bigpickle.txt
+hypotheses-laguna.txt
+hypotheses-ling3.txt
+hypotheses-longcat.txt
+hypotheses-nemotron3.txt
+[0m
+[0m$ [0mcd /tmp/opencode 2>/dev/null || mkdir -p /tmp/opencode && cd /tmp/opencode
+for u in "https://mcp.sumup.com/.well-known/oauth-protected-resource" "https://mcp.sumup.com/mcp/.well-known/oauth-protected-resource" "https://mcp.sumup.com/.well-known/oauth-protected-resource/mcp"; do
+  echo "=== $u"
+  curl -sS --max-time 15 -o body.txt -w "status=%{http_code} size=%{size_download}\n" "$u"
+  cat body.txt; echo
+  sleep 1
+done
+=== https://mcp.sumup.com/.well-known/oauth-protected-resource
+status=200 size=269
+{"resource":"https://mcp.sumup.com/mcp","authorization_servers":["https://auth.sumup.com"],"bearer_methods_supported":["header"],"scopes_supported":["offline_access","email"],"resource_name":"SumUp MCP","resource_documentation":"https://developer.sumup.com/tools/llms"}
+=== https://mcp.sumup.com/mcp/.well-known/oauth-protected-resource
+status=404 size=73
+{"jsonrpc":"2.0","error":{"code":-32010,"message":"Not Found"},"id":null}
+=== https://mcp.sumup.com/.well-known/oauth-protected-resource/mcp
+status=200 size=269
+{"resource":"https://mcp.sumup.com/mcp","authorization_servers":["https://auth.sumup.com"],"bearer_methods_supported":["header"],"scopes_supported":["offline_access","email"],"resource_name":"SumUp MCP","resource_documentation":"https://developer.sumup.com/tools/llms"}
+[0m
+[0m$ [0mcd /tmp/opencode
+for u in "https://accounting.sumup.com/" "https://accounting.sumup.com/.well-known/oauth-authorization-server" "https://accounting.sumup.com/.well-known/openid-configuration"; do
+  echo "=== $u"
+  curl -sS --max-time 15 -D- -o b.txt -w "\n[status=%{http_code} size=%{size_download}]\n" "$u" 2>&1 | grep -iE "^(HTTP/|location:|server:|content-type:|x-frame|www-authenticate|strict-transport|x-amzn|content-security)" 
+  head -c 300 b.txt; echo; echo "---"
+  sleep 1
+done
+=== https://accounting.sumup.com/
+HTTP/2 200 
+content-type: text/html; charset=UTF-8
+server: Heroku
+x-frame-options: SAMEORIGIN
+<!doctype html><script>console.log(
+			'%cAre you a developer?\nHead on over to  https://developer.sumup.com\nTo see the documentation on our APIs and discover what you can do with SumUp.',
+			'font-size: large'
+		);</script><html class="no-js" xmlns:fb="http://ogp.me/ns/fb#" lang=""><head><meta cha
+---
+=== https://accounting.sumup.com/.well-known/oauth-authorization-server
+HTTP/2 200 
+content-type: text/html; charset=UTF-8
+server: Heroku
+x-frame-options: SAMEORIGIN
+<!doctype html><script>console.log(
+			'%cAre you a developer?\nHead on over to  https://developer.sumup.com\nTo see the documentation on our APIs and discover what you can do with SumUp.',
+			'font-size: large'
+		);</script><html class="no-js" xmlns:fb="http://ogp.me/ns/fb#" lang=""><head><meta cha
+---
+=== https://accounting.sumup.com/.well-known/openid-configuration
+HTTP/2 200 
+content-type: text/html; charset=UTF-8
+server: Heroku
+x-frame-options: SAMEORIGIN
+<!doctype html><script>console.log(
+			'%cAre you a developer?\nHead on over to  https://developer.sumup.com\nTo see the documentation on our APIs and discover what you can do with SumUp.',
+			'font-size: large'
+		);</script><html class="no-js" xmlns:fb="http://ogp.me/ns/fb#" lang=""><head><meta cha
+---
+[0m
+[0m$ [0mcd /tmp/opencode
+curl -sS --max-time 20 -o acc.html -w "status=%{http_code} size=%{size_download}\n" https://accounting.sumup.com/
+wc -c acc.html
+grep -oiE '(client_id=[a-z0-9_.-]+|/assets/[a-zA-Z0-9._-]+\.js|https://[a-z0-9.-]*sumup[a-z0-9.-]*)' acc.html | sort -u | head -40
+status=200 size=7591
+7591 acc.html
+https://developer.sumup.com
+https://sumup.my.salesforce-scrt.com
+https://sumup.my.site.com
+https://zn3s1x9iqtaqh21ze-sumup.siteintercept.qualtrics.com
+[0m
+[0m$ [0mcd /tmp/opencode
+grep -oE '<script[^>]*>' acc.html | head -20
+echo "=== link/img"
+grep -oE '(src|href)="[^"]*"' acc.html | head -30
+<script>
+<script>
+<script>
+<script>
+<script src="/static-files/runtime-e9bd0f58af78e3d09fd5.js">
+<script src="/static-files/vendors-1a2da5a80e836b22581a.js">
+<script src="/static-files/scripts-4d0aafb70b7eb804f8b7.js">
+<script src="https://sumup.my.site.com/ESWEUInvoicingWebChat1674059870624/assets/js/bootstrap.min.js">
+<script>
+<script>
+=== link/img
+href="/apple-touch-icon-152x152-precomposed.png"
+href="/apple-touch-icon-144x144-precomposed.png"
+href="/apple-touch-icon-120x120-precomposed.png"
+href="/apple-touch-icon-114x114-precomposed.png"
+href="/apple-touch-icon-76x76-precomposed.png"
+href="/apple-touch-icon-72x72-precomposed.png"
+href="/apple-touch-icon-60x60-precomposed.png"
+href="/apple-touch-icon-57x57-precomposed.png"
+href="/apple-touch-icon-precomposed.png"
+href="/manifest.sumup.webmanifest"
+src="undefined"
+src="/static-files/runtime-e9bd0f58af78e3d09fd5.js"
+src="/static-files/vendors-1a2da5a80e836b22581a.js"
+src="/static-files/scripts-4d0aafb70b7eb804f8b7.js"
+href="/static-files/app.d998ebcb1d4dafd415ae.css"
+href="/static-files/scripts.72fff1c0a9bc13bb2f4a.css"
+src="https://sumup.my.site.com/ESWEUInvoicingWebChat1674059870624/assets/js/bootstrap.min.js"
+[0m
+[0m$ [0mcd /tmp/opencode
+curl -sS --max-time 30 -o scripts.js -w "scripts status=%{http_code} size=%{size_download}\n" https://accounting.sumup.com/static-files/scripts-4d0aafb70b7eb804f8b7.js
+sha256sum scripts.js
+grep -oiE '(client_id[=:"'"'"' ]{1,4}[a-zA-Z0-9_.-]+|https://[a-z0-9.-]*sumup[a-z0-9.-]*)' scripts.js | sort -u | head -40
+scripts status=200 size=4145075
+3671028a1305498e40b73fe47b10d0dc19079fca13ac2af57199439c3431d080  scripts.js
+CLIENT_ID:"debitoor_accounting_public
+https://accounting.sumup.com
+https://auth.sumup.com
+https://ch-de.sumup.com
+https://ch-fr.sumup.com
+https://ch-it.sumup.com
+https://cloud.crm.sumup.com
+https://fr.sumup.be
+https://help.sumup.com
+https://invoices.sumup.com
+https://nl.sumup.be
+https://static.sumup.com
+https://sumup.at
+https://sumup.co.uk
+https://sumup.com
+https://sumup.de
+https://sumup.dk
+https://sumup.es
+https://sumup.fi
+https://sumup.fr
+https://sumup.ie
+https://sumup.it
+https://sumup.nl
+https://sumup.no
+https://sumup.pl
+https://sumup.se
+https://support.sumup.com
+[0m
+[0m$ [0mcd /tmp/opencode
+grep -oE '.{200}debitoor_accounting_public.{300}' scripts.js | head -3
+name=e.pathname||"/",t&&Object.assign(a,t);return a},t.hasSSO=t.oidcConfig=void 0;var n=a(7841),i=r(a(45810)),s=r(a(70586)),o=a(8018),l="staging"===o.APP_ENV&&Boolean("sumup-accounting"),c={clientId:"debitoor_accounting_public",issuer:"https://auth.sumup.com",redirectURI:"".concat("https://accounting.sumup.com","/").concat(l?"oauthcallback-redirect":"oauthcallback"),postLogoutRedirectURI:o.DASHBOARD_URL,scopes:["offline","classic","openid"]};t.oidcConfig=c;var d=new URLSearchParams(window.location.search),u=d.get("sumupA
+pp.debitoor.com",ENABLE_TRACK_JS:!0,HOTJAR_ID:"2431144",HEROKU_RELEASE_VERSION:"v1300",HEROKU_SLUG_COMMIT:"b549fca740e934fe303c4d6f083a0f7d4892405c",HEROKU_APP_NAME:"sumup-accounting",OIDC_CLIENT_ID:"debitoor_accounting_public",OIDC_ISSUER_URL:"https://auth.sumup.com",OIDC_REDIRECT_ORIGIN:"https://accounting.sumup.com",OPTIMIZELY_SDK_KEY:"ViTHoMRMsLUdsLzjURzqt",OPTIMIZELY_LOG_LEVEL:"error"})||void 0===n?void 0:n.APPLICATION_ID)&&"sumup-accounting-web"!==(null===(i={APPLICATION_ID:"sumup-accounting-web",APP_ENV:"productio
+pp.debitoor.com",ENABLE_TRACK_JS:!0,HOTJAR_ID:"2431144",HEROKU_RELEASE_VERSION:"v1300",HEROKU_SLUG_COMMIT:"b549fca740e934fe303c4d6f083a0f7d4892405c",HEROKU_APP_NAME:"sumup-accounting",OIDC_CLIENT_ID:"debitoor_accounting_public",OIDC_ISSUER_URL:"https://auth.sumup.com",OIDC_REDIRECT_ORIGIN:"https://accounting.sumup.com",OPTIMIZELY_SDK_KEY:"ViTHoMRMsLUdsLzjURzqt",OPTIMIZELY_LOG_LEVEL:"error"})||void 0===i?void 0:i.APPLICATION_ID)||"production"!==(null===(s={APPLICATION_ID:"sumup-accounting-web",APP_ENV:"production",SITE_UR
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== A: new client debitoor_accounting_public + accounting redirect (scopes from bundle)"
+curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/oauth2/auth?client_id=debitoor_accounting_public&redirect_uri=https%3A%2F%2Faccounting.sumup.com%2Foauthcallback&response_type=code&scope=offline+classic+openid&state=teststate1234" | grep -iE "^HTTP|^location"
+sleep 1
+echo "=== B: control — same client, attacker redirect (must be invalid_request)"
+curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/oauth2/auth?client_id=debitoor_accounting_public&redirect_uri=https%3A%2F%2Fevil.example%2Fcb&response_type=code&scope=offline+classic+openid&state=teststate1234" | grep -iE "^HTTP|^location"
+sleep 1
+echo "=== C: scope oracle — add readers.read"
+curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/oauth2/auth?client_id=debitoor_accounting_public&redirect_uri=https%3A%2F%2Faccounting.sumup.com%2Foauthcallback&response_type=code&scope=offline+classic+openid+readers.read&state=teststate1234" | grep -iE "^HTTP|^location"
+=== A: new client debitoor_accounting_public + accounting redirect (scopes from bundle)
+HTTP/2 302 
+location: https://auth.sumup.com/flows/auth-callback?login_challenge=0060bf4c3f074f06b2bc4559c9c516f1
+=== B: control — same client, attacker redirect (must be invalid_request)
+HTTP/2 302 
+location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwise+malformed.+The+%27redirect_uri%27+parameter+does+not+match+any+of+the+OAuth+2.0+Client%27s+pre-registered+redirect+urls.
+=== C: scope oracle — add readers.read
+HTTP/2 303 
+location: https://accounting.sumup.com/oauthcallback?error=invalid_scope&error_description=The+requested+scope+is+invalid%2C+unknown%2C+or+malformed.+The+OAuth+2.0+Client+is+not+allowed+to+request+scope+%27readers.read%27.&state=teststate1234
+[0m
+[0m$ [0mcd /tmp/opencode
+for sc in "offline classic openid email" "offline classic openid email profile" "offline classic openid offline_access" "classic openid"; do
+  printf "scope='%s' -> " "$sc"
+  curl -sS --max-time 15 -o /dev/null -w "%{http_code} " "https://auth.sumup.com/oauth2/auth?client_id=debitoor_accounting_public&redirect_uri=https%3A%2F%2Faccounting.sumup.com%2Foauthcallback&response_type=code&scope=$(printf %s "$sc" | sed 's/ /+/g')&state=teststate1234"
+  curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/oauth2/auth?client_id=debitoor_accounting_public&redirect_uri=https%3A%2F%2Faccounting.sumup.com%2Foauthcallback&response_type=code&scope=$(printf %s "$sc" | sed 's/ /+/g')&state=teststate1234" 2>/dev/null | grep -ioE "error=[a-z_]+" | head -1
+  echo
+  sleep 1
+done
+scope='offline classic openid email' -> 303 error=invalid_scope
+
+scope='offline classic openid email profile' -> 303 error=invalid_scope
+
+scope='offline classic openid offline_access' -> 303 error=invalid_scope
+
+scope='classic openid' -> 302
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== legacy gateway presence"
+curl -sS --max-time 15 -o /dev/null -D- "https://api.sumup.com/authorize?client_id=debitoor_accounting_public&redirect_uri=https%3A%2F%2Faccounting.sumup.com%2Foauthcallback&response_type=code&state=teststate1234" | grep -iE "^HTTP|^location"
+sleep 1
+echo "=== oauthcallback on accounting host (anonymous)"
+curl -sS --max-time 15 -o cb.txt -D- -w "\n[status=%{http_code} size=%{size_download}]\n" "https://accounting.sumup.com/oauthcallback" | grep -iE "^HTTP|^location|^content-type|^server"
+head -c 200 cb.txt; echo
+sleep 1
+echo "=== oauthcallback-redirect (staging-only path) on prod host"
+curl -sS --max-time 15 -o /dev/null -w "status=%{http_code} size=%{size_download}\n" "https://accounting.sumup.com/oauthcallback-redirect"
+sleep 1
+echo "=== callback with attacker-supplied code (open-redirect probe)"
+curl -sS --max-time 15 -o /dev/null -D- "https://accounting.sumup.com/oauthcallback?code=ATTACKER_CODE&state=teststate1234" | grep -iE "^HTTP|^location"
+=== legacy gateway presence
+HTTP/2 302 
+location: https://auth.sumup.com/flows/oauth2/error?error=invalid_client&error_description=The+requested+OAuth+2.0+Client+does+not+exist.
+=== oauthcallback on accounting host (anonymous)
+HTTP/2 200 
+content-type: text/html; charset=UTF-8
+server: Heroku
+<!doctype html><script>console.log(
+			'%cAre you a developer?\nHead on over to  https://developer.sumup.com\nTo see the documentation on our APIs and discover what you can do with SumUp.',
+			'font-s
+=== oauthcallback-redirect (staging-only path) on prod host
+status=200 size=7591
+=== callback with attacker-supplied code (open-redirect probe)
+HTTP/2 200
+[0m
+[0m$ [0mcd /tmp/opencode
+grep -oE '.{100}sumupApp.{500}' scripts.js | head -4
+(no output)
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+import re
+for m in re.finditer(r'sumupApp',d):
+    print('---',m.start())
+    print(d[max(0,m.start()-150):m.start()+600].replace('\n',' '))
+    print()
+EOF
+(no output)
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+import re
+seen=set()
+for m in re.finditer(r'debitoor',d,re.I):
+    s=d[max(0,m.start()-250):m.start()+250].replace('\n',' ')
+    if s in seen: continue
+    seen.add(s)
+    print('---',m.start())
+    print(s)
+    print()
+    if len(seen)>6: break
+EOF
+--- 189826
+r r in a)Object.prototype.hasOwnProperty.call(a,r)&&(e[r]=a[r])}return e},o.apply(this,arguments)}function l(e){return s.createElement("svg",o({width:240,height:240,fill:"none",xmlns:"http://www.w3.org/2000/svg"},e),r||(r=s.createElement("mask",{id:"debitoor-empty-list-customers_svg__a",maskUnits:"userSpaceOnUse",x:0,y:0,width:240,height:240},s.createElement("path",{d:"M239.988 161.824v77.92L164.45 240H80.951C36.516 240 .46 205.134.112 161.982A5.402 5.402 0 010 160.867L.433 45.061c.012-3.068 2.5
+
+--- 190294
+0.867L.433 45.061c.012-3.068 2.58-5.549 5.742-5.549H74.44C88.28 15.908 114.323 0 144.168 0h5.184l15.105.247c41.835 2.657 74.961 36.516 75.026 78.028v83.04l.041.04h.464v.451l.012.012-.012.006z",fill:"#0069B1"}))),n||(n=s.createElement("g",{mask:"url(#debitoor-empty-list-customers_svg__a)"},s.createElement("path",{d:"M177 182.929H94.36v9.446H177v-9.446z",fill:"#1760CE"}),s.createElement("path",{fillRule:"evenodd",clipRule:"evenodd",d:"M239.483 78.415v134.916H66.309V78.415h-2.427C63.882 35.116 99.8
+
+--- 190968
+713-4.088L.442 45.173a5.682 5.682 0 015.681-5.66h108.284L240 161.817",fill:"#7FB5FF"}),s.createElement("path",{d:"M239.988 161.355H.118C.119 204.795 36.31 240 80.959 240h83.495l75.535-.256v-78.389z",fill:"#1760CE"}),s.createElement("g",{filter:"url(#debitoor-empty-list-customers_svg__filter0_d)"},s.createElement("path",{d:"M103.642 175.606h41.126l4.361 22.95H99.904l3.738-22.95z",fill:"#9DA7B1"}),s.createElement("path",{fillRule:"evenodd",clipRule:"evenodd",d:"M210.572 47H35.427C30.777 47 27 50.7
+
+--- 191890
+le:"evenodd",d:"M219 167.604v-2.386H27v2.386c0 4.626 3.778 8.37 8.428 8.37h175.14c4.659.004 8.432-3.744 8.432-8.37z",fill:"#D8DDE1"}),s.createElement("path",{fill:"#D8DDE1",d:"M95.542 198.556h57.949V206H95.542z"}),s.createElement("g",{clipPath:"url(#debitoor-empty-list-customers_svg__clip0)"},s.createElement("path",{d:"M93.447 58.102H75.458a1.86 1.86 0 00-1.86 1.86v1.861a1.86 1.86 0 001.86 1.861h17.989a1.86 1.86 0 001.86-1.86v-1.862a1.86 1.86 0 00-1.86-1.86z",fill:"#DAEAFF"}),s.createElement("g"
+
+--- 192155
+list-customers_svg__clip0)"},s.createElement("path",{d:"M93.447 58.102H75.458a1.86 1.86 0 00-1.86 1.86v1.861a1.86 1.86 0 001.86 1.861h17.989a1.86 1.86 0 001.86-1.86v-1.862a1.86 1.86 0 00-1.86-1.86z",fill:"#DAEAFF"}),s.createElement("g",{filter:"url(#debitoor-empty-list-customers_svg__filter1_ddd)"},s.createElement("path",{fill:"#323E49",d:"M36.957 55h32.342v102H36.957z"})),s.createElement("g",{clipPath:"url(#debitoor-empty-list-customers_svg__clip1)"},s.createElement("path",{fill:"#323E49",d:"M3
+
+--- 192317
+86v-1.862a1.86 1.86 0 00-1.86-1.86z",fill:"#DAEAFF"}),s.createElement("g",{filter:"url(#debitoor-empty-list-customers_svg__filter1_ddd)"},s.createElement("path",{fill:"#323E49",d:"M36.957 55h32.342v102H36.957z"})),s.createElement("g",{clipPath:"url(#debitoor-empty-list-customers_svg__clip1)"},s.createElement("path",{fill:"#323E49",d:"M37 149.064h32.255v7.664H37z"}),s.createElement("path",{d:"M65.663 152.197l-.48.479.48.479",stroke:"#9DA7B1",strokeWidth:.24,strokeLinecap:"round",strokeLinejoin:"r
+
+--- 192611
+s.createElement("path",{fill:"#323E49",d:"M37 149.064h32.255v7.664H37z"}),s.createElement("path",{d:"M65.663 152.197l-.48.479.48.479",stroke:"#9DA7B1",strokeWidth:.24,strokeLinecap:"round",strokeLinejoin:"round"}),s.createElement("g",{clipPath:"url(#debitoor-empty-list-customers_svg__clip2)"},s.createElement("path",{fill:"#323E49",d:"M36.97 149.251h32.57v7.739H36.97z"}),s.createElement("path",{d:"M65.913 152.415l-.484.483.484.484",stroke:"#9DA7B1",strokeWidth:.242,strokeLinecap:"round",strokeLin
+[0m
+## Objective
+- Continue the SumUp bug-bounty hunt, validate only in-scope logic/security flaws, and produce the requested STEP 1–7 structured output.
+- Current phase: `POC`; target: `api`.
+
+## Important Details
+- Live testing is passive-first: read-only `GET`/`HEAD`/`OPTIONS`, ≤1 rps; no mutation against live customer data.
+- Report channel: `bugs.olivermaicher.eu`; no local submission mechanism exists.
+- Workspace is repeatedly re-materialized between cycles. Always open with `ls`; write and hash files in the same command before claiming they exist.
+- Current gateway evidence: `https://gateway.sumup.com/hosted.js`, 26,839 B, sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`.
+- Gateway inbound `postMessage` handler does not validate `event.origin`; framing headers are absent. Cross-origin `form--submit` reaches `PUT /v0.2/checkouts/{id}`. Server acceptance remains unproven.
+- `auth.sam-app.ro` exposes RFC 7591 registration and mints JWTs, but observed `scp` is empty. Prod/staging JWKS have zero `kid` overlap; staging has 11 entries but only 9 unique keys. Prod-relay impact is unsupported.
+- `iso20022.sumup.com` has an ELB-before-Istio boundary: raw paths containing case-sensitive `metrics` return fixed `503`; others return `400`. No attacker capability or security impact is demonstrated.
+- Retired: `api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods` IDOR, `js.sumup.com/api/checkouts/{id}` BFF oracle, `pos-payment.sumup.com` route enumeration, MCP JWT algorithm confusion, and Contentful preview-token leak.
+
+## Work State
+### Completed
+- Reconstructed `reports/gateway-hostedfields-cross-origin-messenger.md`: last measured 190 lines, 8,722 B, sha256 `2fb3f7dcc8bcae7d24f846262b1617f21db8fc44c49ab061426a987d45a11737`.
+- Corrected the report’s mistyped `hosted.js` hash before writing.
+- Updated `reports/valid-bugs.md`: last measured 160 lines, 13,994 B, sha256 `9aacaba0e21d7e4a9df08388e617d7cab02e92f2c2ae87732a7737bbfafee7a2`.
+- Confirmed `mcp.sumup.com/mcp` GET requires bearer auth; third RFC 9728 document is live at `/.well-known/oauth-protected-resource/mcp`.
+- Confirmed staging advertises `registration_endpoint`; production omits it.
+- Closed `serial-terminal.dev.solo.sumup.com` as a client-only Web Serial PWA with no remote API, token, or exploitable data exposure.
+
+### Active
+- Gateway hosted-fields finding ranked first; only server-side acceptance on a throwaway checkout separates Medium from High.
+- Staging DCR scope-gap remains the second-ranked hypothesis; needs an authorized token response with non-empty `scp` to raise severity.
+- ISO 20022 ELB/Istio routing boundary remains recon-only pending an actual capability differential.
+
+### Blocked
+- Gateway server acceptance requires `HUMAN_ONLY` testing with a throwaway checkout.
+- DCR scope escalation requires `AUTH_HELPED` credentials/flow.
+- Report files may disappear after re-materialization; last hashes are not durable evidence.
+- Human submission is required; `scripts/sync-issues.py` and `.github/workflows/sync-issues.yml` only mirror leads.
+
+## Next Move
+1. Run `ls -l`, `wc -l -c`, and `sha256sum` on `reports/gateway-hostedfields-cross-origin-messenger.md` and `reports/valid-bugs.md`; reconstruct from the current `hosted.js` bytes if absent.
+2. Submit the verified gateway report to `bugs.olivermaicher.eu` and complete report step 5 using a throwaway checkout.
+
+## Relevant Files
+- `reports/gateway-hostedfields-cross-origin-messenger.md`: primary gateway finding and reproduction report.
+- `reports/valid-bugs.md`: current validated-findings ledger and submission state.
+- `reports/hypotheses-nemotron3.txt`: ranked gateway/ISO follow-up hypotheses.
+- `art/lead_nemotron3.txt`: source lead for the gateway finding.
+- `scope.yml:4`: declares private disclosure through `bugs.olivermaicher.eu`.
+- `inventory/sumup.md`: initial SumUp asset inventory.
+- `scripts/sync-issues.py`: lead mirroring only; not a submission mechanism.
+- `.github/workflows/sync-issues.yml`: lead-sync workflow; not a submission mechanism.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m→ [0mRead scope.yml
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+i=d.find('oidcConfig=void 0')
+print(d[i:i+2600])
+EOF
+oidcConfig=void 0;var n=a(7841),i=r(a(45810)),s=r(a(70586)),o=a(8018),l="staging"===o.APP_ENV&&Boolean("sumup-accounting"),c={clientId:"debitoor_accounting_public",issuer:"https://auth.sumup.com",redirectURI:"".concat("https://accounting.sumup.com","/").concat(l?"oauthcallback-redirect":"oauthcallback"),postLogoutRedirectURI:o.DASHBOARD_URL,scopes:["offline","classic","openid"]};t.oidcConfig=c;var d=new URLSearchParams(window.location.search),u=d.get("sumupAuth");null!==u&&(sessionStorage.setItem("sumupAuth",u),d.delete("sumupAuth"),s.default.replace({pathname:"",search:d.toString()}));t.hasSSO=()=>(0,o.isSumUpUser)()&&!("false"===sessionStorage.getItem("sumupAuth")&&"production"!==o.APP_ENV)},30157:function(e,t,a){"use strict";var r=a(8034);Object.defineProperty(t,"__esModule",{value:!0}),t.handledErrorStatuses=t.handledErrorCodes=t.omitCsrfToken=void 0;var n={withCredentials:!1,transformRequest:[(e,t)=>(delete t.common["x-csrf-token"],e),...r(a(26660)).default.defaults.transformRequest]};t.omitCsrfToken=n;t.handledErrorCodes=(e,t)=>e.includes(t.data.code);t.handledErrorStatuses=(e,t)=>e.includes(t.status)},55685:function(e,t,a){"use strict";var r=a(8034);Object.defineProperty(t,"__esModule",{value:!0}),t.default=t.configureTokenFetcher=void 0;var n=r(a(50797)),i=r(a(26660)),s=function(e,t){if(!t&&e&&e.__esModule)return e;if(null===e||"object"!=typeof e&&"function"!=typeof e)return{default:e};var a=c(t);if(a&&a.has(e))return a.get(e);var r={},n=Object.defineProperty&&Object.getOwnPropertyDescriptor;for(var i in e)if("default"!==i&&Object.prototype.hasOwnProperty.call(e,i)){var s=n?Object.getOwnPropertyDescriptor(e,i):null;s&&(s.get||s.set)?Object.defineProperty(r,i,s):r[i]=e[i]}r.default=e,a&&a.set(e,r);return r}(a(54057)),o=r(a(70586)),l=a(69899);function c(e){if("function"!=typeof WeakMap)return null;var t=new WeakMap,a=new WeakMap;return(c=function(e){return e?a:t})(e)}var d=i.default.create({withCredentials:!0});t.configureTokenFetcher=e=>{d.interceptors.request.use((t=>e().catch((()=>"")).then((e=>e?(t.headers.Authorization="Bearer ".concat(e),t):t))))},d.interceptors.response.use((e=>e),function(){var e=(0,n.default)((function*(e){if(!navigator.onLine)return(0,s.showOfflineError)();if(e.response){var{status:t,data:a,config:{dontTrackErrors:r,url:n,method:i,data:c,headers:d}}=e.response;if(r&&"function"==typeof r&&r(e.response)||(0,s.trackAxiosError)({errorStatus:t,errorRequestBody:c,errorUrl:n,errorMethod:i,errorMessage:a.message,errorRequestHeaders:d,errorData:a}),401===t){if((null==a?void 0:a.reason)&&["disabled","blocked"].includes(a.reason.acc
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+import re
+# API base candidates
+for pat in [r'API_URL[^,}]{0,80}', r'VITE_[A-Z_]+', r'"/api/[^"]{0,60}', r'invoices\.sumup\.com[^"'"'"']{0,40}']:
+    s=sorted(set(re.findall(pat,d)))[:15]
+    print('##',pat)
+    for x in s: print('  ',x)
+EOF
+## API_URL[^,}]{0,80}
+   API_URL=c;var d=function(){var e=(0
+   API_URL=void 0;var n=r(a(39981))
+## VITE_[A-Z_]+
+   VITE_BTN
+   VITE_CANCEL_BTN
+   VITE_DESCRIPTION
+   VITE_EMAIL_ADDRESS_LABEL
+   VITE_FIRST_NAME_LABEL
+   VITE_LAST_NAME_LABEL
+   VITE_MANDATORY
+   VITE_OK_BTN
+   VITE_TITLE
+## "/api/[^"]{0,60}
+   "/api/
+   "/api/account/billingInvoices/
+   "/api/account/deleterequest/
+   "/api/account/deleterequest/v1
+   "/api/account/emailtemplates/
+   "/api/account/plans/v1
+   "/api/account/v1
+   "/api/accounting/payments.[FORMAT]/v1
+   "/api/accounting/transactions.[FORMAT]/skr03/v1
+   "/api/accounting/transactions.[FORMAT]/skr04/v1
+   "/api/accounting/transactions.[FORMAT]/v1
+   "/api/activities/dismiss/v1
+   "/api/activities/status/v1
+   "/api/activities/v1
+   "/api/address/parse/v1
+## invoices\.sumup\.com[^"']{0,40}
+   invoices.sumup.com
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+import re
+paths=sorted(set(re.findall(r'"(/api/[A-Za-z0-9_./\[\]-]{3,70})',d)))
+print(len(paths))
+for p in paths: print(p)
+EOF
+231
+/api/account/billingInvoices/
+/api/account/deleterequest/
+/api/account/deleterequest/v1
+/api/account/emailtemplates/
+/api/account/plans/v1
+/api/account/v1
+/api/accounting/payments.[FORMAT]/v1
+/api/accounting/transactions.[FORMAT]/skr03/v1
+/api/accounting/transactions.[FORMAT]/skr04/v1
+/api/accounting/transactions.[FORMAT]/v1
+/api/activities/dismiss/v1
+/api/activities/status/v1
+/api/activities/v1
+/api/address/parse/v1
+/api/app/otp/v1
+/api/apps/
+/api/banktransactions/
+/api/banktransactions/payments/private/v1
+/api/countries/v1
+/api/currencies/v2
+/api/customers
+/api/customers/
+/api/customers/bulk/v1
+/api/customers/csv/preview/v1
+/api/customers/export.[FORMAT]/v1
+/api/customers/v2
+/api/delegation/confirm/v1
+/api/delegation/v1
+/api/deliveryNotes/v3
+/api/deliverynotes
+/api/deliverynotes/
+/api/draftinvoices-invoices/archive/v1
+/api/draftinvoices-invoices/v5
+/api/draftinvoices-invoices/v7
+/api/draftinvoices-invoices/v8
+/api/emails/validate/v1
+/api/expenses
+/api/expenses/
+/api/expenses/book/range/v4
+/api/expenses/book/range/validate/v4
+/api/expenses/headers/v4
+/api/expenses/month-stats/v1
+/api/expenses/v4
+/api/expenses/v5
+/api/expenses/vatheaders/v4
+/api/export/creditnotes.[FORMAT]/v1
+/api/export/creditnotes/lines.[FORMAT]/v1
+/api/export/deliverynotes/lines.[FORMAT]/v1
+/api/export/expenses.[FORMAT]/v1
+/api/export/income.[FORMAT]/v1
+/api/export/invoices.[FORMAT]/v1
+/api/export/invoices/lines.[FORMAT]/v1
+/api/export/quotes/lines.[FORMAT]/v1
+/api/externalpaymentaccounts/transactions/v1
+/api/fees/invoicing/v1
+/api/files/
+/api/files/v1
+/api/html-converter/form/pdf/v1
+/api/income/
+/api/income/book/range/v2
+/api/income/book/range/validate/v2
+/api/income/headers/v1
+/api/income/month-stats/v1
+/api/income/v1
+/api/installations/
+/api/installations/v2
+/api/integrations/banks/
+/api/integrations/banks/FINTEC/connect/
+/api/integrations/banks/v1
+/api/intercom/v1
+/api/intercom/widget/v1
+/api/invoices/
+/api/login/sumup/dashboard/otp/v1
+/api/market/apps
+/api/market/apps/
+/api/market/images/v1
+/api/messages/
+/api/mixpanel/trackcustom/v1
+/api/notifications/inapp/
+/api/onboarding/bank-account/v1
+/api/onboarding/complete-profile/v1
+/api/onboarding/gdpr-agreements/v1
+/api/onboarding/merchant-profile/v1
+/api/onboarding/mobile/activate/v1
+/api/onboarding/mobile/activation-code/v1
+/api/onboarding/personal-profile/v1
+/api/onlinepayments/
+/api/onlinepayments/gocardless/activate/v1
+/api/onlinepayments/gocardless/deactivate/v1
+/api/onlinepayments/izettle/connect/v1
+/api/onlinepayments/izettle/disconnect/v1
+/api/onlinepayments/paypal/connect/v1
+/api/onlinepayments/paypal/disconnect/v1
+/api/onlinepayments/sumup/connect/v1
+/api/onlinepayments/sumup/disconnect/v1
+/api/open-banking/banks/
+/api/open-banking/banks/v1
+/api/payment-methods/
+/api/payment-methods/bank-accounts/
+/api/payment-methods/bank-accounts/external/
+/api/payment-methods/bank-accounts/validations/
+/api/payment-methods/enable/
+/api/payment-methods/manual-bank-account/
+/api/payment-methods/notifications/
+/api/payment-methods/select-bank-account/
+/api/paymentaccounts/
+/api/paymentaccounts/installation/
+/api/paymentaccounts/offline/
+/api/paymentaccounts/online/
+/api/paymentaccounts/payments/v1
+/api/paymentaccounts/payments/withExpense/v1
+/api/paymentaccounts/transactions/
+/api/paymentaccounts/v1
+/api/payments/
+/api/products
+/api/products/bulk/v1
+/api/products/csv/preview/v1
+/api/products/export.[FORMAT]/v1
+/api/products/v1
+/api/pushsubscriptions/v1
+/api/recurring/invoices/
+/api/recurring/invoices/v1
+/api/reports/balance-sheet/close/v1
+/api/reports/balance-sheet/deltas/v1
+/api/reports/balance-sheet/v1
+/api/reports/profitandloss/drilldown/v1
+/api/reports/profitandloss/startingamounts/v1
+/api/reports/profitandloss/v1
+/api/reports/vat/de/v2
+/api/reports/vat/submit/v1
+/api/sales/
+/api/sales/creditnotes
+/api/sales/creditnotes/
+/api/sales/deliverynotes/
+/api/sales/deliverynotes/v2
+/api/sales/draftcreditnotes
+/api/sales/draftcreditnotes-creditnotes/headers/v2
+/api/sales/draftcreditnotes-creditnotes/headers/v3
+/api/sales/draftcreditnotes-creditnotes/headers/v4
+/api/sales/draftcreditnotes/
+/api/sales/draftcreditnotes/v4
+/api/sales/draftinvoices
+/api/sales/draftinvoices/
+/api/sales/draftinvoices/v8
+/api/sales/invoices
+/api/sales/invoices/
+/api/sales/invoices/autoreminders/stop/
+/api/sales/invoices/headers/v8
+/api/sales/invoices/v8
+/api/sales/quotes/
+/api/sales/quotes/counts/v1
+/api/sales/quotes/headers/v6
+/api/sales/quotes/v5
+/api/sales/reminders/
+/api/settings/consents/v1
+/api/settings/default-attachments
+/api/settings/default-attachments/
+/api/settings/financialyear/v1
+/api/settings/migrate-unified/v1
+/api/settings/splittest/
+/api/settings/v3
+/api/subscription/billing/checkout/validate/v1
+/api/subscription/billing/config/v1
+/api/subscription/billing/coupon/validate/v1
+/api/subscription/billing/paymentMethod/prepare/v1
+/api/subscription/billing/prepare/v1
+/api/subscription/billing/purchase/v1
+/api/subscription/billing_info/v1
+/api/subscription/payment_instrument/v1
+/api/subscription/reactivate/v1
+/api/suppliers
+/api/suppliers/bulk/v1
+/api/suppliers/csv/preview/v1
+/api/suppliers/export.[FORMAT]/v1
+/api/texts/data-processing-agreement/pdf/v1
+/api/texts/data-processing-agreement/v1
+/api/texts/languages/v2
+/api/texts/privacy-policy/pdf/v1
+/api/texts/privacy-policy/v1
+/api/texts/terms-and-conditions/pdf/v1
+/api/texts/terms-and-conditions/v1
+/api/units/
+/api/users/
+/api/users/profile/v1
+/api/users/v1/
+/api/usersettings/v2
+/api/v1.0
+/api/v1.0/
+/api/v1.0/account
+/api/v1.0/account/changeemail/confirm/
+/api/v1.0/account/changeemail/verifyurl
+/api/v1.0/account/downgradeplan
+/api/v1.0/account/requestemailchange/
+/api/v1.0/apps
+/api/v1.0/apps/
+/api/v1.0/authorizations/
+/api/v1.0/countries
+/api/v1.0/customers
+/api/v1.0/customers/
+/api/v1.0/expenses/categories
+/api/v1.0/expenses/categories/
+/api/v1.0/files/templateimages
+/api/v1.0/login/notify
+/api/v1.0/logo
+/api/v1.0/logout
+/api/v1.0/payments
+/api/v1.0/products
+/api/v1.0/products/
+/api/v1.0/reports/dashboard-graph
+/api/v1.0/reports/purchases-graph
+/api/v1.0/reports/vat
+/api/v1.0/reports/vat/
+/api/v1.0/reports/vat/de/finanzamts
+/api/v1.0/reports/vat/summary
+/api/v1.0/sales/countries/
+/api/v1.0/sales/invoices/counts
+/api/v1.0/sales/paymentterms
+/api/v1.0/sales/paymentterms/
+/api/v1.0/settings/advisors
+/api/v1.0/settings/shoeboxemailalias/
+/api/v1.0/settings/splittest/
+/api/v1.0/settings/ui
+/api/v1.0/statements
+/api/v1.0/subscription/
+/api/v1.0/subscription/change_plan/
+/api/v1.0/subscription/upgrade_to_paid/
+/api/v1.0/suppliers
+/api/v1.0/suppliers/
+/api/v1.0/texts/
+/api/v1.0/texts/ui/SBA_
+/api/v2/reports/dashboard-graph
+[0m
+[0m$ [0mcd /tmp/opencode
+for p in /api/market/apps /api/countries/v1 /api/texts/languages/v2 /api/units/ /api/delegation/v1 /api/reports/vat/de/v2; do
+  printf '%-34s ' "$p"
+  curl -sS --max-time 15 -o r.txt -w "%{http_code} %{size_download} ct=%{content_type}\n" "https://accounting.sumup.com$p"
+  head -c 180 r.txt | tr -d '\n'; echo
+  sleep 1
+done
+/api/market/apps                   404 154 ct=text/html; charset=utf-8
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot GET /api/market/apps</pre></body></html>
+/api/countries/v1                  401 111 ct=application/json; charset=utf-8
+{"message":"You are not authorized for this","id":"3fd52a26-d596-4645-bfe8-41a9113674da","code":"unAuthorized"}
+/api/texts/languages/v2            401 111 ct=application/json; charset=utf-8
+{"message":"You are not authorized for this","id":"b714cc51-7bfd-4e9c-aa66-e23b6999f19d","code":"unAuthorized"}
+/api/units/                        404 149 ct=text/html; charset=utf-8
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot GET /api/units/</pre></body></html>
+/api/delegation/v1                 401 111 ct=application/json; charset=utf-8
+{"message":"You are not authorized for this","id":"ebe70d12-9a40-4ab6-bc10-8acadfdde210","code":"unAuthorized"}
+/api/reports/vat/de/v2             404 160 ct=text/html; charset=utf-8
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Error</title></head><body><pre>Cannot GET /api/reports/vat/de/v2</pre></body></html>
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== html-converter GET (auth gate?)"
+curl -sS --max-time 15 -o r.txt -w "%{http_code} %{size_download} ct=%{content_type}\n" "https://accounting.sumup.com/api/html-converter/form/pdf/v1"
+head -c 200 r.txt; echo
+sleep 1
+echo "=== emails/validate GET"
+curl -sS --max-time 15 -o r2.txt -w "%{http_code} %{size_download} ct=%{content_type}\n" "https://accounting.sumup.com/api/emails/validate/v1"
+head -c 200 r2.txt; echo
+sleep 1
+echo "=== address/parse GET"
+curl -sS --max-time 15 -o r3.txt -w "%{http_code} %{size_download} ct=%{content_type}\n" "https://accounting.sumup.com/api/address/parse/v1"
+head -c 200 r3.txt
+=== html-converter GET (auth gate?)
+401 111 ct=application/json; charset=utf-8
+{"message":"You are not authorized for this","id":"73ca2f50-379e-4d6d-9649-c00339a891f7","code":"unAuthorized"}
+=== emails/validate GET
+404 161 ct=text/html; charset=utf-8
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/emails/validate/v1</pre>
+</body>
+</html>
+
+=== address/parse GET
+404 159 ct=text/html; charset=utf-8
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/address/parse/v1</pre>
+</body>
+</html>
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== CORS: attacker origin on authenticated API path"
+curl -sS --max-time 15 -o /dev/null -D- -H "Origin: https://evil.example" "https://accounting.sumup.com/api/delegation/v1" | grep -iE "^HTTP|access-control|vary"
+sleep 1
+echo "=== CORS preflight"
+curl -sS --max-time 15 -o /dev/null -D- -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: authorization,content-type" "https://accounting.sumup.com/api/delegation/v1" | grep -iE "^HTTP|access-control|vary"
+=== CORS: attacker origin on authenticated API path
+HTTP/2 401 
+access-control-allow-origin: https://evil.example
+access-control-expose-headers: x-token,x-requested-with,x-credentials
+vary: Accept-Encoding
+=== CORS preflight
+HTTP/2 204 
+access-control-allow-headers: x-requested-with,x-token,authorization,content-type,accept,accept-charset,accept-encoding,accept-language,connection,content-length,content-type,host,origin,referer,user-agent,x-credentials,x-referer
+access-control-allow-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+access-control-allow-origin: https://evil.example
+access-control-expose-headers: x-token,x-requested-with,x-credentials
+access-control-max-age: 3000
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== with Origin + Cookie, look for ACAC"
+curl -sS --max-time 15 -o /dev/null -D- -H "Origin: https://evil.example" -H "Cookie: s=test" "https://accounting.sumup.com/api/delegation/v1" | grep -iE "^HTTP|access-control"
+sleep 1
+echo "=== root with Origin"
+curl -sS --max-time 15 -o /dev/null -D- -H "Origin: https://evil.example" "https://accounting.sumup.com/" | grep -iE "^HTTP|access-control"
+sleep 1
+echo "=== does app set cookies? login page headers"
+curl -sS --max-time 15 -o /dev/null -D- "https://accounting.sumup.com/login" | grep -iE "^HTTP|set-cookie|^location"
+=== with Origin + Cookie, look for ACAC
+HTTP/2 401 
+access-control-allow-origin: https://evil.example
+access-control-expose-headers: x-token,x-requested-with,x-credentials
+=== root with Origin
+HTTP/2 200 
+access-control-allow-origin: https://evil.example
+access-control-expose-headers: x-token,x-requested-with,x-credentials
+=== does app set cookies? login page headers
+HTTP/2 200
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== end_session with attacker post_logout_redirect_uri"
+curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/oidc/logout?post_logout_redirect_uri=https%3A%2F%2Fevil.example%2Fx&id_token_hint=abc" | grep -iE "^HTTP|^location"
+sleep 1
+echo "=== /logout variant"
+curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/logout?post_logout_redirect_uri=https%3A%2F%2Fevil.example%2Fx" | grep -iE "^HTTP|^location"
+sleep 1
+echo "=== discovery: end_session_endpoint"
+curl -sS --max-time 15 https://auth.sumup.com/.well-known/openid-configuration -o disc.json -w "%{http_code} %{size_download}\n"
+python3 -c "
+import json;d=json.load(open('disc.json'))
+for k in ['end_session_endpoint','revocation_endpoint','introspection_endpoint','userinfo_endpoint','registration_endpoint','scopes_supported','response_types_supported','grant_types_supported']:
+    print(k,'=',d.get(k))"
+=== end_session with attacker post_logout_redirect_uri
+HTTP/2 404 
+=== /logout variant
+HTTP/2 404 
+=== discovery: end_session_endpoint
+200 1506
+end_session_endpoint = https://auth.sumup.com/oauth2/sessions/logout
+revocation_endpoint = https://auth.sumup.com/oauth2/revoke
+introspection_endpoint = None
+userinfo_endpoint = https://auth.sumup.com/userinfo
+registration_endpoint = None
+scopes_supported = ['offline_access', 'offline', 'openid', 'email', 'classic']
+response_types_supported = ['code', 'code id_token', 'id_token', 'token id_token', 'token', 'token id_token code']
+grant_types_supported = ['authorization_code', 'implicit', 'client_credentials', 'refresh_token']
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== end_session attacker redirect"
+curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/oauth2/sessions/logout?post_logout_redirect_uri=https%3A%2F%2Fevil.example%2Fx&id_token_hint=abc" | grep -iE "^HTTP|^location"
+sleep 1
+echo "=== end_session, accounting-registered redirect, bogus hint"
+curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/oauth2/sessions/logout?post_logout_redirect_uri=https%3A%2F%2Faccounting.sumup.com%2F&id_token_hint=abc" | grep -iE "^HTTP|^location"
+sleep 1
+echo "=== end_session registered redirect, NO hint"
+curl -sS --max-time 15 -o /dev/null -D- "https://auth.sumup.com/oauth2/sessions/logout?post_logout_redirect_uri=https%3A%2F%2Faccounting.sumup.com%2F" | grep -iE "^HTTP|^location"
+=== end_session attacker redirect
+HTTP/2 302 
+location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwise+malformed.+square%2Fgo-jose%3A+compact+JWS+format+must+have+three+parts
+=== end_session, accounting-registered redirect, bogus hint
+HTTP/2 302 
+location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwise+malformed.+square%2Fgo-jose%3A+compact+JWS+format+must+have+three+parts
+=== end_session registered redirect, NO hint
+HTTP/2 302 
+location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwise+malformed.+Logout+failed+because+query+parameter+post_logout_redirect_uri+is+set+but+id_token_hint+is+missing.
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+import base64,json,urllib.parse,subprocess,time
+def b64(b): return base64.urlsafe_b64encode(b).rstrip(b'=').decode()
+hdr=b64(json.dumps({"alg":"none","typ":"JWT"}).encode())
+pl={"iss":"https://auth.sumup.com","aud":"debitoor_accounting_public","sub":"probe-nonexistent","exp":int(time.time())+600,"iat":int(time.time())}
+pl=b64(json.dumps(pl).encode())
+tok=f"{hdr}.{pl}.x"
+for name,url in [
+ ("attacker-redirect",f"https://auth.sumup.com/oauth2/sessions/logout?post_logout_redirect_uri={urllib.parse.quote('https://evil.example/x',safe='')}&id_token_hint={urllib.parse.quote(tok,safe='')}"),
+ ("registered-redirect",f"https://auth.sumup.com/oauth2/sessions/logout?post_logout_redirect_uri={urllib.parse.quote('https://accounting.sumup.com/',safe='')}&id_token_hint={urllib.parse.quote(tok,safe='')}"),
+ ("no-redirect-hint-only",f"https://auth.sumup.com/oauth2/sessions/logout?id_token_hint={urllib.parse.quote(tok,safe='')}"),
+]:
+    print("###",name)
+    out=subprocess.run(["curl","-sS","--max-time","15","-o","/dev/null","-D-","url"],capture_output=True,text=True)
+    r=subprocess.run(["curl","-sS","--max-time","15","-o","/dev/null","-D-",url],capture_output=True,text=True)
+    for line in r.stdout.splitlines():
+        if line.lower().startswith(('http/','location:')): print("  ",line.strip())
+    time.sleep(1)
+EOF
+### attacker-redirect
+   HTTP/2 302
+   location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwise+malformed.+illegal+base64+data+at+input+byte+0
+### registered-redirect
+   HTTP/2 302
+   location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwise+malformed.+illegal+base64+data+at+input+byte+0
+### no-redirect-hint-only
+   HTTP/2 302
+   location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwise+malformed.+illegal+base64+data+at+input+byte+0
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+import base64,json,urllib.parse,subprocess,time
+def b64(b): return base64.urlsafe_b64encode(b).rstrip(b'=').decode()
+hdr=b64(json.dumps({"alg":"RS256","typ":"JWT","kid":"none"}).encode())
+pl={"iss":"https://auth.sumup.com","aud":"debitoor_accounting_public","sub":"probe-nonexistent-user","exp":int(time.time())+600,"iat":int(time.time())}
+pl=b64(json.dumps(pl).encode())
+sig=b64(b"\x00"*32)
+tok=f"{hdr}.{pl}.{sig}"
+print("token parts:",tok.count('.')+1)
+cases=[("attacker",'https://evil.example/x'),("registered",'https://accounting.sumup.com/'),("attacker-path-on-registered-origin",'https://accounting.sumup.com.evil.example/x'),("suffix-confusion",'https://accounting.sumup.com@evil.example/x')]
+for name,uri in cases:
+    url=f"https://auth.sumup.com/oauth2/sessions/logout?post_logout_redirect_uri={urllib.parse.quote(uri,safe='')}&id_token_hint={urllib.parse.quote(tok,safe='')}"
+    r=subprocess.run(["curl","-sS","--max-time","15","-o","/dev/null","-D-",url],capture_output=True,text=True)
+    print("###",name,uri)
+    for line in r.stdout.splitlines():
+        if line.lower().startswith(('http/','location:')): print("  ",line.strip()[:230])
+    time.sleep(1)
+EOF
+token parts: 3
+### attacker https://evil.example/x
+   HTTP/2 302
+   location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwi
+### registered https://accounting.sumup.com/
+   HTTP/2 302
+   location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwi
+### attacker-path-on-registered-origin https://accounting.sumup.com.evil.example/x
+   HTTP/2 302
+   location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwi
+### suffix-confusion https://accounting.sumup.com@evil.example/x
+   HTTP/2 302
+   location: https://auth.sumup.com/flows/oauth2/error?error=invalid_request&error_description=The+request+is+missing+a+required+parameter%2C+includes+an+invalid+parameter+value%2C+includes+a+parameter+more+than+once%2C+or+is+otherwi
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== ACAC definitive check across data paths (any hit = yes)"
+for p in /api/delegation/v1 /api/countries/v1 /api/texts/languages/v2 /api/settings/v3 /api/users/profile/v1; do
+  printf '%-32s ' "$p"
+  curl -sS --max-time 15 -o /dev/null -D- -H "Origin: https://evil.example" -H "Cookie: s=x" "https://accounting.sumup.com$p" | grep -ciE "access-control-allow-credentials" | tr -d '\n'
+  echo " (0=absent)"
+  sleep 1
+done
+=== ACAC definitive check across data paths (any hit = yes)
+/api/delegation/v1               0 (0=absent)
+/api/countries/v1                0 (0=absent)
+/api/texts/languages/v2          0 (0=absent)
+/api/settings/v3                 0 (0=absent)
+/api/users/profile/v1            0 (0=absent)
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== hunt for any 200 on /api paths without auth (231 paths, 1rps)"
+python3 - <<'EOF'
+import re,subprocess,time
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+paths=sorted(set(re.findall(r'"(/api/[A-Za-z0-9_./\[\]-]{3,70})',d)))
+hits=[]
+for p in paths:
+    if '[FORMAT]' in p: continue
+    url='https://accounting.sumup.com'+p
+    r=subprocess.run(["curl","-sS","--max-time","10","-o","/dev/null","-w","%{http_code} %{size_download}",url],capture_output=True,text=True)
+    code=r.stdout.strip()
+    if code.startswith('200'):
+        hits.append((p,code)); print("  200:",p,code)
+    time.sleep(1.0)
+print("total 200s:",len(hits))
+EOF
+=== hunt for any 200 on /api paths without auth (231 paths, 1rps)
+
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 120000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF' > unauth200.txt 2>&1 &
+import re,subprocess,time
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+paths=sorted(set(re.findall(r'"(/api/[A-Za-z0-9_./\[\]-]{3,70})',d)))
+for p in paths:
+    if '[FORMAT]' in p: continue
+    r=subprocess.run(["curl","-sS","--max-time","10","-o","/dev/null","-w","%{http_code} %{size_download}",'https://accounting.sumup.com'+p],capture_output=True,text=True)
+    if r.stdout.strip().startswith('200'): print("200:",p,r.stdout.strip(),flush=True)
+    time.sleep(1.0)
+print("DONE")
+EOF
+echo "started pid $!"
+started pid 3798
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+import re
+# how is the token fetched/stored? look for token storage + the fetchToken impl
+for pat in ['sessionStorage','localStorage']:
+    print('##',pat, d.count(pat))
+i=d.find('hasSSO')
+# find isSumUpUser
+m=re.search(r'isSumUpUser[=:][^,]{0,200}',d)
+print('isSumUpUser:',m.group(0)[:200] if m else None)
+for m in re.finditer(r'sessionStorage\.(getItem|setItem)\("([^"]+)"',d):
+    print('sess',m.group(1),m.group(2))
+EOF
+## sessionStorage 28
+## localStorage 51
+isSumUpUser: isSumUpUser=function(){return m===d||m===u}
+sess setItem sumupAuth
+sess getItem sumupAuth
+sess getItem sessionStart
+sess setItem sessionStart
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+# find config of axios for token fetcher
+i=d.find('configureTokenFetcher')
+if i==-1: print('no')
+else:
+    j=d.find('function(',i-100); print('near',d[max(0,i-160):i+280])
+EOF
+near handledErrorStatuses=(e,t)=>e.includes(t.status)},55685:function(e,t,a){"use strict";var r=a(8034);Object.defineProperty(t,"__esModule",{value:!0}),t.default=t.configureTokenFetcher=void 0;var n=r(a(50797)),i=r(a(26660)),s=function(e,t){if(!t&&e&&e.__esModule)return e;if(null===e||"object"!=typeof e&&"function"!=typeof e)return{default:e};var a=c(t);if(a&&a.has(e))return a.get(e);var r={},n=Object.defineProperty&&Object.getOwnPropertyDe
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+import re
+for m in list(re.finditer(r'Bearer',d))[:8]:
+    print('---',m.start()); print(d[max(0,m.start()-350):m.start()+150].replace('\n',' ')); print()
+EOF
+--- 661637
+=e,a&&a.set(e,r);return r}(a(54057)),o=r(a(70586)),l=a(69899);function c(e){if("function"!=typeof WeakMap)return null;var t=new WeakMap,a=new WeakMap;return(c=function(e){return e?a:t})(e)}var d=i.default.create({withCredentials:!0});t.configureTokenFetcher=e=>{d.interceptors.request.use((t=>e().catch((()=>"")).then((e=>e?(t.headers.Authorization="Bearer ".concat(e),t):t))))},d.interceptors.response.use((e=>e),function(){var e=(0,n.default)((function*(e){if(!navigator.onLine)return(0,s.showOffli
+
+--- 2420533
+t.termsAndConditionsConsent}))}))).apply(this,arguments)}var x=$.ajax;t.configureTokenFetcher=e=>{$.ajax=function(){for(var t=arguments.length,a=new Array(t),r=0;r<t;r++)a[r]=arguments[r];return $.Deferred((t=>{e().then((e=>{$.ajaxPrefilter((function(t){void 0===t.headers&&(t.headers={}),t.beforeSend=function(t){t.setRequestHeader("Authorization","Bearer "+e)}}))})).finally((()=>{x(...a).done(t.resolve).fail(t.reject)}))}))}}},29582:function(e,t,a){"use strict";Object.defineProperty(t,"__esModul
+
+--- 3509337
+i,headers:s,returnHeaders:p,passErrorResponse:h,errorHandled:g,errorHandledStatuses:v,errorHandledErrorCodes:A}=t,_=(0,n.default)(t,u),b=new Date,S=m({method:a||"GET",credentials:"include",headers:Object.assign({"Content-type":"application/json"},s),body:i&&JSON.stringify(i)},_);if("omit"!==_.credentials){var y=yield f();y?S.headers.Authorization="Bearer ".concat(y):S.headers["x-csrf-token"]=localStorage.getItem("csrfToken")}var O=null,T=null,I=null;if(r){var C=-1===e.indexOf("?")?"?":"&";e=[e,C
+[0m
+[0m$ [0mcd /tmp/opencode; sleep 45; cat unauth200.txt; echo "--- job still running?"; pgrep -f "curl.*accounting" >/dev/null && echo yes || echo no
+--- job still running?
+yes
+[0m
+[0m$ [0mcd /tmp/opencode; sleep 100; cat unauth200.txt; echo "--- running?"; pgrep -f "curl.*accounting" >/dev/null && echo yes || echo no
+--- running?
+yes
+[0m
+[0m$ [0mcd /tmp/opencode; sleep 110; cat unauth200.txt; echo "--- running?"; pgrep -f "curl.*accounting" >/dev/null && echo yes || echo no
+200: /api/v1.0/account/changeemail/verifyurl 200 18
+--- running?
+yes
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== body + headers"
+curl -sS --max-time 15 -D- "https://accounting.sumup.com/api/v1.0/account/changeemail/verifyurl" | tail -20
+sleep 1
+echo "=== with a param guess"
+curl -sS --max-time 15 -o v1.txt -w "%{http_code} %{size_download}\n" "https://accounting.sumup.com/api/v1.0/account/changeemail/verifyurl?token=abc&verifyToken=abc&hash=abc"
+cat v1.txt; echo
+sleep 1
+echo "=== POST empty json"
+curl -sS --max-time 15 -o v2.txt -w "%{http_code} %{size_download}\n" -X POST -H "Content-Type: application/json" -d '{}' "https://accounting.sumup.com/api/v1.0/account/changeemail/verifyurl"
+cat v2.txt
+=== body + headers
+cf-ray: a43c4842ac3c56ea-DUB
+content-type: application/json; charset=utf-8
+date: Thu, 01 Oct 2026 14:50:53 GMT
+etag: W/"12-Q7PHivsaOEUI/J8+PYEC/XFpZoA"
+expires: Sat, 26 Jul 1997 05:00:00 GMT
+nel: {"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}
+report-to: {"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=4BdwkBb9SN%2FYi8IP8oWtKz6ZZLewfNT%2BcNF0zbiHMEA%3D\u0026sid=c4c9725f-1ab0-44d8-820f-430df2718e11\u0026ts=1790866253"}],"max_age":3600}
+reporting-endpoints: heroku-nel="https://nel.heroku.com/reports?s=4BdwkBb9SN%2FYi8IP8oWtKz6ZZLewfNT%2BcNF0zbiHMEA%3D&sid=c4c9725f-1ab0-44d8-820f-430df2718e11&ts=1790866253"
+server: Heroku
+set-cookie: __cf_bm=Y20AEBVqIGAyge7xpQZ7WxJ33Kx1m6w6lYKKAioYJ4g-1790866253.2272415-1.0.1.1-bXcNOuZ05bDzjfJZ89psZRSjO1CpBDGATrBGGgaZYIwXQ9Pb6Gs5hdaQSpksc5k2faeeQblEpsPwkkPejudViKE3tS2NK7ZwWxXXpkhJEdqX6zsBT4hTSR5OncFFg.ZA; HttpOnly; SameSite=None; Secure; Path=/; Domain=sumup.net; Expires=Thu, 01 Oct 2026 15:20:53 GMT
+strict-transport-security: max-age=31536000000; includeSubDomains
+vary: Accept-Encoding
+via: 2.0 heroku-router
+x-envoy-upstream-service-time: 5
+x-ratelimit-limit: 60000
+x-ratelimit-remaining: 59839
+x-ratelimit-reset: 2271058
+content-length: 18
+
+{"isSigned":false}=== with a param guess
+200 18
+{"isSigned":false}
+=== POST empty json
+404 178
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /api/v1.0/account/changeemail/verifyurl</pre>
+</body>
+</html>
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+import re
+i=d.find('changeemail/verifyurl')
+print(d[max(0,i-1800):i+900])
+EOF
+lt.getStatus(),i.default.update()}})};t.default=O},51146:function(e,t,a){"use strict";var r=a(8034),n=r(a(34796)),i=a(12446),s=r(a(64146)),o=r(a(12288)),l=a(21692),c=a(67674);e.exports=function(e){(0,o.default)((function(t){var a=sba.bootstrapped.userSettings.accountSettings,r=function(e){var t=n.default.extend(e.get("currentPlan"),{isCurrentPlan:!0});return t.planId=t.id,t.id="CURRENT",t}(t),o=t.get("plans").concat(r),d=function(e){if(a.isFree()||a.isTrial()){var t=e.get("discounts");return t&&t.length&&t[0]}return null}(t),u=new c(o,{discount:d}),p=t.get("settings"),m=new s.default(t.get("userSettings")),f=e.cardAccepted&&a.isPaid(),h=e.referrer,g=a.isTrial()||e.all||h,v=new l({model:u,showAllPlans:g,planId:e.planId,accountSettings:a,settings:p,userSettings:m,cardAccepted:e.cardAccepted,cardFailed:e.cardFailed,accountUpgraded:f,referrer:h,billingInvoices:t.get("billingInvoices"),discount:d});i.analytics.trackViewedPlanPage(),sba.ViewManager.showView(v)}),{titles:{page:"SBA_SLS_PAGE_TITLE_PLAN"},showBackButton:!1,appQuery:{userSettings:"usersettings/v2",plans:"account/plans/v1",currentPlan:"account/currentplan/v1",billingInvoices:"account/billingInvoices/v1",discounts:"subscription/discounts/v1"}})}},39668:function(e,t,a){"use strict";var r=a(8034)(a(12288));e.exports=function(e){(0,r.default)((function(e){var t=e.get("payment").url;t?window.location=t:sba.Router.redirect("/account/plan")}),{titles:{page:"SBA_SLS_PAGE_TITLE_PLAN"},overlay:!0,appQuery:{payment:"subscription/change_payment"}})}},8969:function(e,t,a){"use strict";var r=a(8034);Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=r(a(93197)),i=r(a(4366)),s=r(a(96022)),o=function(e){var t={titles:{page:"SBA_SLS_PAGE_TITLE_SETTINGS"},appQuery:function(e){return{isSigned:"/api/v1.0/account/changeemail/verifyurl?currentEmail="+a.currentEmail+"&newEmail="+a.newEmail+"&signature="+a.signature}},languageCode:e.languageCode},a=$.url(location.href).param();(0,s.default)((function(e){for(var t in a)a[t]=decodeURIComponent(a[t]);var r=new i.default(a),s=new n.default({model:r,isSigned:e.get("isSigned").isSigned});sba.ViewManager.showView(s)}),t)};t.default=o},73532:function(e,t,a){"use strict";var r=a(8034);Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=r(a(84258)),i=r(a(56052)),s=r(a(96022)),o=function(e){var t={titles:{page:"SBA_SLS_PAGE_TITLE_SETTINGS"},appQuery:()=>({deleteAccountRequest:"/api/account/deleterequest/".concat(e.id,"/v1")}),languageCode:e.languageCode};(0,s.default)((function(t,a){var r=t.get("deleteAccountRequest");sba.ViewManager.showView(new n.default({account:new i.default({deleteAccountRequest:r},{parse:!0}),languageCode:e.languageCo
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== oracle: does it validate email pairing? try signature-only variants"
+for q in "currentEmail=a@b.com&newEmail=c@d.com&signature=x" "newEmail=c@d.com&signature=x" "signature=x" "currentEmail=a@b.com&newEmail=c@d.com" ; do
+  printf '%-56s ' "$q"
+  curl -sS --max-time 10 "https://accounting.sumup.com/api/v1.0/account/changeemail/verifyurl?$q"; echo
+  sleep 1
+done
+echo "=== related changeemail paths unauth"
+for p in "/api/v1.0/account/changeemail/confirm/" "/api/v1.0/account/requestemailchange/" "/api/v1.0/account/changeemail/verifyurl"; do
+  printf '%-46s ' "$p"
+  curl -sS --max-time 10 -o t.txt -w "%{http_code} " "https://accounting.sumup.com$p"; head -c 100 t.txt; echo
+  sleep 1
+done
+=== oracle: does it validate email pairing? try signature-only variants
+currentEmail=a@b.com&newEmail=c@d.com&signature=x        {"isSigned":false}
+newEmail=c@d.com&signature=x                             {"isSigned":false}
+signature=x                                              {"isSigned":false}
+currentEmail=a@b.com&newEmail=c@d.com                    {"isSigned":false}
+=== related changeemail paths unauth
+/api/v1.0/account/changeemail/confirm/         404 <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<
+/api/v1.0/account/requestemailchange/          404 <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<
+/api/v1.0/account/changeemail/verifyurl        200 {"isSigned":false}
+[0m
+[0m$ [0mcd /tmp/opencode; cat unauth200.txt; echo "--- running?"; pgrep -f "curl.*accounting" >/dev/null && echo yes || echo no
+200: /api/v1.0/account/changeemail/verifyurl 200 18
+DONE
+--- running?
+yes
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+import base64,json,hashlib,hmac,urllib.parse,subprocess,time
+def b64(b): return base64.urlsafe_b64encode(b).rstrip(b'=').decode()
+ce,ne='probe@invalid.example','probe2@invalid.example'
+sig=b64(json.dumps({"alg":"none","typ":"JWT"}).encode())
+claims={"currentEmail":ce,"newEmail":ne,"exp":int(time.time())+99999}
+c=b64(json.dumps(claims).encode())
+jwtnone=f"{sig}.{c}."
+guesses={
+ 'md5(ce+ne)':hashlib.md5((ce+ne).encode()).hexdigest(),
+ 'sha1(ne)':hashlib.sha1(ne.encode()).hexdigest(),
+ 'md5(ne)':hashlib.md5(ne.encode()).hexdigest(),
+ 'b64(ne)':b64(ne.encode()),
+ 'jwt-none':jwtnone,
+ 'empty':'',
+ 'none-str':'undefined',
+ 'null-str':'null',
+}
+for name,s in guesses.items():
+    q=f"currentEmail={urllib.parse.quote(ce)}&newEmail={urllib.parse.quote(ne)}&signature={urllib.parse.quote(s)}"
+    r=subprocess.run(["curl","-sS","--max-time","10",f"https://accounting.sumup.com/api/v1.0/account/changeemail/verifyurl?{q}"],capture_output=True,text=True)
+    print(f"{name:16} -> {r.stdout.strip()}")
+    time.sleep(1)
+EOF
+md5(ce+ne)       -> {"isSigned":false}
+sha1(ne)         -> {"isSigned":false}
+md5(ne)          -> {"isSigned":false}
+b64(ne)          -> {"isSigned":false}
+jwt-none         -> {"isSigned":false}
+empty            -> {"isSigned":false}
+none-str         -> {"isSigned":false}
+null-str         -> {"isSigned":false}
+[0m
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && ls knowledge/ leads/ 2>&1 | head -20 && echo "=== state" && cat state_nemotron3.json
+knowledge/:
+index.md
+
+leads/:
+lead-bigpickle.md
+lead-laguna.md
+lead-ling3.md
+lead-longcat.md
+lead-mimo.md
+lead-nemotron3.md
+reposcan-sumup.md
+=== state
+{"phase": "POC", "target": "api"}
+[0m
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && ls -la reports/*.md 2>&1; echo "---"; ls -la reports/ | head
+-rw-r--r-- 1 runner runner 530862 Oct  1 14:35 reports/hypotheses.md
+-rw-r--r-- 1 runner runner   9173 Oct  1 14:35 reports/reposcan-findings.md
+-rw-r--r-- 1 runner runner   7384 Oct  1 14:35 reports/valid-bugs.md
+---
+total 8060
+drwxr-xr-x  2 runner runner    4096 Oct  1 14:35 .
+drwxr-xr-x 12 runner runner    4096 Oct  1 14:35 ..
+-rw-r--r--  1 runner runner 4871360 Oct  1 14:35 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   37541 Oct  1 14:35 analyst-laguna.log
+-rw-r--r--  1 runner runner   37368 Oct  1 14:35 analyst-ling3.log
+-rw-r--r--  1 runner runner   37714 Oct  1 14:35 analyst-longcat.log
+-rw-r--r--  1 runner runner 2660151 Oct  1 14:35 analyst-nemotron3.log
+-rw-r--r--  1 runner runner      54 Oct  1 14:35 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Oct  1 14:35 hypotheses-laguna.txt
+[0m
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && wc -l -c reports/valid-bugs.md && sha256sum reports/valid-bugs.md
+79 7384 reports/valid-bugs.md
+282390f83b2213178c41f92857bb9df779abc3deaaefb81fb9b8f8c886ae6369  reports/valid-bugs.md
+[0m
+[0m→ [0mRead reports/valid-bugs.md
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== confirm no ACAC on the 200 verifyurl endpoint either"
+curl -sS --max-time 10 -o /dev/null -D- -H "Origin: https://evil.example" "https://accounting.sumup.com/api/v1.0/account/changeemail/verifyurl?currentEmail=a@b.com&newEmail=c@d.com&signature=x" | grep -iE "^HTTP|access-control"
+sleep 1
+echo "=== ratelimit headers present on 401 (auth wall rate limit)"
+curl -sS --max-time 10 -o /dev/null -D- "https://accounting.sumup.com/api/delegation/v1" | grep -iE "^HTTP|x-ratelimit"
+=== confirm no ACAC on the 200 verifyurl endpoint either
+HTTP/2 200 
+access-control-allow-origin: https://evil.example
+access-control-expose-headers: x-token,x-requested-with,x-credentials
+=== ratelimit headers present on 401 (auth wall rate limit)
+HTTP/2 401 
+x-ratelimit-limit: 60000
+x-ratelimit-remaining: 59821
+x-ratelimit-reset: 2116058
+[0m
+[0m$ [0mcd /tmp/opencode
+python3 - <<'EOF'
+d=open('scripts.js',encoding='utf-8',errors='replace').read()
+import re
+# find the token fetch implementation: search for oauthCallback / code exchange
+for pat in ['oauthcallback','auth-callback','/oauth2/token','id_token','access_token']:
+    print('##',pat, d.count(pat))
+i=d.find('DASHBOARD_URL')
+print('DASHBOARD_URL ctx:', d[max(0,i-200):i+200])
+EOF
+## oauthcallback 4
+## auth-callback 0
+## /oauth2/token 0
+## id_token 0
+## access_token 0
+DASHBOARD_URL ctx: entId:"debitoor_accounting_public",issuer:"https://auth.sumup.com",redirectURI:"".concat("https://accounting.sumup.com","/").concat(l?"oauthcallback-redirect":"oauthcallback"),postLogoutRedirectURI:o.DASHBOARD_URL,scopes:["offline","classic","openid"]};t.oidcConfig=c;var d=new URLSearchParams(window.location.search),u=d.get("sumupAuth");null!==u&&(sessionStorage.setItem("sumupAuth",u),d.delete("su
+[0m
+[0m← [0mWrite recon-notes/accounting-sumup-debitoor.md
+Wrote file successfully.
+[0m
