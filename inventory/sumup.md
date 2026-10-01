@@ -1571,3 +1571,18 @@ www.sumup.com
 - CHANGED `gateway.sumup.com/hosted.js` re-verified byte-identical (sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`); origin-validation greps 0/0/0/0/0; framing headers 0.
 - CHANGED `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations.
 - CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
+
+## 2026-10-01 19:54:25 UTC
+- NEW recon-notes/AI-LLM-TOOLING-SURFACE.md — 86 lines / 4,909 B / sha256 `4a938b7986eeb0df242f3b61baf57c7b977138a13af27c5cf867239b111e78c2`
+- CHANGED Workspace re-materialized again; both prior report files absent. `reports/valid-bugs.md` present only in its exact 79-line / 7,384 B / `282390f8` pre-append state — the 190-line gateway report and 160
+- CHANGED `auth.sam-app.ro` DCR hypothesis, confidence 55 → **62**, testability `AUTH_HELPED`. Prod/staging AS metadata diffed: `registration_endpoint` is the *only* structural difference, so DCR is cleanly sta
+- CHANGED Gateway cross-origin messenger reframed from hardening to possibly-absent intended control. SumUp's own `references/security/README.md` documents "Authorized JavaScript origins ... list every allowed 
+- NEW Workspace re-materialized 38th cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; gateway-hostedfields and cognito report files claim
+- CHANGED `api.sumup.com/v0.2/checkouts/{id}/payment-methods` 92-confidence IDOR RETIRED — credential matrix (7 shapes × 5 IDs) all return byte-identical 404/58B `{"error_code":"NOT_FOUND"}`; param-invariant AN
+- CHANGED `js.sumup.com/api/checkouts/{id}` BFF existence-oracle REFUTED — 4/4 credential differential checks failed; endpoint returns 68B Vercel platform 404, not application-routed.
+- CHANGED `pos-payment.sumup.com` route-level enum REFUTED — negative control (nonsense path) returns identical 403 IAM; no route discrimination.
+- CHANGED `iso20022.sumup.com` dual-upstream routing confirmed: case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `istio-envoy`. Rule proven by control
+- CHANGED `staging.iso20022.sumup.com` is NXDOMAIN — prod/stage pair does not exist on this rail.
+- CHANGED `gateway.sumup.com/hosted.js` re-verified byte-identical (sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`); origin-validation greps 0/0/0/0/0; framing headers 0.
+- CHANGED `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations.
+- CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only

@@ -1,1 +1,20 @@
-## 2026-10-01 14:55:14 UTC [target] (model bigpickle)
+## 2026-10-01 19:54:13 UTC [target] (model bigpickle)
+[NEW] recon-notes/AI-LLM-TOOLING-SURFACE.md — 86 lines / 4,909 B / sha256 `4a938b7986eeb0df242f3b61baf57c7b977138a13af27c5cf867239b111e78c2`
+[CHANGED] Workspace re-materialized again; both prior report files absent. `reports/valid-bugs.md` present only in its exact 79-line / 7,384 B / `282390f8` pre-append state — the 190-line gateway report and 160-line ledger were **not** carried over.
+[CHANGED] `auth.sam-app.ro` DCR hypothesis, confidence 55 → **62**, testability `AUTH_HELPED`. Prod/staging AS metadata diffed: `registration_endpoint` is the *only* structural difference, so DCR is cleanly staging-only. `mcp.sam-app.ro` is live and its issuer *is* `auth.sam-app.ro`, requiring only `offline_access email` against tools that "explore SumUp accounts, payments, customers, and payouts" — so an empty-`scp` token has a real consumer. Unresolved: `email` is absent from `scopes_supported` on both staging and prod.
+[CHANGED] Gateway cross-origin messenger reframed from hardening to possibly-absent intended control. SumUp's own `references/security/README.md` documents "Authorized JavaScript origins ... list every allowed staging and production domain in client credentials configuration," while `hosted.js` never reads `event.origin`.
+[PRIO]
+confidence: 62
+reasoning: Source review shows the MCP server enforces issuer, audience, expiry, and scopes
+testability: AUTH_HELPED
+confidence: 88
+reasoning: An intended, documented control appears absent from the receiving side, which is a
+testability: HUMAN_ONLY
+confidence: 42
+reasoning: Real routing boundary, but no security consequence demonstrated; retained only as recon.
+testability: PASSIVE
+[PARKED]
+[FINAL] Gateway 88 `HUMAN_ONLY` · DCR 62 `AUTH_HELPED` · ISO 42 `PASSIVE`
+[NEXT]
+[LEARN]
+[RISK]
