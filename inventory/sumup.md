@@ -1538,3 +1538,14 @@ www.sumup.com
 - CHANGED `gateway.sumup.com/hosted.js` re-verified before writing: 26,839 B, `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`; `event.origin`/`origin!==`/`origin===`/`targetOrigin`/`event.sou
 - CHANGED `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations.
 - CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
+
+## 2026-10-01 00:55:34 UTC
+- NEW Workspace re-materialized 37th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not per
+- CHANGED `api.sumup.com/v0.2/checkouts/{id}/payment-methods` 92-confidence IDOR **RETIRED** — credential matrix (7 shapes × 5 IDs) all return byte-identical 404/58B `{"error_code":"NOT_FOUND"}`; param-invarian
+- CHANGED `js.sumup.com/api/checkouts/{id}` BFF existence-oracle **REFUTED** — 4/4 credential differential checks failed; endpoint returns 68B Vercel platform 404, not application-routed.
+- CHANGED `pos-payment.sumup.com` route-level enum **REFUTED** — negative control (nonsense path) returns identical 403 IAM; no route discrimination.
+- CHANGED `iso20022.sumup.com` dual-upstream routing confirmed: case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `istio-envoy`. Rule proven by control
+- CHANGED `staging.iso20022.sumup.com` is NXDOMAIN — prod/stage pair does not exist on this rail.
+- CHANGED `gateway.sumup.com/hosted.js` re-verified byte-identical (sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`); origin-validation greps 0/0/0/0/0; framing headers 0.
+- CHANGED `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations.
+- CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
