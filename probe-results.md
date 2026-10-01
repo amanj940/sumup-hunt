@@ -1515,3 +1515,8 @@ https://iso20022.sumup.com/anything -> HTTP 400
 https://iso20022.sumup.com/internal/metrics -> HTTP 503
 https://iso20022.sumup.com/actuator/metrics -> HTTP 503
 https://iso20022.sumup.com/prometheus/metrics -> HTTP 503
+
+## 2026-10-01 07:10:00 UTC
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://mcp.sumup.com/mcp -> HTTP 401

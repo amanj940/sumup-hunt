@@ -7710,3 +7710,4 @@ testability: PASSIVE
 [LEARN] ACCEPTED AUTH @ metadata documents: absence of a registration_endpoint is not proof an endpoint is absent, but comparing prod vs staging metadata was the only way to locate the real severity delta (advertised 19 scopes vs empty granted scp) without a single mutating request.
 [RISK] sumup: 80 — discovery is not the bottleneck. Two money findings are evidence-complete and have been unsubmitted for 15+ cycles across 38 workspace re-materializations, and the top finding's severity is gated on a single human test I am not permitted to perform. The remaining risk is delivery and destruction of artifacts, not coverage; every byte-stable surface I can passively reach is now exhausted or closed.
 ## 2026-10-01 00:55:24 UTC [target] (model bigpickle)
+## 2026-10-01 07:09:11 UTC [target] (model bigpickle)
