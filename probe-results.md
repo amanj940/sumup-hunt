@@ -1552,3 +1552,8 @@ https://iso20022.sumup.com/zzzmetricezzz -> HTTP 400
 https://gateway.sumup.com/ -> 200 len=546
 https://gateway.sumup.com/hosted.js -> 200 len=26839
 https://mcp.sumup.com/mcp -> HTTP 401
+
+## 2026-10-02 16:51:06 UTC
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://mcp.sumup.com/mcp -> HTTP 401
