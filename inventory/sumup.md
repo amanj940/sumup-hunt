@@ -1638,3 +1638,18 @@ www.sumup.com
 - CHANGED `gateway.sumup.com/hosted.js` re-verified byte-identical (sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`); origin-validation greps 0/0/0/0/0; framing headers 0
 - CHANGED Workspace re-materialized 38th cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; gateway-hostedfields and cognito report files claim
 - CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
+
+## 2026-10-02 21:18:03 UTC
+- NEW `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations
+- NEW `api.sumup.com/v0.2/checkouts/{id}/payment-methods`: 92-confidence IDOR RETIRED — credential matrix (7 shapes × 5 IDs) all return byte-identical 404/58B `{"error_code":"NOT_FOUND"}`; param-invariant A
+- NEW `js.sumup.com/api/checkouts/{id}`: BFF existence-oracle REFUTED — 4/4 credential differential checks failed; endpoint returns 68B Vercel platform 404, not application-routed
+- NEW `pos-payment.sumup.com`: route-level enum REFUTED — negative control (nonsense path) returns identical 403 IAM; no route discrimination
+- NEW `iso20022.sumup.com`: dual-upstream routing confirmed: case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `istio-envoy`. Rule proven by contro
+- NEW `staging.iso20022.sumup.com` is NXDOMAIN — prod/stage pair does not exist on this rail
+- CHANGED `gateway.sumup.com/hosted.js` re-verified byte-identical (sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`); origin-validation greps 0/0/0/0/0; framing headers 0
+- CHANGED Workspace re-materialized 38th cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; gateway-hostedfields and cognito report files claim
+- CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
+- NEW `reports/gateway-hostedfields-cross-origin-messenger.md` WRITTEN TO DISK this cycle — 234 L / 9,967 B / sha256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`; `reports/valid-bugs.m
+- NEW Gateway emission code read at source (not inferred from summary): `s.endpoint("checkouts/".concat(r),{method:"PUT",headers:{...}})`; `endpoint:(s,i={})=>{...i.headers={...i.headers,"X-SumUp-Widget-Ses
+- CHANGED `targetOrigin` literal appears 0 times in hosted.js — the outbound argument is the positional 2nd param of `t.postMessage(e, n||"*")`. Report avoids naming it as a literal string; the direction asymme
+- CHANGED api.sumup.com quartet NOT re-probed — prior cycles logged byte-stable responses across 27+ re-checks; further GET/OPTIONS is measured waste. Breadth (gateway source verification + report delivery) use
