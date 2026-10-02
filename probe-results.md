@@ -1547,3 +1547,8 @@ https://mcp.sumup.com/mcp -> HTTP 401
 https://iso20022.sumup.com/metrics -> HTTP 503
 https://iso20022.sumup.com/metricsfoo -> HTTP 503
 https://iso20022.sumup.com/zzzmetricezzz -> HTTP 400
+
+## 2026-10-02 11:20:25 UTC
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://mcp.sumup.com/mcp -> HTTP 401

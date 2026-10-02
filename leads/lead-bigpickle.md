@@ -7823,3 +7823,4 @@ testability: PASSIVE
 [LEARN] ACCEPTED AUTH @ auth.sam-app.ro: DCR advertises 19 scopes while granted scp is empty; issuer auth.sam-app.ro; prod/staging differ only by registration_endpoint; cross-env JWKS isolation holds (zero kid overlap)
 [LEARN] REJECTED OTHER @ workspace: 38 re-materializations make `open with ls` mandatory before referencing any [NEW] file; write+hash must be same act
 [RISK] SumUp program: 80 — two money-relevant hypotheses evidence-complete; only gateway severity requires single HUMAN test (not permitted passively). Delivery/artifact persistence is blocker; passive money/auth surface exhausted
+## 2026-10-02 11:20:10 UTC [target] (model bigpickle)
