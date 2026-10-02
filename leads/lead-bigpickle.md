@@ -7779,3 +7779,47 @@ testability: PASSIVE
 [LEARN] REJECTED AUTH @ auth.sam-app.ro: "attacker-controlled aud → prod relay" leg unfalsifiable-and-unsupported — zero sync evidence, key-level isolation is binding control; fileable finding is staging posture only.
 [LEARN] REJECTED OTHER @ workspace: 38 re-materializations make `open with ls` mandatory before referencing any [NEW] file; write+hash must be the same act.
 [RISK] SumUp program: 80 — two money-relevant hypotheses are evidence-complete but only the gateway’s final severity requires a single human test (not permitted passively). Delivery/artifact persistence is the blocker; passive money/auth surface is exhausted.
+## 2026-10-02 05:07:00 UTC [target] (model bigpickle)
+[NEW] recon-notes/AI-LLM-TOOLING-SURFACE.md — 86 lines / 4,909 B / sha256 `4a938b7986eeb0df242f3b61baf57c7b977138a13af27c5cf867239b111e78c2`
+[CHANGED] Workspace re-materialized between cycles — artifacts written in cycle N do not persist to N+1; measurements of volatile store only evidence while store survives; write+hash must be same act before referencing any [NEW] file claim
+[CHANGED] `auth.sam-app.ro` DCR hypothesis confidence 55 → 62, testability AUTH_HELPED (prod/staging AS metadata differ only by registration_endpoint)
+[CHANGED] `gateway.sumup.com/hosted.js` cross-origin messenger reframed to possibly-absent intended control (no event.origin validation; inbound handler never reads event.origin)
+[PRIO] gateway.sumup.com/hosted.js, 88 — axis: attack_surface=10, business_value=10, tech_exposure=9, gate_ease=8, cloud_surface=6, freshness=9 (priority=0.90)
+[PRIO] auth.sam-app.ro/oauth2/register, 62 — axis: attack_surface=7, business_value=8, tech_exposure=8, gate_ease=6, cloud_surface=5, freshness=5 (priority=0.69)
+[PRIO] iso20022.sumup.com, 42 — axis: attack_surface=4, business_value=6, tech_exposure=4, gate_ease=6, cloud_surface=4, freshness=3 (priority=0.48)
+[HYP] gateway.sumup.com/hosted.js cross-origin postMessage checkout-write
+class: MISCONFIG
+asset: gateway.sumup.com/hosted.js → api.sumup.com/v0.2/checkouts/{id}
+confidence: 88
+reasoning: inbound handler destructures only {data,source} and never reads event.origin; grep -cE 'event\.origin|\.origin[!=]==|allowedOrigin|trustedOrigin' = 0 across 26,839 B; frame ships no X-Frame-Options/CSP frame-ancestors; emission issues PUT via messenger toWindow.postMessage with n||"*"
+evidence_needed: server-side acceptance of emitted PUT on a throwaway checkout
+verify_steps: curl -sS -D- -o /dev/null https://gateway.sumup.com/hosted.js; curl -sS -D- -o /dev/null https://gateway.sumup.com/; test cross-origin postMessage form--submit targeting throwaway checkout id
+impact: medium — attacker-directed authenticated checkout write from logged-in merchant's browser; severity capped at Medium until server acceptance proven
+testability: HUMAN_ONLY
+[HYP] auth.sam-app.ro DCR scope gap (advertised scopes vs granted scp)
+class: AUTH
+asset: auth.sam-app.ro/oauth2/register → auth.sam-app.ro/oauth2/token
+confidence: 62
+reasoning: prod vs staging AS metadata differ only by registration_endpoint; DCR advertises 19 scopes (incl. merchants.write, payouts.read, refunds.write, api_keys.write, customers.read/write); DCR-minted tokens have empty scp:[]; mcp.sam-app.ro (issuer auth.sam-app.ro) requires offline_access+email
+evidence_needed: token response from freshly registered client with non-empty scp, or proof scope set bound only to client_credentials grant
+verify_steps: GET https://auth.sam-app.ro/.well-known/oauth-authorization-server; POST https://auth.sam-app.ro/oauth2/register (RFC 7591, unauthenticated); POST https://auth.sam-app.ro/oauth2/token (grant_type=client_credentials, client_secret_post) and inspect access_token claims (scp)
+impact: critical if confirmed — self-registered client could reach merchant resources; currently capped by empty scp
+testability: AUTH_HELPED
+[HYP] iso20022.sumup.com routing boundary (ELB listener rules evaluated before Istio mesh)
+class: MISCONFIG
+asset: iso20022.sumup.com
+confidence: 42
+reasoning: case-sensitive substring 'metrics' → 503 "Not Allowed" on awselb/2.0 with no x-envoy-* and no HSTS; all other paths → 400 on istio-envoy with HSTS
+evidence_needed: path satisfying ELB rule yet reaching mesh handler meant to be blocked, or metric data readable via a non-'metrics' substring
+verify_steps: curl -sS -i https://iso20022.sumup.com/metrics; curl -sS -i https://iso20022.sumup.com/metricsfoo; curl -sS -i https://iso20022.sumup.com/zzzmetricezzz
+impact: low/unclear — no route/data/authz bypass demonstrated
+testability: PASSIVE
+[FINAL] gateway.sumup.com/hosted.js cross-origin postMessage checkout-write — 88, HUMAN_ONLY
+[FINAL] auth.sam-app.ro DCR scope gap (advertised scopes vs granted scp) — 62, AUTH_HELPED
+[FINAL] iso20022.sumup.com routing boundary (ELB listener rules evaluated before Istio mesh) — 42, PASSIVE
+[PARKED] serial-terminal.dev.solo.sumup.com — gate inconsistency exists but exposed artifact is zero-secret client-side Web Serial PWA with no backend/relay; utility requires physical access (out-of-scope)
+[NEXT] HUMAN: submit `reports/gateway-hostedfields-cross-origin-messenger.md` (reconstruct from served bytes: GET https://gateway.sumup.com/hosted.js → sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`, 26,839 B). Complete step with throwaway checkout — server-side acceptance is single leg separating Medium from High.
+[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e,n||"*")); inbound handler never reads event.origin; guard exists but applied backwards
+[LEARN] ACCEPTED AUTH @ auth.sam-app.ro: DCR advertises 19 scopes while granted scp is empty; issuer auth.sam-app.ro; prod/staging differ only by registration_endpoint; cross-env JWKS isolation holds (zero kid overlap)
+[LEARN] REJECTED OTHER @ workspace: 38 re-materializations make `open with ls` mandatory before referencing any [NEW] file; write+hash must be same act
+[RISK] SumUp program: 80 — two money-relevant hypotheses evidence-complete; only gateway severity requires single HUMAN test (not permitted passively). Delivery/artifact persistence is blocker; passive money/auth surface exhausted

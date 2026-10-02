@@ -1539,3 +1539,11 @@ https://payout-settings-edge.sumup.com/ -> HTTP 403
 https://iso20022.sumup.com/metrics -> HTTP 503
 https://iso20022.sumup.com/metricsfoo -> HTTP 503
 https://iso20022.sumup.com/zzzmetricezzz -> HTTP 400
+
+## 2026-10-02 05:07:17 UTC
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://mcp.sumup.com/mcp -> HTTP 401
+https://iso20022.sumup.com/metrics -> HTTP 503
+https://iso20022.sumup.com/metricsfoo -> HTTP 503
+https://iso20022.sumup.com/zzzmetricezzz -> HTTP 400

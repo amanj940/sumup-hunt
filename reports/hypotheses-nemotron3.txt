@@ -1,4 +1,4 @@
-## 2026-10-01 23:49:55 UTC [target] (model nemotron3)
+## 2026-10-02 05:06:18 UTC [target] (model nemotron3)
 [NEW] Workspace re-materialized 38th cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; gateway-hostedfields and cognito report files claimed in prior cycles are ABSENT on disk.
 [CHANGED] `api.sumup.com/v0.2/checkouts/{id}/payment-methods` 92-confidence IDOR RETIRED — credential matrix (7 shapes × 5 IDs) all return byte-identical 404/58B `{"error_code":"NOT_FOUND"}`; param-invariant AND credential-invariant stub.
 [CHANGED] `js.sumup.com/api/checkouts/{id}` BFF existence-oracle REFUTED — 4/4 credential differential checks failed; endpoint returns 68B Vercel platform 404, not application-routed.
