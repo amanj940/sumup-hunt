@@ -1,4 +1,4 @@
-## 2026-10-03 15:15:50 UTC [target] (model nemotron3)
+## 2026-10-03 18:45:10 UTC [target] (model nemotron3)
 [NEW] Workspace re-materialized 39th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not persist to N+1
 [NEW] Gateway finding report (`gateway-hostedfields-cross-origin-messenger.md`) and Cognito finding report (`cognito-implicit-grant-dev-solo-buckets.md`) claimed in prior cycles but absent on disk — must be reconstructed from served bytes and written with hash verification in same command
 [NEW] `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations

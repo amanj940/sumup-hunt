@@ -1721,3 +1721,14 @@ www.sumup.com
 - NEW `iso20022.sumup.com`: dual-upstream routing confirmed — case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `istio-envoy`; rule proven by contr
 - NEW `staging.iso20022.sumup.com` is NXDOMAIN — prod/stage pair does not exist on this rail
 - CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
+
+## 2026-10-03 18:50:53 UTC
+- NEW Workspace re-materialized 39th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not per
+- NEW Gateway finding report (`gateway-hostedfields-cross-origin-messenger.md`) and Cognito finding report (`cognito-implicit-grant-dev-solo-buckets.md`) claimed in prior cycles but absent on disk — must be
+- NEW `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations
+- NEW `api.sumup.com/v0.2/checkouts/{id}/payment-methods`: 92-confidence IDOR RETIRED — credential matrix (7 shapes × 5 IDs) all return byte-identical 404/58B `{"error_code":"NOT_FOUND"}`; param-invariant A
+- NEW `js.sumup.com/api/checkouts/{id}`: BFF existence-oracle REFUTED — 4/4 credential differential checks failed; endpoint returns 68B Vercel platform 404, not application-routed
+- NEW `pos-payment.sumup.com`: route-level enum REFUTED — negative control (nonsense path) returns identical 403 IAM; no route discrimination
+- NEW `iso20022.sumup.com`: dual-upstream routing confirmed — case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `istio-envoy`; rule proven by contr
+- NEW `staging.iso20022.sumup.com` is NXDOMAIN — prod/stage pair does not exist on this rail
+- CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
