@@ -7992,3 +7992,4 @@ reasoning: RFC 7591 dynamic client registration LIVE unauthenticated (POST → 2
 confidence: 90%
 confidence: 85%
 ## 2026-10-03 18:50:44 UTC [target] (model bigpickle)
+## 2026-10-03 22:07:11 UTC [target] (model bigpickle)
