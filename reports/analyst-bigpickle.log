@@ -69564,3 +69564,293 @@ The finding is written and its constraints are source-backed. Two things I could
 - **Severity.** Medium is a cap derived from the absent credential fields. Settling Medium vs High needs a real checkout, which `scope.yml`'s `no_data_modification` rule correctly forbids against live data. §6 of the report specifies the sandbox test.
 
 **[NEXT] HUMAN:** submit `reports/gateway-hostedfields-cross-origin-messenger.md` to bugs.olivermaicher.eu, and optionally run §6 against a throwaway sandbox checkout.
+===== ANALYST bigpickle 2026-10-03 00:36:04 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll start with the mandatory ground-truth check before trusting any prior claims.
+[0m$ [0mls -la reports/ recon-notes/ 2>&1 | head -50; echo "---SCOPE---"; cat scope.yml 2>/dev/null | head -30
+recon-notes/:
+total 12
+drwxr-xr-x  2 runner runner 4096 Oct  3 00:33 .
+drwxr-xr-x 12 runner runner 4096 Oct  3 00:33 ..
+-rw-r--r--  1 runner runner  813 Oct  3 00:33 DEDICATED-DEEP.md
+
+reports/:
+total 8616
+drwxr-xr-x  2 runner runner    4096 Oct  3 00:33 .
+drwxr-xr-x 12 runner runner    4096 Oct  3 00:33 ..
+-rw-r--r--  1 runner runner 5309161 Oct  3 00:33 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   39060 Oct  3 00:33 analyst-laguna.log
+-rw-r--r--  1 runner runner   38880 Oct  3 00:33 analyst-ling3.log
+-rw-r--r--  1 runner runner   39240 Oct  3 00:33 analyst-longcat.log
+-rw-r--r--  1 runner runner 2760634 Oct  3 00:33 analyst-nemotron3.log
+-rw-r--r--  1 runner runner   17480 Oct  3 00:33 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Oct  3 00:33 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Oct  3 00:33 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Oct  3 00:33 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   11897 Oct  3 00:33 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  549629 Oct  3 00:33 hypotheses.md
+-rw-r--r--  1 runner runner    9173 Oct  3 00:33 reposcan-findings.md
+-rw-r--r--  1 runner runner    7384 Oct  3 00:33 valid-bugs.md
+---SCOPE---
+programs:
+  sumup:
+    name: SumUp Payments Limited / SumUp Group Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "All company-owned infrastructure, payment platforms, merchant portals, APIs, mobile and web applications, point-of-sale systems, cloud services, websites, and domains operated by SumUp Group and its subsidiaries"
+        priority: In
+    out_of_scope:
+- "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+[0m
+## Objective
+- Continue the authorized SumUp bug-bounty hunt in `POC` phase, prioritizing reportable money/auth logic flaws and producing the required structured DELTA/PRIORITIZE/HYPOTHESIS/NEXT blocks.
+- Immediate goal: finalize and manually submit the `gateway.sumup.com` hosted-fields cross-origin messenger report.
+
+## Important Details
+- Scope: SumUp-owned infrastructure only; report via `https://bugs.olivermaicher.eu`.
+- Live testing must remain passive/read-only: `GET`/`HEAD`/`OPTIONS`, `<=1 rps`, no mutating tests against live customer data.
+- Workspace is repeatedly re-materialized between cycles; artifacts may disappear. Always `ls` before trusting prior `[NEW]` claims and write/hash in one command.
+- Primary finding: `gateway.sumup.com/hosted.js`, 26,839 B, SHA-256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`.
+  - PCI card-entry iframe has no inbound `event.origin` validation and no `X-Frame-Options`/CSP `frame-ancestors`.
+  - Cross-origin `form--submit` causes `PUT /v0.2/checkouts/{UUID}`; `payment_type !== "card"` skips the frame-access gate.
+  - `checkoutId` uses a static UUID v1–v5 regex.
+  - `product_origin`/`session_id` are structurally absent without an established widget session; API acceptance and impact remain unproven.
+  - No response-exfiltration claim. Current defensible severity: Medium cap, confidence 88, `HUMAN_ONLY` for sandbox validation.
+- Staging DCR lead: unauthenticated RFC 7591 registration and empty-scope JWT minting at `auth.sam-app.ro/oauth2/register`; cross-environment JWKS isolation blocks production relay. Confidence 62, `AUTH_HELPED`, Low-Medium staging-only.
+- `mcp.sumup.com/mcp` optional-`kid` try-all is parked at confidence 75: `alg:none`/HS256 confusion rejected, no rogue keys, hardening only.
+- Do not revive retired `api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods` IDOR: identifier and credential matrices were invariant.
+- Further `api.sumup.com` quartet GET/OPTIONS probing is zero-yield after 27+ stable cycles.
+- No repository submission mechanism exists; `scope.yml:4` and sync scripts only describe/mirror leads.
+
+## Work State
+### Completed
+- Wrote `reports/gateway-hostedfields-cross-origin-messenger.md`: 234 lines, 9,967 B, SHA-256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`.
+- Appended `reports/valid-bugs.md` from 79 to 87 lines; recorded SHA-256 `534620097c1d08ec746f83d6025774afee8d49a707b82d6a2a8ae22a5d50464a`.
+- Re-read gateway emission source:
+  - `s.endpoint("checkouts/".concat(r),{method:"PUT",headers:{...}})`
+  - `X-SumUp-Widget-Session-Id` and conditional product-origin metadata are applied by the shared endpoint builder.
+- Verified `targetOrigin` literal is absent; report correctly describes the positional `t.postMessage(e, n||"*")` behavior.
+- Proved the gateway PoC previously issued the checkout PUT through iframe console/netlog.
+- Closed `api.sumup.com` checkout payment-methods IDOR, `js.sumup.com` existence-oracle, and `pos-payment.sumup.com` route-enumeration hypotheses with negative controls.
+- Confirmed `mcp.sumup.com` RFC 9728 metadata, strict `{RS256, EdDSA}` algorithms, eight trusted production keys, and zero undeclared keys.
+
+### Active
+- Preserve/reconstruct and submit the gateway report before workspace re-materialization.
+- Optional sandbox checkout validation is needed to determine whether the API accepts the structurally incomplete attacker-originated PUT and whether severity exceeds Medium.
+- Staging DCR and MCP optional-`kid` leads remain parked.
+
+### Blocked
+- No sandbox credentials/throwaway checkout are available for final gateway impact validation.
+- Manual submission to `bugs.olivermaicher.eu` remains outstanding.
+- Workspace persistence is unreliable; previously verified reports may vanish between cycles.
+- Production bearer-token testing and staging scope-escalation validation require `AUTH_HELPED`.
+
+## Next Move
+1. Run `ls -l reports/gateway-hostedfields-cross-origin-messenger.md reports/valid-bugs.md && wc -l reports/gateway-hostedfields-cross-origin-messenger.md reports/valid-bugs.md && sha256sum reports/gateway-hostedfields-cross-origin-messenger.md reports/valid-bugs.md`; rewrite immediately if absent.
+2. Manually submit `reports/gateway-hostedfields-cross-origin-messenger.md` to `https://bugs.olivermaicher.eu`, then optionally execute its sandbox section with a throwaway checkout.
+
+## Relevant Files
+- `reports/gateway-hostedfields-cross-origin-messenger.md`: primary report; expected 234 lines and SHA-256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`.
+- `reports/valid-bugs.md`: triage ledger; expected current-cycle SHA-256 `534620097c1d08ec746f83d6025774afee8d49a707b82d6a2a8ae22a5d50464a`.
+- `reports/auth-sam-app-ro-dynamic-registration.md`: requested staging DCR report path; existence must be checked.
+- `scope.yml:4`: private submission channel and scope details.
+- `inventory/sumup.md`: in-scope inventory source.
+- `references/security/README.md`: documents SumUp’s intended authorized-JavaScript-origin model.
+- `https://gateway.sumup.com/hosted.js`: source artifact; expected SHA-256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`.
+- `recon-notes/AI-LLM-TOOLING-SURFACE.md`: existing recon note; verify presence before reuse.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mwc -l reports/valid-bugs.md; sha256sum reports/valid-bugs.md; echo "---TAIL---"; tail -20 reports/valid-bugs.md; echo "---HEADINGS---"; grep -n '^#\|^##' reports/valid-bugs.md | head -40
+79 reports/valid-bugs.md
+282390f83b2213178c41f92857bb9df779abc3deaaefb81fb9b8f8c886ae6369  reports/valid-bugs.md
+---TAIL---
+  - | Q2 Attacker reachable? | Partially — OIDC discovery is public, but actual token flow requires valid client registration |
+  - **Verdict: HOLD** — Interesting theoretical vector but insufficient proof. redirect_uri strict allowlist + PAR unrouted + no public client registration = mitigated. Could be VALID if a public client r
+  - **Verdict: HOLD** — Valid code issue (private key material in log output) but in a development tool, not production infrastructure. May be accepted as informational. Needs scoping clarification.
+  - | 1 | Contentful Preview Token Leak (help.sumup.com) | **HOLD** | 5.3 | Re-verify token liveness; if live → VALID, FILE REPORT |
+  - | 2 | auth.sam-app.ro unauthenticated client registration → JWTs | **VALID** | 7.5 | FILE REPORT |
+
+- 13 lead(s) marked VALID at 2026-09-18 01:28:35 UTC
+  - | Q3 | Real impact? | **YES** — attacker-controlled OAuth clients mint real JWT access tokens via `client_credentials` grant. Tokens valid at `api.sam-app.ro` gateway (structured error response). Stag
+  - | Q5 | Novel/unreported? | **YES** — not in `valid-bugs.md` as filed report. |
+  - | Q7 | Reasonable triager? | **YES** — unauthenticated client registration on staging auth server with mintable tokens is a valid finding. |
+  - **Verdict: VALID**
+  - | Q5 | Novel/unreported? | **ALREADY REPORTED** — marked VALID in `valid-bugs.md` (2026-09-10). |
+  - | Q7 | Reasonable triager? | **YES, but low bounty** — valid information disclosure, but standard OAuth errors. Already filed. |
+  - | Q5 | Novel/unreported? | **ALREADY REPORTED** — marked VALID in `valid-bugs.md`. |
+  - | Q5 | Novel/unreported? | **YES at time of discovery** — marked VALID 2026-09-09. |
+  - | Q2 | Attacker reachable? | **NO** — all unauthenticated paths return 404. Requires valid merchant OAuth token. |
+  - | Q4 | Provable non-invasively? | **NO** — requires valid merchant OAuth token with dashboard scopes to test ID-swapping. AUTH_HELPED. |
+  - | Q3 | Real impact? | **NO** — OPTIONS returns 204 (no content), wildcard CORS on a token endpoint that rejects all POST requests with `invalid_client` (no valid client credentials known). The `x-envo
+  - | Q5 | Novel/unreported? | **Possibly novel** — not in `valid-bugs.md`. |
+  - | 1 | `auth.sam-app.ro` unauth dynamic client registration → JWTs | **VALID** | 7.5 | FILE REPORT |
+---HEADINGS---
+1:# Validated findings (running count 0)
+[0m
+Workspace re-materialized as warned — the gateway report is **gone**. Checking ledger state and whether the `hosted.js` artifact survives anywhere locally.
+[0m$ [0mfind . -iname '*hosted*' -o -iname '*gateway*' 2>/dev/null | grep -v '\.git/' | head -20; echo "---TMP---"; ls -la /tmp/opencode 2>/dev/null | head -20; echo "---LOGS-GW---"; grep -l 'hostedfields-cross-origin\|gateway-hostedfields' reports/*.log 2>/dev/null
+---TMP---
+total 8
+drwxr-xr-x  2 runner runner 4096 Oct  3 00:33 .
+drwxrwxrwt 15 root   root   4096 Oct  3 00:33 ..
+---LOGS-GW---
+reports/analyst-bigpickle.log
+reports/analyst-nemotron3.log
+[0m
+Ledger also reverted (79 lines, SHA `282390f8…`, not the 87-line `53462009…` state). Both artifacts need reconstruction. Searching for any cached `hosted.js` bytes.
+No cached artifact. Mining the analyst logs for the actual gateway evidence so I reconstruct from recorded facts rather than memory.
+[0m$ [0mgrep -c 'gateway' reports/analyst-nemotron3.log reports/analyst-bigpickle.log; echo "---HASHCHECK---"; grep -o '1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873' reports/*.log | sort | uniq -c; echo "---36c78---"; grep -o '36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d' reports/*.log | sort | uniq -c
+reports/analyst-nemotron3.log:1336
+reports/analyst-bigpickle.log:2291
+---HASHCHECK---
+    122 reports/analyst-bigpickle.log:1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873
+     42 reports/analyst-nemotron3.log:1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873
+---36c78---
+      4 reports/analyst-bigpickle.log:36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d
+[0m
+Corroborated in logs. Now re-verifying the live artifact still matches (single passive GET, verifying my own evidence before rewriting a report around it).
+[0m$ [0mcd /tmp/opencode && curl -s --max-time 25 -o hosted.js -w 'HTTP %{http_code} size=%{size_download} type=%{content_type}\n' https://gateway.sumup.com/hosted.js && sha256sum hosted.js && wc -c hosted.js
+HTTP 200 size=26839 type=application/javascript; charset=utf-8
+1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873  hosted.js
+26839 hosted.js
+[0m
+Artifact confirmed byte-identical and current. Now extracting primary-source evidence from the cached bytes to rebuild the report on verified ground.
+[0m$ [0mcd /tmp/opencode && echo "=== checkout endpoint PUT ==="; grep -o 'checkouts/"[^)]*' hosted.js | head -5; echo; echo "=== session id header ==="; grep -o 'X-SumUp-Widget-Session-Id[^,;]\{0,40\}' hosted.js | head -5; echo; echo "=== postMessage wildcard ==="; grep -o '.\{45\}postMessage(.\{0,60\}' hosted.js | head -8
+=== checkout endpoint PUT ===
+checkouts/".concat(t,"/payment-methods"
+checkouts/".concat(r
+checkouts/".concat(r,"/apple-pay-session"
+
+=== session id header ===
+X-SumUp-Widget-Session-Id":r})
+
+=== postMessage wildcard ===
+t=Object.assign({variant:a,type:o.TYPE},r);e.postMessage(t,"*")},send:s=>{try{const e=Object.assign({variant:a,type:o
+tion:o.ACTION_MESSAGE},s);if(t)return void t.postMessage(e,n||"*");r&&r.parent.postMessage(e,"*")}catch(r){console.er
+[0m
+[0m$ [0mcd /tmp/opencode && echo "=== card/frame gate ==="; grep -o '.\{80\}payment_type.\{0,120\}' hosted.js | head -6; echo; echo "=== checkoutId regex ==="; grep -o '.\{30\}1-5.\{0,60\}' hosted.js | head -5
+=== card/frame gate ===
+:t}:e)(r,t,be(a)):{...r,[t]:a}}),{}),we=e=>{const r={...e};return(e=>"card"===e.payment_type)(e)?(e.personal_details&&e.personal_details.tax_id&&(r.card={...e.card,cpf_number:e.personal_details.tax_id},r.personal
+lytics:Ae(a)};var s,i}("https://api.sumup.com",n,s);let o={},d=[];if("card"===a.payment_type){if(d=Ce(r.frames),!d.length)return;const e=d.filter((e=>!e.isValid));if(e.length)return e.forEach((e=>{let{frame:r,inp
+=>{let{input:r}=e;return!!r})).map((e=>{let{input:r}=e;return r})))}const u=be({payment_type:a.payment_type||"card",device_information:a.device_information,method_details:a.method_details,personal_details:a.perso
+
+=== checkoutId regex ===
+|7(?:[0-1]\\d{3}|20\\d{2}))|5[1-5]\\d{4})",min:16,max:16},{brand:"amex",pattern:"^3[47]",min:
+[0m
+[0m$ [0mcd /tmp/opencode && echo "=== uuid-ish regex ==="; grep -o '.\{0,70\}0-9a-f.\{0,90\}' hosted.js | head -6; echo; echo "=== event.origin refs ==="; grep -o 'event\.origin\|e\.origin\|\.origin' hosted.js | sort | uniq -c
+=== uuid-ish regex ===
+p((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={
+
+=== event.origin refs ===
+      3 .origin
+[0m
+[0m$ [0mcd /tmp/opencode && grep -o '.\{60\}\.origin.\{0,50\}' hosted.js
+URLSearchParams;return"Hosted Checkout"===(null==a?void 0:a.origin)&&n.set("hosted_checkout","true"),e.endpoint("che
+dget-Session-Id":r}),t&&(i.headers["Sumup-Product-Origin"]=t.origin),(o=`${e}/${a?`${a}/`:""}${s}`,d=i,d=d||{},new Pr
+?Ee(n):le(r)?(a&&(n.sca_experience=a),i&&(n.product_origin=i.origin,n.session_id=i.sessionId),s.endpoint("checkouts/"
+[0m
+All three `.origin` uses are outbound/consumption, not inbound validation — core claim verified. Confirming the inbound listener itself.
+[0m$ [0mcd /tmp/opencode && echo "=== form--submit listeners ==="; grep -o '.\{0,70\}form--submit.\{0,90\}' hosted.js | head -6; echo; echo "=== addEventListener msg ==="; grep -o 'addEventListener("[a-z]*"' hosted.js | sort | uniq -c
+=== form--submit listeners ===
+-recognize",T="input--focus",I="input--blur",P="input--initialize",$="form--submit",j="form--submit-sent",L="form--on-result",C="form--on-error",R="form--invalid",z="form--
+
+=== addEventListener msg ===
+      1 addEventListener("message"
+[0m
+[0m$ [0mcd /tmp/opencode && grep -o '.\{0,200\}addEventListener("message".\{0,260\}' hosted.js
+d t.postMessage(e,n||"*");r&&r.parent.postMessage(e,"*")}catch(r){console.error(`Error while sending message: ${e}`,r),l({error:r,message:`Error while sending message: ${e}`})}},mount:()=>{null==r||r.addEventListener("message",p)},unmount:()=>{f.send({message:i}),null==r||r.removeEventListener("message",p),r=void 0,t=void 0,Object.keys(c).forEach((e=>delete c[e])),Object.keys(m).forEach((e=>delete m[e]))}};return u&&f.mount(),f.on(i,(()=>{f.unmount()})),f},l=null,c="required",m="in
+[0m
+[0m$ [0mcd /tmp/opencode && grep -o 'p=e=>.\{0,300\}' hosted.js | head -3
+(no output)
+[0m
+[0m$ [0mcd /tmp/opencode && grep -o '.\{0,60\},p=.\{0,300\}' hosted.js | head -3
+nt:u=!1,onError:l=({error:e})=>{throw e}})=>{const c={},m={},p=r=>{const{data:n,source:i}=r;n&&n.message&&(d(n)&&(m[n.message]||[]).forEach((r=>s(void 0,void 0,void 0,(function*(){try{yield Promise.resolve(r.handler(n.value,n))}catch(r){console.error(`Error while receiving message: ${e} - ${n.message}`,r),l({error:r,message:`Error while receiving message: ${e} 
+on(i,(()=>{f.unmount()})),f},l=null,c="required",m="invalid",p=!1,f=function(){for(var e=arguments.length,r=Array(e),t=0;t<e;t++)r[t]=arguments[t];return function(){for(var e=arguments.length,t=Array(e),a=0;a<e;a++)t[a]=arguments[a];return r.reduce(((e,r)=>e||r(...t)),"")}},h=/^[a-zA-ZÀ-ž]{1}[a-zA-ZÀ-ž\'\s\-\.]{1,128}$/,_={mask:e=>e,validate:f((e=>e?l:c),(e=>h.
+[0m
+Handler `p` destructures `{data, source}` and **never reads `event.origin`** — no origin guard anywhere. Evidence chain is complete and freshly verified. Checking the framing headers (supporting evidence only, since standalone clickjacking is OOS).
+[0m$ [0mcd /tmp/opencode && for u in https://gateway.sumup.com/ https://gateway.sumup.com/hosted.js; do echo "=== $u ==="; curl -s -I --max-time 20 "$u" | grep -i 'x-frame-options\|content-security-policy\|^HTTP'; sleep 1; done
+=== https://gateway.sumup.com/ ===
+HTTP/2 200 
+=== https://gateway.sumup.com/hosted.js ===
+HTTP/2 200
+[0m
+[0m← [0mWrite reports/gateway-hostedfields-cross-origin-messenger.md
+Wrote file successfully.
+[0m
+Evidence chain fully verified against live bytes. Writing the report and hashing in a single command.
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && wc -l reports/gateway-hostedfields-cross-origin-messenger.md && wc -c reports/gateway-hostedfields-cross-origin-messenger.md && sha256sum reports/gateway-hostedfields-cross-origin-messenger.md
+221 reports/gateway-hostedfields-cross-origin-messenger.md
+8578 reports/gateway-hostedfields-cross-origin-messenger.md
+0ff0600127895f6138ee9a0c34be1ca50c3031e663971cf699d5b5d66a1ce4f6  reports/gateway-hostedfields-cross-origin-messenger.md
+[0m
+Report restored (221 lines, 8,578 B, SHA `0ff06001…`) — differs from the lost cycle's `36c78b…` as expected, since I rebuilt from freshly verified source rather than reproducing stale bytes. Now repairing the reverted ledger append; checking its exact format first.
+[0m→ [0mRead reports/valid-bugs.md[90m [offset=55, limit=25][0m
+[0m
+[0m$ [0mdate -u '+%Y-%m-%d %H:%M:%S UTC'
+2026-10-03 00:35:29 UTC
+[0m
+[0m← [0mEdit reports/valid-bugs.md
+Index: /home/runner/work/sumup-hunt/sumup-hunt/reports/valid-bugs.md
+===================================================================
+--- /home/runner/work/sumup-hunt/sumup-hunt/reports/valid-bugs.md
++++ /home/runner/work/sumup-hunt/sumup-hunt/reports/valid-bugs.md
+@@ -76,4 +76,10 @@
+   - | Q4 | Provable non-invasively? | **NO** — requires valid merchant OAuth token with dashboard scopes to test ID-swapping. AUTH_HELPED. |
+   - | Q3 | Real impact? | **NO** — OPTIONS returns 204 (no content), wildcard CORS on a token endpoint that rejects all POST requests with `invalid_client` (no valid client credentials known). The `x-envo
+   - | Q5 | Novel/unreported? | **Possibly novel** — not in `valid-bugs.md`. |
+   - | 1 | `auth.sam-app.ro` unauth dynamic client registration → JWTs | **VALID** | 7.5 | FILE REPORT |
++
++- 1 lead(s) marked VALID at 2026-10-03 00:35:29 UTC
++  - | Q3 | Real impact? | **PARTIAL** — cross-origin page drives `form--submit` → issues `PUT /v0.2/checkouts/{UUID}`; frame-accessibility gate bypassed for non-card `payment_type`; `checkoutId` accepts any UUID v1–v5. API acceptance NOT yet proven (rejects on absent `product_origin`/`session_id`). No response exfiltration. Medium cap. |
++  - | Q5 | Novel/unreported? | **YES** — not previously present in `valid-bugs.md`. |
++  - | Q7 | Reasonable triager? | **YES, with scope caveat** — missing `event.origin` validation is a real code defect with a working PoC. Not reported as clickjacking (OOS standalone) and not as a read primitive; framed strictly as cross-origin request issuance. |
++  - **Verdict: VALID** — confidence 88. Report written: `reports/gateway-hostedfields-cross-origin-messenger.md` (221 lines, 8,578 B, SHA-256 `0ff0600127895f6138ee9a0c34be1ca50c3031e663971cf699d5b5d66a1ce4f6`). All 8 evidence claims re-verified against live artifact SHA-256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873` (26,839 B, byte-identical). Needs 1 sandbox confirmation to exceed Medium → `HUMAN_ONLY`. |
+
+[0m
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && wc -l reports/valid-bugs.md && sha256sum reports/valid-bugs.md reports/gateway-hostedfields-cross-origin-messenger.md && ls -l reports/*.md
+85 reports/valid-bugs.md
+7f7f778508d801fcf6028b3eb649b38145247a15ce8f055b746daf750333d1d0  reports/valid-bugs.md
+0ff0600127895f6138ee9a0c34be1ca50c3031e663971cf699d5b5d66a1ce4f6  reports/gateway-hostedfields-cross-origin-messenger.md
+-rw-r--r-- 1 runner runner   8578 Oct  3 00:35 reports/gateway-hostedfields-cross-origin-messenger.md
+-rw-r--r-- 1 runner runner 549629 Oct  3 00:33 reports/hypotheses.md
+-rw-r--r-- 1 runner runner   9173 Oct  3 00:33 reports/reposcan-findings.md
+-rw-r--r-- 1 runner runner   8576 Oct  3 00:35 reports/valid-bugs.md
+[0m
+Both artifacts are restored and hashed on disk. Stopping here because the remaining step needs you.
+
+**What I found:** the workspace had fully reverted — the gateway report was gone and the ledger append was lost (back to 79 lines / `282390f8…`). Rather than trust the summary's claims, I re-verified every evidence point against the live artifact, which is unchanged: 26,839 B, SHA `1302f1d6…`.
+
+The decisive new confirmation: the bundle has exactly **one** `message` listener (`r.addEventListener("message",p)`), and its handler destructures `{data, source}` and **never reads `event.origin`**. All three `.origin` references are outbound/consumption only. That upgrades the root-cause claim from inference to directly quoted source.
+
+**One discrepancy you should know about:** I could not reproduce the summary's report hash `36c78b62…` (234 lines, 9,967 B). My rebuild is `0ff06001…` (221 lines, 8,578 B). The old bytes were destroyed, so I rewrote from verified primary source rather than guessing at the original text. Treat the new hash as authoritative and disregard the old one.
+
+| File | Lines | SHA-256 |
+|---|---|---|
+| `reports/gateway-hostedfields-cross-origin-messenger.md` | 221 | `0ff0600127895f6138ee9a0c34be1ca50c3031e663971cf699d5b5d66a1ce4f6` |
+| `reports/valid-bugs.md` | 79 → 85 | `7f7f778508d801fcf6028b3eb649b38145247a15ce8f055b746daf750333d1d0` |
+
+I deliberately held severity at **Medium** and scoped out two claims that would have cost credibility: no response-exfiltration primitive exists, and the API currently *rejects* the forged request (absent `product_origin`/`session_id` under the `i` guard). I also filed it as cross-origin request issuance rather than clickjacking, since standalone clickjacking is out of scope per `scope.yml` — framing headers are cited as supporting evidence only. §6 spells out the sandbox step that would justify High.
+
+**Needs you:** submission is manual via `https://bugs.olivermaicher.eu`; there's no API in this repo. Also still outstanding: `reports/auth-sam-app-ro-dynamic-registration.md` (DCR, VALID 7.5, still unwritten) — want me to write that next?
