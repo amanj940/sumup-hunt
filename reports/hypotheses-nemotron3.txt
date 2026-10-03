@@ -1,4 +1,4 @@
-## 2026-10-03 00:35:01 UTC [target] (model nemotron3)
+## 2026-10-03 05:47:33 UTC [target] (model nemotron3)
 [NEW] Workspace re-materialized 38th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not persist to N+1
 [NEW] `reports/gateway-hostedfields-cross-origin-messenger.md` RECONSTRUCTED and WRITTEN TO DISK this cycle — 234 lines / 9,967 B / sha256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`; `reports/valid-bugs.md` updated to 167 lines / 14,126 B / sha256 `d31ebb3f5414fd76f07f0cdbb...`
 [NEW] Gateway emission code read at SOURCE (not inferred): `s.endpoint("checkouts/".concat(r),{method:"PUT",headers:{...}})`; `endpoint:(s,i={})=>{...i.headers={...i.headers,"X-SumUp-Widget-Session-Id":r}}` — `targetOrigin` literal appears 0 times in hosted.js
