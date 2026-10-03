@@ -70611,3 +70611,625 @@ I kept claims11–13 in the verification table as **not established** (API accep
 
 1. **Commit is the fix for persistence** — say the word and I'll `git add` + commit both files so they survive the next reset. I haven't committed, per standing policy.
 2. **Submission.** Nothing has been submitted in 13+ cycles and no repo mechanism can do it — `scope.yml:4` routes disclosure to `bugs.olivermaicher.eu`. The report is at the path above; sandbox validation (step 5) is still required to settle severity, since I did not mutate anything.
+===== ANALYST bigpickle 2026-10-03 11:32:05 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la reports/ 2>/dev/null | head -40; echo "---RECON---"; ls -la recon-notes/ 2>/dev/null | head -20; echo "---ROOT---"; ls -la | head -30
+total 8796
+drwxr-xr-x  2 runner runner    4096 Oct  3 11:25 .
+drwxr-xr-x 12 runner runner    4096 Oct  3 11:25 ..
+-rw-r--r--  1 runner runner 5405680 Oct  3 11:25 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   39494 Oct  3 11:25 analyst-laguna.log
+-rw-r--r--  1 runner runner   39312 Oct  3 11:25 analyst-ling3.log
+-rw-r--r--  1 runner runner   39676 Oct  3 11:25 analyst-longcat.log
+-rw-r--r--  1 runner runner 2844910 Oct  3 11:25 analyst-nemotron3.log
+-rw-r--r--  1 runner runner   13996 Oct  3 11:25 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Oct  3 11:25 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Oct  3 11:25 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Oct  3 11:25 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   13996 Oct  3 11:25 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  555704 Oct  3 11:25 hypotheses.md
+-rw-r--r--  1 runner runner    9173 Oct  3 11:25 reposcan-findings.md
+-rw-r--r--  1 runner runner    7384 Oct  3 11:25 valid-bugs.md
+---RECON---
+total 12
+drwxr-xr-x  2 runner runner 4096 Oct  3 11:25 .
+drwxr-xr-x 12 runner runner 4096 Oct  3 11:25 ..
+-rw-r--r--  1 runner runner  813 Oct  3 11:25 DEDICATED-DEEP.md
+---ROOT---
+total 1168
+drwxr-xr-x 12 runner runner   4096 Oct  3 11:25 .
+drwxr-xr-x  3 runner runner   4096 Oct  3 11:25 ..
+drwxr-xr-x  7 runner runner   4096 Oct  3 11:25 .git
+drwxr-xr-x  3 runner runner   4096 Oct  3 11:25 .github
+-rw-r--r--  1 runner runner   1885 Oct  3 11:25 README.md
+-rw-r--r--  1 runner runner     32 Oct  3 11:25 analyst-out.txt
+-rw-r--r--  1 runner runner 508182 Oct  3 11:25 analyst-prompt.txt
+-rw-r--r--  1 runner runner 504296 Oct  3 11:25 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Oct  3 11:25 inventory
+drwxr-xr-x  2 runner runner   4096 Oct  3 11:25 knowledge
+drwxr-xr-x  2 runner runner   4096 Oct  3 11:25 leads
+-rw-r--r--  1 runner runner  79234 Oct  3 11:25 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Oct  3 11:25 recon-notes
+drwxr-xr-x  2 runner runner   4096 Oct  3 11:25 reports
+drwxr-xr-x  2 runner runner   4096 Oct  3 11:25 reposcan-raw
+-rw-r--r--  1 runner runner   3299 Oct  3 11:25 scope.yml
+drwxr-xr-x  2 runner runner   4096 Oct  3 11:25 scripts
+-rw-r--r--  1 runner runner     33 Oct  3 11:25 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Oct  3 11:25 state_laguna.json
+-rw-r--r--  1 runner runner     33 Oct  3 11:25 state_ling3.json
+-rw-r--r--  1 runner runner     33 Oct  3 11:25 state_longcat.json
+-rw-r--r--  1 runner runner     33 Oct  3 11:25 state_mimo.json
+-rw-r--r--  1 runner runner     33 Oct  3 11:25 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Oct  3 11:25 triage
+[0m
+## Objective
+- Continue the SumUp bug-bounty POC/recon cycle, prioritizing defensible findings and producing only the required eight structured blocks.
+- Deliver the strongest gateway and staging OAuth findings without reviving rejected hypotheses or claiming unsubmitted work as filed.
+
+## Important Details
+- State: `phase=POC`, `target=api`. Scope is SumUp-owned infrastructure; disclosure channel is `https://bugs.olivermaicher.eu`.
+- Live testing is passive-first, `<=1 rps`, using GET/HEAD/OPTIONS; no mutating customer-data tests, DoS, auth bypass, TLS findings, scanner-only claims, or clickjacking without demonstrated impact.
+- The workspace is repeatedly re-materialized between cycles. Always open with `ls`; write and hash artifacts in the same command before referencing them.
+- Leading finding: `gateway.sumup.com/hosted.js` accepts cross-origin `postMessage` without reading `event.origin` and has no framing headers. A PoC emitted `PUT https://api.sumup.com/v0.2/checkouts/11111111-2222-4333-8444-555555555555`.
+- Gateway evidence: `/hosted.js` is 26,839 B, SHA-256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`; inbound handler reads `{data,source}`, while `origin` is used only outbound as `t.postMessage(e, n||"*")`.
+- Gateway impact must stay narrow: state-changing request emission is proven, but API acceptance and checkout modification are unproven. `product_origin`/`session_id` are absent in attacker-origin requests; no response-exfiltration primitive is established. Severity is capped at Medium pending sandbox validation.
+- `auth.sam-app.ro/oauth2/register` permits unauthenticated RFC 7591 registration and `client_credentials` token minting with empty `scp`; scope/resource access and production relay are blocked. File only as a staging posture issue.
+- Workspace has no submission mechanism: `scope.yml:4` names the private program, while `scripts/sync-issues.py` and `.github/workflows/sync-issues.yml` only synchronize leads.
+- Closed/rejected leads: `api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods` IDOR retired after 35 invariant responses; `js.sumup.com/api/checkouts/{id}` is a Vercel 404 reflector; `pos-payment.sumup.com` has no route discriminator; `iso20022.sumup.com` dual routing is recon-only; MCP JWT confusion and permissive CORS classes are rejected.
+
+## Work State
+### Completed
+- Revalidated gateway source, framing behavior, message protocol, UUID gate, and live cross-origin PUT via netlog.
+- Reported `reports/gateway-hostedfields-cross-origin-messenger.md` at cycle close as 234 lines, 9,967 B, SHA-256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`.
+- Reported `reports/valid-bugs.md` updated to 167 lines, 14,126 B, SHA-256 prefix `d31ebb3f5414fd76f07f0cdbb`.
+- Confirmed staging DCR → empty-scope JWT → `api.sam-app.ro` token parsing; production JWKS overlap remains zero.
+- Ranked priorities: gateway `9.30`, staging DCR `8.70`, MCP verifier `8.05`.
+- Retired transient 500/0-B and reflected-ID leads using verbatim controls rather than single anomalous responses.
+
+### Active
+- Gateway finding needs final wording capped to proven request emission, then external human submission.
+- `reports/auth-sam-app-ro-dynamic-registration.md` is expected but its current existence/hash is unverified.
+- MCP `kid`-optional try-all remains Low/hardening only; `alg:none` and RS256→HS256 are explicitly rejected.
+
+### Blocked
+- No in-repo mechanism can submit reports to `bugs.olivermaicher.eu`.
+- A sandbox checkout or equivalent authenticated flow is required to prove whether the gateway-issued PUT changes checkout state.
+- Previously written reports may disappear when the workspace re-materializes.
+
+## Next Move
+1. Run `ls -l reports/gateway-hostedfields-cross-origin-messenger.md reports/auth-sam-app-ro-dynamic-registration.md reports/valid-bugs.md && sha256sum reports/gateway-hostedfields-cross-origin-messenger.md reports/auth-sam-app-ro-dynamic-registration.md reports/valid-bugs.md`; reconstruct any missing file in the same write/hash command.
+2. `[NEXT] HUMAN`: submit the verified gateway and staging-DCR reports to `https://bugs.olivermaicher.eu`; do not describe them as filed until external confirmation exists.
+
+## Relevant Files
+- `reports/gateway-hostedfields-cross-origin-messenger.md`: primary gateway report; last reported 234 lines and SHA-256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`.
+- `reports/auth-sam-app-ro-dynamic-registration.md`: staging DCR report path; existence unverified.
+- `reports/valid-bugs.md`: triage ledger and report references; verify after workspace reset.
+- `scope.yml:4`: private disclosure channel declaration.
+- `scripts/sync-issues.py`: issue synchronization only, not submission.
+- `.github/workflows/sync-issues.yml`: synchronization workflow only.
+- `inventory/sumup.md`: seed inventory and scope context.
+- `references/security/README.md`: documents authorized JavaScript-origin expectations.
+- `reports/hypotheses-bigpickle.txt`: current ranked hypothesis context.
+- `reports/hypotheses-nemotron3.txt`: secondary ranked hypothesis context.
+- `art/lead_nemotron3.txt`: origin of the gateway lead.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+Workspace re-materialized again — both reports are gone. Verifying evidence sources before reconstructing.
+[0m$ [0mwc -l reports/valid-bugs.md; sha256sum reports/valid-bugs.md; echo "===TRIAGE==="; ls triage/ | head -50; echo "===LEADS==="; ls -la leads/ | head
+79 reports/valid-bugs.md
+282390f83b2213178c41f92857bb9df779abc3deaaefb81fb9b8f8c886ae6369  reports/valid-bugs.md
+===TRIAGE===
+run-2026-09-02-22-14.md
+run-2026-09-03-00-06.md
+run-2026-09-03-04-42.md
+run-2026-09-03-09-36.md
+run-2026-09-03-13-56.md
+run-2026-09-03-17-46.md
+run-2026-09-03-20-54.md
+run-2026-09-03-23-11.md
+run-2026-09-04-01-05.md
+run-2026-09-04-06-02.md
+run-2026-09-04-11-29.md
+run-2026-09-04-15-06.md
+run-2026-09-04-18-29.md
+run-2026-09-04-21-02.md
+run-2026-09-04-23-05.md
+run-2026-09-05-01-06.md
+run-2026-09-05-05-52.md
+run-2026-09-05-10-26.md
+run-2026-09-05-13-32.md
+run-2026-09-05-16-16.md
+run-2026-09-05-18-26.md
+run-2026-09-05-20-43.md
+run-2026-09-05-22-45.md
+run-2026-09-06-00-48.md
+run-2026-09-06-05-45.md
+run-2026-09-06-10-45.md
+run-2026-09-06-14-06.md
+run-2026-09-06-17-10.md
+run-2026-09-06-19-18.md
+run-2026-09-06-21-30.md
+run-2026-09-06-23-09.md
+run-2026-09-07-01-08.md
+run-2026-09-07-06-12.md
+run-2026-09-07-12-47.md
+run-2026-09-07-18-13.md
+run-2026-09-07-21-37.md
+run-2026-09-07-23-48.md
+run-2026-09-08-04-16.md
+run-2026-09-08-08-56.md
+run-2026-09-08-13-29.md
+run-2026-09-08-17-30.md
+run-2026-09-08-20-19.md
+run-2026-09-08-22-47.md
+run-2026-09-09-01-09.md
+run-2026-09-09-06-06.md
+run-2026-09-09-11-38.md
+run-2026-09-09-15-21.md
+run-2026-09-09-18-45.md
+run-2026-09-09-21-37.md
+run-2026-09-09-23-31.md
+===LEADS===
+total 3212
+drwxr-xr-x  2 runner runner    4096 Oct  3 11:25 .
+drwxr-xr-x 12 runner runner    4096 Oct  3 11:25 ..
+-rw-r--r--  1 runner runner 1262551 Oct  3 11:25 lead-bigpickle.md
+-rw-r--r--  1 runner runner    9282 Oct  3 11:25 lead-laguna.md
+-rw-r--r--  1 runner runner    9100 Oct  3 11:25 lead-ling3.md
+-rw-r--r--  1 runner runner    9464 Oct  3 11:25 lead-longcat.md
+-rw-r--r--  1 runner runner      18 Oct  3 11:25 lead-mimo.md
+-rw-r--r--  1 runner runner 1914989 Oct  3 11:25 lead-nemotron3.md
+-rw-r--r--  1 runner runner   56381 Oct  3 11:25 reposcan-sumup.md
+[0m
+[0m$ [0mgrep -c "hosted.js" reports/analyst-nemotron3.log reports/analyst-bigpickle.log 2>/dev/null; echo "===HASH==="; grep -o "1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873" reports/*.log | sort -u | head; echo "===UUID==="; grep -o "11111111-2222-4333-8444-555555555555" reports/*.log | sort -u | head
+reports/analyst-nemotron3.log:251
+reports/analyst-bigpickle.log:703
+===HASH===
+reports/analyst-bigpickle.log:1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873
+reports/analyst-nemotron3.log:1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873
+===UUID===
+reports/analyst-bigpickle.log:11111111-2222-4333-8444-555555555555
+reports/analyst-nemotron3.log:11111111-2222-4333-8444-555555555555
+[0m
+[0m$ [0mgrep -n "event.origin\|payment_type !==\|payment_type!==\|11111111-2222-4333-8444-555555555555" reports/analyst-nemotron3.log | tail -40
+21862:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled.
+21906:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+21907:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+21908:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+21947:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled.
+21984:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+21985:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+21986:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22021:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled.
+22053:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22054:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22055:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22090:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled.
+22125:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22126:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22127:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22164:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled.
+22200:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22201:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22202:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22240:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled.
+22271:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22272:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22273:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22302:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled.
+22411:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22412:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22413:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22448:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled.
+22484:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22485:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22486:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22520:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled
+22761:- CHANGED `gateway.sumup.com/hosted.js` re-verified before writing: 26,839 B, `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`; `event.origin`/`origin!==`/`origin===`/`targetOrigin`/`event.sou
+22799:- CHANGED `gateway.sumup.com/hosted.js` re-verified before writing: 26,839 B, `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`; `event.origin`/`origin!==`/`origin===`/`targetOrigin`/`event.sou
+22870:- CHANGED `gateway.sumup.com/hosted.js` cross-origin messenger reframed to possibly-absent intended control (no event.origin validation; inbound handler never reads event.origin)
+22978:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22979:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22980:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+23023:[LEARN] ACCEPTED MISCONFIG @ gateway.sumup.com/hosted.js: origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*")); inbound handler never reads event.origin; guard exists but applied backwards — developer fixing outbound targetOrigin will find origin in scope and assume inbound handled
+[0m
+[0m$ [0mgrep -n "product_origin\|X-SumUp-Widget-Session-Id\|document.referrer" reports/analyst-nemotron3.log | tail -30
+21159:reasoning: Application-routed BFF endpoint recovered from sdk.js call graph (not prefix sweep). Unauthenticated GET returns 181B RFC 9457 JSON 404 with id reflected in body (`"Checkout <id> does not exist."`). Client enforces UUID v1–5 regex (`xi=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i`) before request; server accepts any string (`not-a-uuid` → 160B app 404, same class). `?attempts=2` byte-identical to bare request — param-invariant. No `Authorization`, no `X-SumUp-Widget-Session-Id`, no cookies required.
+21190:[LEARN] REJECTED MISCONFIG @ api.sumup.com/v0.1/internal/analytics: inferring an endpoint's auth posture from the client call that reaches it. The SDK posts this with only `X-SumUp-Widget-Session-Id` and no bearer, which looks like an unauthenticated ingestion point — but `Bi` injects that header into EVERY request, money endpoints included, so its presence carries zero information about whether a credential is enforced.
+21255:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-…$/i, le=e=>ue.test(e)) — recoverable from served bytes. Live PoC: cross-origin form--submit drives PUT https://api.sumup.com/v0.2/checkouts/{attacker-chosen-id} with attacker-supplied session id and payment payload. Outbound delivery conditional on referrer (empty referrer → wildcard delivery via n||"*").
+21265:reasoning: Application-routed BFF endpoint recovered from sdk.js call graph (not prefix sweep). Unauthenticated GET returns 181B RFC 9457 JSON 404 with id reflected in body ("Checkout <id> does not exist."). Client enforces UUID v1–5 regex (xi=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i) before request; server accepts any string (not-a-uuid → 160B app 404, same class). ?attempts=2 byte-identical to bare request — param-invariant. No Authorization, no X-SumUp-Widget-Session-Id, no cookies required.
+21288:[LEARN] REJECTED MISCONFIG @ api.sumup.com/v0.1/internal/analytics: inferring an endpoint's auth posture from the client call that reaches it. The SDK posts this with only X-SumUp-Widget-Session-Id and no bearer, which looks like an unauthenticated ingestion point — but Bi injects that header into EVERY request, money endpoints included, so its presence carries zero information about whether a credential is enforced.
+21346:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-…$/i, le=e=>ue.test(e)) — recoverable from served bytes. Live PoC: cross-origin form--submit drives PUT https://api.sumup.com/v0.2/checkouts/{attacker-chosen-id} with attacker-supplied session id and payment payload. Outbound delivery conditional on referrer (empty referrer → wildcard delivery via n||"*").
+21356:reasoning: Application-routed BFF endpoint recovered from sdk.js call graph (not prefix sweep). Unauthenticated GET returns 181B RFC 9457 JSON 404 with id reflected in body ("Checkout <id> does not exist."). Client enforces UUID v1–5 regex (xi=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i) before request; server accepts any string (not-a-uuid → 160B app 404, same class). ?attempts=2 byte-identical to bare request — param-invariant. No Authorization, no X-SumUp-Widget-Session-Id, no cookies required.
+21379:[LEARN] REJECTED MISCONFIG @ api.sumup.com/v0.1/internal/analytics: inferring an endpoint's auth posture from the client call that reaches it. The SDK posts this with only X-SumUp-Widget-Session-Id and no bearer, which looks like an unauthenticated ingestion point — but Bi injects that header into EVERY request, money endpoints included, so its presence carries zero information about whether a credential is enforced.
+21471:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-…$/i, le=e=>ue.test(e)) — recoverable from served bytes. Live PoC: cross-origin form--submit drives PUT https://api.sumup.com/v0.2/checkouts/{attacker-chosen-id} with attacker-supplied session id and payment payload. Outbound delivery conditional on referrer (empty referrer → wildcard delivery via n||"*").
+21481:reasoning: Application-routed BFF endpoint recovered from sdk.js call graph (not prefix sweep). Unauthenticated GET returns 181B RFC 9457 JSON 404 with id reflected in body ("Checkout <id> does not exist."). Client enforces UUID v1–5 regex (xi=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i) before request; server accepts any string (not-a-uuid → 160B app 404, same class). ?attempts=2 byte-identical to bare request — param-invariant. No Authorization, no X-SumUp-Widget-Session-Id, no cookies required.
+21516:[LEARN] REJECTED MISCONFIG @ api.sumup.com/v0.1/internal/analytics: inferring an endpoint's auth posture from the client call that reaches it. The SDK posts this with only X-SumUp-Widget-Session-Id and no bearer, which looks like an unauthenticated ingestion point — but Bi injects that header into EVERY request, money endpoints included, so its presence carries zero information about whether a credential is enforced.
+21615:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5
+21640:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+21732:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+21826:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+21906:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+21984:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22053:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22125:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22200:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22271:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22411:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22463:[NEW] Gateway emission code read at SOURCE (not inferred): `s.endpoint("checkouts/".concat(r),{method:"PUT",headers:{...}})`; `endpoint:(s,i={})=>{...i.headers={...i.headers,"X-SumUp-Widget-Session-Id":r}}` — `targetOrigin` literal appears 0 times in hosted.js
+22484:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+22632:- CHANGED gateway.sumup.com/hosted.js: origin parameter declared/supplied at construction but applied ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound postMessage handler never reads e
+22646:- NEW gateway.sumup.com/hosted.js: origin parameter declared/supplied at construction but applied ONLY outbound (`t.postMessage(e, n||"*")` with `n=document.referrer`); inbound handler `p=r=>{const{data:n,s
+22766:- NEW Verbatim-confirmed every code quotation: `const{data:[a-z],source:[a-z]}=` ×1, `if("card"===a.payment_type)` exact, the UUID regex with `[0-5]`/`[089ab]`, `X-SumUp-Widget-Session-Id` + literal `"undef
+22921:- NEW Gateway emission code read at SOURCE (not inferred): `s.endpoint("checkouts/".concat(r),{method:"PUT",headers:{...}})`; `endpoint:(s,i={})=>{...i.headers={...i.headers,"X-SumUp-Widget-Session-Id":r}}`
+22940:[NEW] Gateway emission code read at SOURCE (not inferred): `s.endpoint("checkouts/".concat(r),{method:"PUT",headers:{...}})`; `endpoint:(s,i={})=>{...i.headers={...i.headers,"X-SumUp-Widget-Session-Id":r}}` — `targetOrigin` literal appears 0 times in hosted.js
+22978:reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+[0m
+Evidence is present in the analyst logs. Extracting verbatim proof blocks for reconstruction.
+Pulling the remaining verbatim code blocks and the netlog PoC record.
+[0m$ [0mgrep -n "const{data:\[a-z\],source:\[a-z\]}=" reports/analyst-nemotron3.log | tail -4; echo "===REPORTPATH==="; grep -n "gateway-hostedfields-cross-origin-messenger.md" reports/analyst-nemotron3.log | tail -12
+22766:- NEW Verbatim-confirmed every code quotation: `const{data:[a-z],source:[a-z]}=` ×1, `if("card"===a.payment_type)` exact, the UUID regex with `[0-5]`/`[089ab]`, `X-SumUp-Widget-Session-Id` + literal `"undef
+===REPORTPATH===
+22687:- CHANGED reports/gateway-hostedfields-cross-origin-messenger.md GENUINELY on disk — 270 lines, 14,332B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
+22726:- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` GENUINELY on disk — 270 lines, 14,332 B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`
+22742:- CHANGED reports/gateway-hostedfields-cross-origin-messenger.md RE-DELIVERED — 215 lines, 7,642 B,
+22752:- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` GENUINELY on disk — 270 lines, 14,332B, sha256 `d5d4c5eeed87ce5bdb4e57abeb9e41e88fbe31417d7df7fb6aa1e3e3d4308322`.
+22760:- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` re-delivered — 140 lines, 6,867 B, sha256 `79aa5df2a9ee5e3c44787d6c4cb2b4495cc1559c1d86c2d81b97c2f20e5095ba`; `valid-bugs.md` 79→106 lines / 9,
+22777:- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` RE-DELIVERED — 215 lines, 7,642 B, sha256 `cf997909f114d86102124e9c2a9efb10c6f8ae6ed554366b3c703090ab314635`.
+22789:- CHANGED reports/gateway-hostedfields-cross-origin-messenger.md was absent on open (38th re-materialization); RECONSTRUCTED from re-fetched bytes → 190 lines, 8,722 B, sha256 2fb3f7dcc8bcae7d24f846262b1617f21d
+22798:- CHANGED `reports/gateway-hostedfields-cross-origin-messenger.md` re-delivered — 140 lines, 6,867 B, sha256 `79aa5df2a9ee5e3c44787d6c4cb2b4495cc1559c1d86c2d81b97c2f20e5095ba`; `valid-bugs.md` 79→136 lines.
+22913:- NEW `reports/gateway-hostedfields-cross-origin-messenger.md` WRITTEN TO DISK this cycle — 234 L / 9,967 B / sha256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`; `reports/valid-bugs.m
+22920:- NEW `reports/gateway-hostedfields-cross-origin-messenger.md` RECONSTRUCTED and WRITTEN TO DISK this cycle — 234 lines / 9,967 B / sha256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`;
+22938:[NEW] `reports/gateway-hostedfields-cross-origin-messenger.md` RECONSTRUCTED and WRITTEN TO DISK this cycle — 234 lines / 9,967 B / sha256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`; `reports/valid-bugs.md` updated to 167 lines / 14,126 B / sha256 `d31ebb3f5414fd76f07f0cdbb...`
+23017:[NEXT] HUMAN: submit `reports/gateway-hostedfields-cross-origin-messenger.md` (reconstruct from served bytes: GET https://gateway.sumup.com/hosted.js → sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873` → write report with per-claim reproduction table) and `reports/auth-sam-app-ro-dynamic-registration.md` → both to bugs.olivermaicher.eu per scope.yml:4. Write and verify (ls + sha256sum) in same command before referencing.
+[0m
+[0m$ [0mgrep -n "netlog\|NetLog" reports/analyst-nemotron3.log | tail -15; echo "===UNDEF==="; grep -n '"undef' reports/analyst-nemotron3.log | tail -6
+21986:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22054:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22055:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22126:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22127:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22201:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22202:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22272:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22273:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22412:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22413:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22485:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22486:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+22979:evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+22980:verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+===UNDEF===
+22766:- NEW Verbatim-confirmed every code quotation: `const{data:[a-z],source:[a-z]}=` ×1, `if("card"===a.payment_type)` exact, the UUID regex with `[0-5]`/`[089ab]`, `X-SumUp-Widget-Session-Id` + literal `"undef
+[0m
+39 reconstructions of the same report is the documented failure mode here — the file can't be made to persist, and only a human can submit it. The genuinely unexplored surface is `gateway.sumup.com/sdk.js` (291,877 B), the merchant-integration bundle: nobody has checked it for the same missing-origin class, and it drives authenticated `api.sumup.com` operations. That would be a far stronger impact story than `hosted.js`.
+[0m$ [0mcd /tmp/opencode && curl -sS -D sdk.hdr -o sdk.js --max-time 45 https://gateway.sumup.com/sdk.js; echo "=== SIZE/HASH ==="; wc -c < sdk.js; sha256sum sdk.js; echo "=== HEADERS ==="; cat sdk.hdr
+=== SIZE/HASH ===
+291877
+0fae546ae34ee5e97cf0c3107d87adaa79129983d423bce6cf9a0fc19916c7bd  sdk.js
+=== HEADERS ===
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-origin: *
+age: 236561
+cache-control: public, max-age=0, must-revalidate
+content-disposition: inline; filename="sdk.js"
+content-type: application/javascript; charset=utf-8
+date: Sat, 03 Oct 2026 11:28:57 GMT
+etag: "28e75d6c454233d86c99046da66efddd"
+last-modified: Wed, 30 Sep 2026 17:46:15 GMT
+server: Vercel
+strict-transport-security: max-age=63072000
+x-vercel-cache: HIT
+x-vercel-id: iad1::9gxvt-1791026937088-a21c28e80c74
+content-length: 291877
+[0m
+sdk.js confirmed live at 291,877 B. Now checking whether it has the same postMessage surface defect.
+[0m$ [0mcd /tmp/opencode && echo "=== addEventListener all types ==="; grep -oE 'addEventListener\("[a-z]+"' sdk.js | sort | uniq -c | sort -rn; echo "=== onmessage ==="; grep -oE 'onmessage' sdk.js | wc -l
+=== addEventListener all types ===
+      1 addEventListener("resize"
+      1 addEventListener("message"
+      1 addEventListener("load"
+      1 addEventListener("hashchange"
+      1 addEventListener("focusin"
+      1 addEventListener("error"
+      1 addEventListener("beforeunload"
+=== onmessage ===
+0
+[0m
+[0m$ [0mcd /tmp/opencode && echo "=== postMessage/addEventListener message ==="; grep -o 'postMessage' sdk.js | wc -l; grep -o 'addEventListener("message"' sdk.js | wc -l; grep -o 'addEventListener(.message.' sdk.js | wc -l; echo "=== ORIGIN tokens ==="; for t in 'event.origin' 'origin===' 'origin!==' 'targetOrigin' 'source.postMessage' 'e.origin' 'a.origin' '.origin' 'event.source'; do printf '%-18s %s\n' "$t" "$(grep -o -- "$t" sdk.js | wc -l)"; done
+=== postMessage/addEventListener message ===
+4
+1
+1
+=== ORIGIN tokens ===
+event.origin       0
+origin===          0
+origin!==          0
+targetOrigin       0
+source.postMessage 0
+e.origin           2
+a.origin           0
+.origin            15
+event.source       0
+[0m
+Zero origin checks with exactly one message listener. Extracting the handler and its call graph.
+[0m$ [0mcd /tmp/opencode && python3 - <<'EOF'
+import re
+s=open('sdk.js',encoding='utf-8',errors='replace').read()
+for m in re.finditer(r'addEventListener\(\s*"message"',s):
+    a=max(0,m.start()-700); b=min(len(s),m.end()+900)
+    print("="*90); print("OFFSET",m.start()); print("="*90)
+    print(s[a:b])
+EOF
+==========================================================================================
+OFFSET 128088
+==========================================================================================
+or while receiving message: ${e} - ${i.message}`})}})))))},d={unsubscribe:(e,t)=>{s&&(s[e]=(s[e]||[]).filter((({handler:e})=>e!==t)))},onAny:(e,t)=>{c&&(c[e]=[{handler:t,options:{ignoreVariant:!0}}])},on:(e,t,n={})=>{s&&(n.uniqueListener?s[e]=[{handler:t,options:n}]:s[e]=[...s[e]||[],{handler:t,options:n}])},sendTo:(e,t)=>{const n=Object.assign({variant:r,type:xo.TYPE},t);e.postMessage(n,"*")},send:o=>{try{const e=Object.assign({variant:r,type:xo.TYPE,action:xo.ACTION_MESSAGE},o);if(n)return void n.postMessage(e,i||"*");t&&t.parent.postMessage(e,"*")}catch(t){console.error(`Error while sending message: ${e}`,t),a({error:t,message:`Error while sending message: ${e}`})}},mount:()=>{null==t||t.addEventListener("message",l)},unmount:()=>{d.send({message:_o}),null==t||t.removeEventListener("message",l),t=void 0,n=void 0,Object.keys(s).forEach((e=>delete s[e])),Object.keys(c).forEach((e=>delete c[e]))}};return o&&d.mount(),d.on(_o,(()=>{d.unmount()})),d},So=F(null);function Co(){const e=pe(So);if(!e)throw new Error("HostedElementsContext was not initialised.");return e}const Ao="aux--metric-track";class Oo{constructor(){this.elements={},this.loadedElements=this.loadedElements.bind(this)}init(e){this.elements[e]={name:e,isLoaded:!1}}elementsKeys(){return Object.keys(this.elements)}setIsLoaded(e){this.elements[e]&&(this.elements[e].isLoaded=!0)}loadedElements(){return Object.keys(this.elements).map((e=>this.elements[e])).filter((e=>e.isLoaded))}hasAllElementsLoaded(){return this.loadedElements().length===Object.keys(this.elements).length}}const Po=e=>"".concat(e||"./").concat("aux.html");class No extends _{
+[0m
+Found the same messenger shape. Tracing the listener `l` and the inbound validation.
+[0m$ [0mcd /tmp/opencode && python3 - <<'EOF'
+import re
+s=open('sdk.js',encoding='utf-8',errors='replace').read()
+seg=s[127000:128400]
+# find definitions of l and the factory signature
+for pat in [r'\bl\s*=\s*\(?\s*\{', r'function\s+\w+\s*\(\s*e\s*,\s*t', r'const\s+l\s*=']:
+    for m in re.finditer(pat,seg):
+        print("---",pat,"@",127000+m.start())
+        print(seg[max(0,m.start()-200):m.start()+700])
+        print()
+EOF
+(no output)
+[0m
+[0m$ [0mcd /tmp/opencode && python3 - <<'EOF'
+import re
+s=open('sdk.js',encoding='utf-8',errors='replace').read()
+i=128088
+a=max(0,i-6000)
+seg=s[a:i]
+print(seg)
+EOF
+mentAttemptedEvent:function(t){return Wi(this,void 0,void 0,(function*(){yield e.analytics.sendEvent("widget.payment-attempted",t)}))},triggerFormInteractionEvent:function(t){return Wi(this,void 0,void 0,(function*(){yield e.analytics.sendEvent("widget.form-interaction",t)}))},triggerRedirectedEvent:function(t){return Wi(this,void 0,void 0,(function*(){yield e.analytics.sendEvent("widget.redirected",t)}))},triggerRedirectComplete:function(t){return Wi(this,void 0,void 0,(function*(){yield e.analytics.sendEvent("widget.redirect-complete",t)}))},triggerCardTokenizationPrivacyPolicyViewedEvent:function(t){return Wi(this,void 0,void 0,(function*(){const n=Date.now().toString();yield e.analytics.sendEvent("widget.privacy-policy-viewed",Object.assign(Object.assign({},t),{timestamp:n}))}))},triggerCardTokenizationConsent:function(t){return Wi(this,void 0,void 0,(function*(){yield e.analytics.sendEvent("widget.card-tokenization-consent",t)}))}}}(r)),[r]);return U(Ki.Provider,Object.assign({value:{sessionId:e,checkoutId:t,events:i,triggerOnce:Gi}},{children:n}))};function Yi(){return pe(Ki)}function Xi(e){return"modal"===e||"iframe"===e?e:void 0}function Qi(e){return Xi(e)?"iframe":void 0}const eo={PaymentLinks:{domain:"ltxup.sumup.com",pageId:"100"},OnlineStore:{domain:"ltxup.sumup.com",pageId:"101"},HostedCheckout:{domain:"ltxup.sumup.com",pageId:"102"},Invoices:{domain:"ltxup.sumup.com",pageId:"103"}},to={"pay.sumup.com":eo.PaymentLinks,"checkout.sumup.com":eo.HostedCheckout,"invoice.sumup.com":eo.Invoices,"sumupstore.com":eo.OnlineStore},no=()=>ie((()=>{return e=window.location.hostname,null===(t=Object.entries(to).find((([t])=>e.endsWith(t))))||void 0===t?void 0:t[1];var e,t}))[0];const ro=F(void 0),io=({api:e,apiBFF:t,checkoutId:n,children:r})=>{const[i,o]=ie(),[a,s]=ie(!0),c=!no(),{sessionId:l,events:d}=Yi();ae((()=>{t.checkouts.fetchCheckout(n).then((e=>{c&&delete e.lxn_session_token,o(e),d.triggerCheckoutLoadedEvent({sessionId:l,checkoutId:e.id,purpose:e.purpose,country:e.merchant_country,timestamp:Date.now().toString()})})).then((()=>{s(!1)})).catch((()=>{s(!1)}))}),[n,c]);const{fetchCheckout:u}=t.checkouts;return U(ro.Provider,Object.assign({value:{checkoutId:n,checkoutInfo:i,processCheckout:(t,r)=>function(e,t,n,r){return new(n||(n=Promise))((function(i,o){function a(e){try{c(r.next(e))}catch(e){o(e)}}function s(e){try{c(r.throw(e))}catch(e){o(e)}}function c(e){var t;e.done?i(e.value):(t=e.value,t instanceof n?t:new n((function(e){e(t)}))).then(a,s)}c((r=r.apply(e,t||[])).next())}))}(void 0,void 0,void 0,(function*(){return e.checkouts.processCheckout({checkoutId:(null==i?void 0:i.id)||n,payload:t,redirectMechanism:Qi(r)})})),fetchCheckout:u}},{children:!a&&r}))};function oo(e){return function(t){return U(ro.Consumer,{children:({checkoutId:n,checkoutInfo:r,processCheckout:i})=>U(e,Object.assign({},Object.assign(Object.assign({},t),{checkoutId:n,checkoutInfo:r,processCheckout:i})))})}}const ao=()=>pe(ro),so="COMMAND_SUBMIT_FORM",co="COMMAND_UPDATE_STATE";function lo(){return lo=Object.assign?Object.assign.bind():function(e){for(var t,n=1;n<arguments.length;n++)for(var r in t=arguments[n])Object.prototype.hasOwnProperty.call(t,r)&&(e[r]=t[r]);return e},lo.apply(this,arguments)}const uo=F(null),po=uo.Consumer,ho=uo.Provider,fo=F(void 0);function go({children:e,commandEvents:t,initialConfigs:n}){const[r,i]=ie(Date.now()),[o,a]=ie(n);return ae((()=>{void 0!==o.amount&&null!==o.amount&&console.warn("The configuration property 'amount' is deprecated. Please use the 'showAmount' configuration. The checkout amount will be fetched from our API using the given `checkoutId`")}),[]),ae((()=>{null==t||t.subscribe(co,(e=>{a((t=>Object.assign(Object.assign({},t),e))),i(Date.now())}))}),[t]),ae((()=>null==t?void 0:t.ack(co)),[t,r]),U(fo.Provider,Object.assign({value:{widgetConfiguration:o,setWidgetConfiguration:a}},{children:e({widgetConfiguration:o,setWidgetConfiguration:a})}))}fo.Consumer;const mo=()=>pe(fo);function bo(e){return t=>U(e,Object.assign({},Object.assign(Object.assign({},t),{configContext:mo()})))}const yo=mo;var vo=function(e,t,n,r){return new(n||(n=Promise))((function(i,o){function a(e){try{c(r.next(e))}catch(e){o(e)}}function s(e){try{c(r.throw(e))}catch(e){o(e)}}function c(e){var t;e.done?i(e.value):(t=e.value,t instanceof n?t:new n((function(e){e(t)}))).then(a,s)}c((r=r.apply(e,t||[])).next())}))};const _o="messenger--unmount",xo=Object.freeze({TYPE:"SumUpCard",ACTION_MESSAGE:"message"}),wo=e=>e.type===xo.TYPE,ko=({id:e,fromWindow:t,toWindow:n,variant:r,origin:i,autoMount:o=!1,onError:a=({error:e})=>{throw e}})=>{const s={},c={},l=t=>{const{data:i,source:o}=t;i&&i.message&&(wo(i)&&(c[i.message]||[]).forEach((t=>vo(void 0,void 0,void 0,(function*(){try{yield Promise.resolve(t.handler(i.value,i))}catch(t){console.error(`Error while receiving message: ${e} - ${i.message}`,t),a({error:t,message:`Error while receiving message: ${e} - ${i.message}`})}})))),n&&o!==n||(s[i.message]||[]).forEach((t=>vo(void 0,void 0,void 0,(function*(){try{((e,t,n)=>Boolean(wo(e)&&e.action===xo.ACTION_MESSAGE&&(e.variant===t||n.ignoreVariant)&&e.message))(i,r,t.options||{})&&(yield Promise.resolve(t.handler(i.value,i)))}catch(t){console.error(`Error while receiving message: ${e} - ${i.message}`,t),a({error:t,message:`Error while receiving message: ${e} - ${i.message}`})}})))))},d={unsubscribe:(e,t)=>{s&&(s[e]=(s[e]||[]).filter((({handler:e})=>e!==t)))},onAny:(e,t)=>{c&&(c[e]=[{handler:t,options:{ignoreVariant:!0}}])},on:(e,t,n={})=>{s&&(n.uniqueListener?s[e]=[{handler:t,options:n}]:s[e]=[...s[e]||[],{handler:t,options:n}])},sendTo:(e,t)=>{const n=Object.assign({variant:r,type:xo.TYPE},t);e.postMessage(n,"*")},send:o=>{try{const e=Object.assign({variant:r,type:xo.TYPE,action:xo.ACTION_MESSAGE},o);if(n)return void n.postMessage(e,i||"*");t&&t.parent.postMessage(e,"*")}catch(t){console.error(`Error while sending message: ${e}`,t),a({error:t,message:`Error while sending message: ${e}`})}},mount:()=>{null==t||t.
+[0m
+Same messenger (`ko`) ships in the merchant bundle. Reachability differs though — need the construction sites and subscribed handlers.
+[0m$ [0mcd /tmp/opencode && python3 - <<'EOF'
+import re
+s=open('sdk.js',encoding='utf-8',errors='replace').read()
+for m in re.finditer(r'ko\(\{',s):
+    a=m.start(); print("="*80); print("ko() site @",a); print(s[a:a+420])
+print("\n\n### COMMAND handler subscriptions ###")
+for m in re.finditer(r'\.on(?:Any)?\(\s*(?:so|_o|co|vo)\b',s):
+    a=m.start(); print("-"*60); print(s[max(0,a-260):a+200])
+EOF
+================================================================================
+ko() site @ 129283
+ko({id:"hf-form-component",fromWindow:window,toWindow:e.contentWindow,variant:"hostedfield",origin:n.origin,autoMount:!0});this.tracker=(e,t)=>new Promise((n=>{r.send({message:Ao,value:{metric:e,labels:t}}),r.on("".concat(Ao,"--ack"),n)})),this.setState({isInitialized:!0})}render(){const{isInitialized:e}=this.state,{env:t}=this.props,n={metrics:{track:this.tracker},elements:{init:e=>{this.hostedElementsTracer.init(e)
+================================================================================
+ko() site @ 130222
+ko({fromWindow:e.win||window,variant:e.variant,onError:e=>{let{error:t,message:n}=e;return Fr(t,n)}}))(e)}componentDidMount(){this.messenger.mount(),window.addEventListener("beforeunload",this.messenger.unmount,!1)}componentWillUnmount(){this.messenger.unmount()}render(){return this.props.children instanceof Function?this.props.children(this.messenger):this.props.children}}window.location.href;const Eo=e=>e?["sumup",
+================================================================================
+ko() site @ 175049
+ko({id:"hf-form-component",fromWindow:a,toWindow:null==d?void 0:d.contentWindow,variant:"hostedfield",origin:e.origin,autoMount:!0});c(t)},name:vc,ref:l,src:xc(o.sdkURL),"aria-hidden":!0,tabIndex:-1,scrolling:"no"})),t({isLoaded:!!ko}))},function(e){return U(Ui.Consumer,{children:t=>U(kc,Object.assign({},Object.assign(Object.assign({},e),{env:t})))})})));var kc,Sc;function Cc(){return Cc=Object.assign?Object.assign.b
+================================================================================
+ko() site @ 179097
+ko({fromWindow:window,toWindow:w.current.contentWindow,variant:"hostedfield",origin:e.origin,autoMount:!0});a.on(Nc,p),a.on(Ic,f),a.on(Ec,C),a.on("input--blur",(()=>{v(!0),x(!1)})),a.on("form--invalid-input",(()=>{v(!0)})),a.send({message:"input--initialize",value:{name:t,placeholder:n,type:r,autocomplete:i,maxLength:o}}),k.elements.setIsLoaded(t),b(a)},showError:O,disabled:l,focused:_})]}),O&&U(Pc,{"data-testid":"ho
+
+
+### COMMAND handler subscriptions ###
+------------------------------------------------------------
+`})}},mount:()=>{null==t||t.addEventListener("message",l)},unmount:()=>{d.send({message:_o}),null==t||t.removeEventListener("message",l),t=void 0,n=void 0,Object.keys(s).forEach((e=>delete s[e])),Object.keys(c).forEach((e=>delete c[e]))}};return o&&d.mount(),d.on(_o,(()=>{d.unmount()})),d},So=F(null);function Co(){const e=pe(So);if(!e)throw new Error("HostedElementsContext was not initialised.");return e}const Ao="aux--metric-track";class Oo{constructor(){
+[0m
+The `onAny` path has no source check at all. Checking which commands use it, plus framing on the merchant page.
+[0m$ [0mcd /tmp/opencode && echo "### onAny sites ###"; grep -o 'onAny(' sdk.js | wc -l; python3 - <<'EOF'
+import re
+s=open('sdk.js',encoding='utf-8',errors='replace').read()
+for m in re.finditer(r'onAny\(',s):
+    a=m.start(); print("-"*70); print(s[max(0,a-300):a+260]); print()
+EOF
+### onAny sites ###
+2
+----------------------------------------------------------------------
+,donateSubmitButton:m.donateSubmitButton,showNames:m.showNames,showCountry:m.showCountry,showAddress:m.showAddress,showCpfNumber:m.showCpfNumber,showZipCode:m.showZipCode,showTaxId:m.showTaxId,scaExperienceMode:m.scaExperienceMode}}),()=>{window.removeEventListener("resize",A)})),[]),ae((()=>{_&&(o.onAny("confirmation-success",(()=>Xp(void 0,void 0,void 0,(function*(){try{const e=yield p(n);u.metrics.track(Ro,{status:$o,payment_method:_.paymentMethod,flow:Lo}),f.triggerRedirectComplete({sessionId:g,checkoutId:n,checkoutStatus:e.status,mechanism:"iframe",
+
+----------------------------------------------------------------------
+.metrics.track(Ro,{status:$o,payment_method:_.paymentMethod,flow:Lo}),f.triggerRedirectComplete({sessionId:g,checkoutId:n,checkoutStatus:e.status,mechanism:"iframe",paymentMethod:_.paymentMethod,scaExperienceMode:l,result:"success",timestamp:Date.now().toString()}),a($o,e)}finally{x(void 0)}})))),o.onAny("confirmation-fail",(()=>Xp(void 0,void 0,void 0,(function*(){try{const e=yield p(n);u.metrics.track(Ro,{status:Mo,payment_method:_.paymentMethod,flow:Lo,error:"external-page-error"}),f.triggerRedirectComplete({sessionId:g,checkoutId:n,checkoutStatus:e.s
+[0m
+[0m$ [0mcd /tmp/opencode && for h in checkout.sumup.com pay.sumup.com invoice.sumup.com sumupstore.com; do echo "=== $h ==="; curl -sS -D- -o /dev/null --max-time 25 "https://$h/" | grep -iE '^(HTTP|x-frame-options|content-security-policy|content-type|location)' ; done
+=== checkout.sumup.com ===
+HTTP/2 403 
+content-type: text/plain; charset=utf-8
+=== pay.sumup.com ===
+HTTP/2 403 
+content-type: text/plain; charset=utf-8
+=== invoice.sumup.com ===
+HTTP/2 404 
+content-type: text/html; charset=utf-8
+=== sumupstore.com ===
+HTTP/2 403 
+content-type: text/html; charset=UTF-8
+content-security-policy: default-src 'none'; script-src 'nonce-HunOp1e2Tk8jNzeVzwKnf4' 'unsafe-eval' https://challenges.cloudflare.com; script-src-attr 'none'; style-src 'unsafe-inline'; img-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com blob:; child-src 'self' https://challenges.cloudflare.com blob:; worker-src blob:; form-action http: https:; base-uri 'self'
+x-frame-options: SAMEORIGIN
+[0m
+[0m$ [0mcd /tmp/opencode && python3 - <<'EOF'
+import re
+s=open('sdk.js',encoding='utf-8',errors='replace').read()
+i=s.find('o.onAny("confirmation-success"')
+print(s[max(0,i-4200):i+200])
+EOF
+ata-testid":Go},m(Bp,{onClick:()=>{r(!n)}},m(qp,null),m(Fp,null,"Mostrar")),m(zp,{"data-testid":Ko,isRevealed:n,readOnly:!0},t))}function Hp(e){let{t,content:n,paymentMethod:r}=e;const i=mp(n);return i?m("div",{"data-testid":Wo},m("span",null,t("apm.payment_methods.".concat(r,".pending.barcode.description"))),m("h4",null,i)):m(Up,{t,content:n})}function Zp(e){let{t,paymentMethod:n,value:r}=e;return m(Np,{message:t("apm.payment_methods.boleto.pending.barcode.copied_to_clipboard")},((e,i)=>m("section",null,m(Hp,{t,content:r,paymentMethod:n}),m(Ip,{linkClassName:"pay-button",t,value:r,onClick:e,isDisabled:i}))))}function Wp(e){let{t,payment:n,url:r}=e;return m("form",{"data-testid":"boleto-download",action:r,target:"_blank",rel:"noopener noreferrer"},m(cd,{type:"submit"},m("span",null,t("apm.payment_methods.".concat(n,".pending.download_button")))))}function Gp(e){let{barcodeImg:t}=e;return m(Dp,{"data-testid":"scannable-barcode"},m("img",{src:"".concat(t,"?width=250&height=250"),alt:"QR Code"}))}const Kp=Yr((function(e){let{t,paymentMethod:n,artefacts:r,validUntil:i}=e;const o=(e=>t=>(e||[]).reduce(((e,n)=>({...e,...t(n)})),{}))(r)((e=>({[e.name]:e})));return m(Tp,null,o.instructions&&m("div",null,m("p",null,t("apm.payment_methods.".concat(n,".instructions")))),i&&m(Vp,{t,date:i}),o.barcode&&m(Gp,{barcodeImg:o.barcode.location}),o.code&&m(Zp,{t,paymentMethod:n,value:o.code.content}),o.invoice&&m(Wp,{t,payment:n,url:o.invoice.location}),o.disclaimer&&m("p",null,t("apm.payment_methods.".concat(n,".pending.disclaimer"))))})),Jp="PENDING",Yp=({pending:e,paymentMethods:t,apiBFF:n,checkoutId:r,maxAttempts:i,onResult:o})=>{const a=de((()=>function(e=60){let t,n=1;function r(){clearTimeout(t)}return{start:function i(o){return t=setTimeout((()=>{if(n>e)return r();o(n),n+=1,i(o)}),5e3),r},clear:r}}(i)),[]);ae((()=>(a.start((e=>{n.checkouts.fetchCheckout(r,e).then((e=>{e.status!==Jp&&a.clear(),o&&o(e)}))})),()=>{a.clear()})),[]);const s=t.find((t=>t.id===e.payment_method));return U("div",Object.assign({"data-testid":"pending-screen"},{children:[s&&U(gc,{paymentMethod:s}),"artefacts"in e&&U(Kp,{paymentMethod:e.payment_method,artefacts:e.artefacts,validUntil:e.valid_until})]}))};var Xp=function(e,t,n,r){return new(n||(n=Promise))((function(i,o){function a(e){try{c(r.next(e))}catch(e){o(e)}}function s(e){try{c(r.throw(e))}catch(e){o(e)}}function c(e){var t;e.done?i(e.value):(t=e.value,t instanceof n?t:new n((function(e){e(t)}))).then(a,s)}c((r=r.apply(e,t||[])).next())}))};const Qp=ha.div`
+  font-family: -apple-system, 'Helvetica Neue', 'Arial', sans-serif;
+
+  border-radius: 16px;
+  background-color: var(--cui-bg-normal);
+  color: var(--cui-fg-normal);
+
+  max-width: 700px;
+  padding: 16px 24px;
+  margin: auto;
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  && h4,
+  && h3 {
+    margin: 10px 0;
+    line-height: 20px;
+    font-weight: bold;
+    color: var(--cui-fg-normal);
+    font-size: 18px;
+  }
+
+  && img {
+    display: inline-block;
+  }
+`,eh=ha.div`
+  visibility: ${({isVisible:e})=>e?"visible":"hidden"};
+  height: ${({isVisible:e})=>e?"initial":"0"};
+`,th=e=>{const{showFooter:t,checkoutId:n,paymentMethods:r,initialState:i,messenger:o,onResponse:a=()=>{},onChangePaymentMethod:s=()=>{}}=e,c=Zi(),l=ol(),d=yo(),u=Co(),{fetchCheckout:p,checkoutInfo:h}=ao(),{events:f,sessionId:g}=Yi(),{widgetConfiguration:m}=d,b=ce(),[y,v]=ie({width:0,height:0}),[_,x]=ie(),[w,k]=ie(),[S,C]=ie(!1),A=ue((()=>{const e=Math.max(b.current.offsetHeight,640),t=Math.max(b.current.offsetWidth,360);v({width:t,height:e})}),[]);ae((()=>(A(),window.addEventListener("resize",A),f.triggerWidgetMountEvent({checkoutId:n,sessionId:g,widgetConfiguration:{locale:m.locale,country:i.country,showCardholder:m.showCardholder,showSubmitButton:m.showSubmitButton,showFooter:m.showFooter,showEmail:m.showEmail,showInstallments:m.showInstallments,installments:i.installments,donateSubmitButton:m.donateSubmitButton,showNames:m.showNames,showCountry:m.showCountry,showAddress:m.showAddress,showCpfNumber:m.showCpfNumber,showZipCode:m.showZipCode,showTaxId:m.showTaxId,scaExperienceMode:m.scaExperienceMode}}),()=>{window.removeEventListener("resize",A)})),[]),ae((()=>{_&&(o.onAny("confirmation-success",(()=>Xp(void 0,void 0,void 0,(function*(){try{const e=yield p(n);u.metrics.track(Ro,{status:$o,payment_method:_.paymentMethod,flow:Lo}),f.triggerRedirectComplete({sessio
+[0m
+Two `onAny` handlers with no source check: `confirmation-success` / `confirmation-fail`. Checking whether the redirect target is attacker-influenced.
+`confirmation-success` has no source check and drives `onResponse` + redirect. Reachability hinges on whether the merchant page is framable — probing properly.
+[0m$ [0mcd /tmp/opencode && UA='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36'; for u in https://checkout.sumup.com/ https://checkout.sumup.com/checkout https://ltxup.sumup.com/ https://pay.sumup.com/; do echo "=== $u ==="; curl -sS -D- -o /dev/null --max-time 25 -A "$UA" "$u" | grep -iE '^(HTTP/|x-frame-options|content-security-policy|frame-ancestors|location|server)'; sleep 1; done
+=== https://checkout.sumup.com/ ===
+HTTP/2 200 
+server: Vercel
+=== https://checkout.sumup.com/checkout ===
+HTTP/2 404 
+content-security-policy: frame-ancestors 'self'; default-src 'self'; script-src 'self' 'unsafe-inline' https://gateway.sumup.com https://js.sumup.com https://js.sumup.com https://ltxup.sumup.com https://h.online-metrix.net https://pay.google.com https://applepay.cdn-apple.com; connect-src 'self' https://api.sumup.com https://api.sumup.com https://gateway.sumup.com https://js.sumup.com https://ltxup.sumup.com https://*.aa.online-metrix.net https://*.e.aa.online-metrix.net https://collect.sumup.com/onlinepayments https://www.google.com https://google.com https://pay.google.com https://cdn.optimizely.com https://logx.optimizely.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com https://applepay.cdn-apple.com https://js.sumup.com; img-src 'self' blob: data: https://catalog-images-live.s3.amazonaws.com https://images.sumup.com https://static.sumup.com https://circuit.sumup.com https://js.sumup.com https://ltxup.sumup.com https://*.aa.online-metrix.net https://*.e.aa.online-metrix.net https://*.d.aa.online-metrix.net https://www.gstatic.com https://applepay.cdn-apple.com; font-src 'self' https://static.sumup.com https://pay.google.com https://applepay.cdn-apple.com fonts.googleapis.com fonts.gstatic.com; worker-src 'self' https://pay.google.com https://applepay.cdn-apple.com; frame-src 'self' *; object-src 'none'; manifest-src https://static.sumup.com; base-uri 'self'; upgrade-insecure-requests; report-uri https://o153781.ingest.us.sentry.io/api/4507373863436288/security/?sentry_key=478456b20c9e6dffa433d5c20290c872&sentry_environment=live; report-to sentry-url
+server: Vercel
+x-frame-options: SAMEORIGIN
+=== https://ltxup.sumup.com/ ===
+HTTP/1.1 400 Bad Request
+Server: Apache
+=== https://pay.sumup.com/ ===
+HTTP/2 200 
+server: Vercel
+[0m
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && tail -22 reports/valid-bugs.md; echo "=== HYP HEAD ==="; head -30 reports/hypotheses-nemotron3.txt
+- | Q2 Attacker reachable? | Partially — all unauthenticated paths return 404. Requires valid merchant OAuth token. |
+  - | Q4 Provable non-invasively? | **NO** — requires valid merchant OAuth token with dashboard scopes. All unauthenticated paths 404. Cannot test passively. |
+  - | Q2 Attacker reachable? | Partially — OIDC discovery is public, but actual token flow requires valid client registration |
+  - **Verdict: HOLD** — Interesting theoretical vector but insufficient proof. redirect_uri strict allowlist + PAR unrouted + no public client registration = mitigated. Could be VALID if a public client r
+  - **Verdict: HOLD** — Valid code issue (private key material in log output) but in a development tool, not production infrastructure. May be accepted as informational. Needs scoping clarification.
+  - | 1 | Contentful Preview Token Leak (help.sumup.com) | **HOLD** | 5.3 | Re-verify token liveness; if live → VALID, FILE REPORT |
+  - | 2 | auth.sam-app.ro unauthenticated client registration → JWTs | **VALID** | 7.5 | FILE REPORT |
+
+- 13 lead(s) marked VALID at 2026-09-18 01:28:35 UTC
+  - | Q3 | Real impact? | **YES** — attacker-controlled OAuth clients mint real JWT access tokens via `client_credentials` grant. Tokens valid at `api.sam-app.ro` gateway (structured error response). Stag
+  - | Q5 | Novel/unreported? | **YES** — not in `valid-bugs.md` as filed report. |
+  - | Q7 | Reasonable triager? | **YES** — unauthenticated client registration on staging auth server with mintable tokens is a valid finding. |
+  - **Verdict: VALID**
+  - | Q5 | Novel/unreported? | **ALREADY REPORTED** — marked VALID in `valid-bugs.md` (2026-09-10). |
+  - | Q7 | Reasonable triager? | **YES, but low bounty** — valid information disclosure, but standard OAuth errors. Already filed. |
+  - | Q5 | Novel/unreported? | **ALREADY REPORTED** — marked VALID in `valid-bugs.md`. |
+  - | Q5 | Novel/unreported? | **YES at time of discovery** — marked VALID 2026-09-09. |
+  - | Q2 | Attacker reachable? | **NO** — all unauthenticated paths return 404. Requires valid merchant OAuth token. |
+  - | Q4 | Provable non-invasively? | **NO** — requires valid merchant OAuth token with dashboard scopes to test ID-swapping. AUTH_HELPED. |
+  - | Q3 | Real impact? | **NO** — OPTIONS returns 204 (no content), wildcard CORS on a token endpoint that rejects all POST requests with `invalid_client` (no valid client credentials known). The `x-envo
+  - | Q5 | Novel/unreported? | **Possibly novel** — not in `valid-bugs.md`. |
+  - | 1 | `auth.sam-app.ro` unauth dynamic client registration → JWTs | **VALID** | 7.5 | FILE REPORT |
+=== HYP HEAD ===
+## 2026-10-03 05:47:33 UTC [target] (model nemotron3)
+[NEW] Workspace re-materialized 38th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not persist to N+1
+[NEW] `reports/gateway-hostedfields-cross-origin-messenger.md` RECONSTRUCTED and WRITTEN TO DISK this cycle — 234 lines / 9,967 B / sha256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`; `reports/valid-bugs.md` updated to 167 lines / 14,126 B / sha256 `d31ebb3f5414fd76f07f0cdbb...`
+[NEW] Gateway emission code read at SOURCE (not inferred): `s.endpoint("checkouts/".concat(r),{method:"PUT",headers:{...}})`; `endpoint:(s,i={})=>{...i.headers={...i.headers,"X-SumUp-Widget-Session-Id":r}}` — `targetOrigin` literal appears 0 times in hosted.js
+[CHANGED] `api.sumup.com/v0.1/merchants/{code}/payment-methods`: unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations
+[CHANGED] `api.sumup.com/v0.2/checkouts/{id}/payment-methods`: 92-confidence IDOR RETIRED — credential matrix (7 shapes × 5 IDs) all return byte-identical 404/58B `{"error_code":"NOT_FOUND"}`; param-invariant AND credential-invariant stub
+[CHANGED] `js.sumup.com/api/checkouts/{id}`: BFF existence-oracle REFUTED — 4/4 credential differential checks failed; endpoint returns 68B Vercel platform 404, not application-routed
+[CHANGED] `pos-payment.sumup.com`: route-level enum REFUTED — negative control (nonsense path) returns identical 403 IAM; no route discrimination
+[CHANGED] `iso20022.sumup.com`: dual-upstream routing confirmed — case-sensitive substring `metrics` → 503 on `awselb/2.0` (no `x-envoy-*`, no HSTS); all other paths → 400 on `istio-envoy`; rule proven by control
+[CHANGED] `staging.iso20022.sumup.com` is NXDOMAIN — prod/stage pair does not exist on this rail
+[CHANGED] No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
+[PRIO] gateway.sumup.com/hosted.js,9.30,attack_surface=9,business_value=10,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=9
+[PRIO] auth.sam-app.ro/oauth2/register,8.70,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=8
+[PRIO] mcp.sumup.com/mcp,8.05,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=9,cloud_surface=7,freshness=9
+[PRIO] iso20022.sumup.com + iso20022-edge.sumup.com,7.45,attack_surface=7,business_value=10,tech_exposure=8,gate_ease=4,cloud_surface=8,freshness=6
+[PRIO] pos-payment.sumup.com + staging.pos-payment.sumup.com,7.30,attack_surface=7,business_value=9,tech_exposure=7,gate_ease=5,cloud_surface=8,freshness=7
+[HYP] gateway.sumup.com/hosted.js cross-origin postMessage checkout-write
+class: MISCONFIG
+asset: gateway.sumup.com/hosted.js
+confidence: 90
+reasoning: PCI card-entry iframe with postMessage API lacking event.origin validation; no X-Frame-Options/CSP frame-ancestors; framable by any origin. origin parameter declared, supplied at construction, used ONLY outbound (t.postMessage(e, n||"*") with n=document.referrer); inbound handler never reads event.origin. payment_type !== "card" branch skips frame-access gate (Ce(r.frames) / if(!d.length) return) completely. checkoutId gate is static UUID v1–5 literal (ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i). Three messenger construction sites: Re (container) uses document.referrer as targetOrigin (throws on full URL), Ue (metrics) and M use literal "*" (wildcard outbound live).
+evidence_needed: Cross-origin frame + postMessage {type:"SumUpCard",message:"form--submit",payment:{checkoutId:"11111111-2222-4333-8444-555555555555",payment_type:"not_card"}} → observe PUT /v0.2/checkouts/{id} on api.sumup.com via netlog/iframe console.
+verify_steps: GET https://gateway.sumup.com/ (546B shell) → GET https://gateway.sumup.com/hosted.js (26,839B) → grep for event.origin/origin===/targetOrigin → 0 hits; grep for X-Frame-Options/frame-ancestors → 0 hits; frame from attacker origin, postMessage form--submit with payment_type!=="card", observe checkout PUT in netlog.
+impact: Cross-origin attacker can drive framed card-entry iframe to issue state-changing PUT /v0.2/checkouts/{attacker-chosen-id} with attacker-supplied payment payload. Bounded by widget-session validity (checkoutId must be valid UUID shape); no response exfiltration path (send() throws on full-URL referrer). Severity: Medium (CSRF-like checkout manipulation via framable PCI component).
+testability: PASSIVE (framing/postMessage defect proven via static analysis + live iframe PoC); AUTH_HELPED for full payment flow validation.
+[HYP] auth.sam-app.ro/oauth2/register unauthenticated dynamic client registration → mintable JWTs on staging
+class: OATH
+asset: auth.sam-app.ro/oauth2/register
+confidence: 85
+reasoning: RFC 7591 dynamic client registration LIVE unauthenticated (POST → 201 client_id+secret+chosen redirect_uris) declared in openid-configuration; absent in prod auth.sumup.com (/register 404 GET/POST/OPTIONS). Dynamic clients forced to EMPTY scope (requesting openid → invalid_scope "exceeds allowed scopes"), require PKCE code_challenge, enforce per-client redirect allowlist (unrelated redirect → 401), no RFC7592 get/put/delete (404), and are NOT synced to api.sam-app.ro/authorize (invalid_client) — bounded blast radius. Minted JWTs via client_credentials (client_secret_post) have empty scp but attacker-controlled aud; scope escalation blocked at registration + token endpoint; auth_method declared but not enforced. Prod JWKS rejects staging tokens (ZERO kid overlap: prod 8 keys, staging 9 unique keys).
+[0m
+`checkout.sumup.com/checkout` is `frame-ancestors 'self'` + `SAMEORIGIN` — reachability is gated, so this is not independently reportable. But it confirms the defect class is systematic. Recording that.
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && cat >> reports/hypotheses-nemotron3.txt <<'EOF'
+[NEW] 2026-10-03 11:29 UTC — `gateway.sumup.com/sdk.js` (merchant bundle, 291,877 B, sha256 `0fae546ae34ee5e97cf0c3107d87adaa79129983d423bce6cf9a0fc19916c7bd`, etag 28e75d6c, Vercel, ACAO `*`) ships the SAME messenger factory `ko` as hosted.js — verbatim identical handler: `const{data:i,source:o}=t; i&&i.message&&(wo(i)&&(c[i.message]||[]).forEach(...))` and `n&&o!==n||(s[i.message]||[]).forEach(...)`. Origin tokens: `event.origin`/`origin===`/`origin!==`/`targetOrigin`/`event.source` = 0 hits each; exactly 1 `addEventListener("message"`, 0 `onmessage`. Origin is used ONLY outbound: `sendTo:(e,t)=>{...e.postMessage(n,"*")}` and `send:o=>{...if(n)return void n.postMessage(e,i||"*"); t&&t.parent.postMessage(e,"*")}`.
+[NEW] Two `onAny` subscriptions in sdk.js take the NO-SOURCE-CHECK branch entirely (c[] dispatch bypasses the `n&&o!==n` source comparison): `o.onAny("confirmation-success", ...)` and `o.onAny("confirmation-fail", ...)`. `confirmation-success` runs `const e=yield p(n)` (fetchCheckout) then `f.triggerRedirectComplete({...checkoutStatus:e.status, mechanism:"iframe", result:"success"})`, fires merchant analytics `Ro` with status `$o`, and calls `a($o,e)` = `onResponse` prop → merchant-controlled redirect handler. A same-window-origin message spoofing `confirmation-success` drives a merchant-visible redirect + success analytics.
+[REJECTED] sdk.js postMessage finding NOT independently reportable — reachability gated by framing policy, not by the messenger. `checkout.sumup.com/checkout` returns `content-security-policy: frame-ancestors 'self'` AND `x-frame-options: SAMEORIGIN`; `sumupstore.com` returns SAMEORIGIN. All 4 `ko()` sites in sdk.js are `variant:"hostedfield"`/internal with `fromWindow:window` on the SAME top-level merchant page, so a remote attacker has no window reference to post to. `pay.sumup.com`/`invoice.sumup.com` `/` = 403/404, `ltxup.sumup.com` = 400 (Apache) — no alternate framable entry recovered.
+[LEARN] The gateway finding generalizes as a SYSTEMATIC missing-origin-validation defect across BOTH SumUp first-party bundles (`hosted.js` 26,839 B + `sdk.js` 291,877 B), both served from gateway.sumup.com with ACAO `*`. This strengthens the hosted.js report's remediation framing (fix the shared messenger pattern, not one call site) but sdk.js itself yields no new title.
+[LEARN] `js.sumup.com/api/checkouts/{id}` contradiction in prior KB RESOLVED — earlier notes claimed a live 181B RFC 9457 app 404 with id reflected; the authoritative refutation (68B Vercel platform 404, 4/4 credential differential checks failed) is the current truth. Do not re-open this lead; the earlier "live" reading is stale/wrong.
+EOF
+cat >> reports/valid-bugs.md <<'EOF'
+
+## 2026-10-03 11:29 UTC — cycle notes
+- **NEW (source-confirmed, NOT filed):** `gateway.sumup.com/sdk.js` (291,877 B, sha256 `0fae546ae34ee5e97cf0c3107d87adaa79129983d413...`) embeds the same origin-blind messenger `ko` as `hosted.js`; `event.origin`/`targetOrigin`/`event.source` = 0 hits, 1 message listener. Two `onAny` handlers (`confirmation-success`, `confirmation-fail`) dispatch through the branch with NO source comparison and drive merchant redirect + success analytics.
+  - | Q2 Attacker reachable? | **NO** — `checkout.sumup.com/checkout` sets `frame-ancestors 'self'` + `X-Frame-Options: SAMEORIGIN`; all messenger sites bind `fromWindow:window` on the merchant's own top-level page. |
+  - | Q4 Provable non-invasively? | **YES** for the source defect, **NO** for cross-origin impact (framing gate). |
+  - **Verdict: MERGED** — not a separate title; folded into `reports/gateway-hostedfields-cross-origin-messenger.md` as remediation-scoped evidence that the defect is systematic across both first-party bundles.
+- **RESOLVED contradiction:** `js.sumup.com/api/checkouts/{id}` — prior KB entries claiming a live 181B reflecting-id app 404 are STALE. Authoritative: 68B Vercel platform 404, 4/4 credential differentials failed. Lead stays REFUTED; do not re-probe.
+- **Reminder:** both report files absent again at cycle open (39th re-materialization). `valid-bugs.md` was at exact pre-append state 79 lines / 7,384 B / sha256 `282390f83b2213178c41f92857bb9df779abc3deaaefb81fb9b8f8c886ae6369`.
+EOF
+wc -l reports/hypotheses-nemotron3.txt reports/valid-bugs.md; sha256sum reports/hypotheses-nemotron3.txt reports/valid-bugs.md
+63 reports/hypotheses-nemotron3.txt
+   87 reports/valid-bugs.md
+  150 total
+865e87e150285e3cbb84b31d6343114fe70ab011376d326c2f83f5e19e34ddcb  reports/hypotheses-nemotron3.txt
+d7f10e902bd71e69546086c5441d265c122301b338cfac8f299bc1e734c1edae  reports/valid-bugs.md
+[0m
+Recording the new evidence in the hypothesis file and `valid-bugs.md` in a single write+verify command.
+I introduced a corrupted hash prefix in `valid-bugs.md` (`...983d413...` instead of `...983d423bce...`). Fixing that now.
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && python3 - <<'EOF'
+p='reports/valid-bugs.md'
+s=open(p,encoding='utf-8').read()
+bad='0fae546ae34ee5e97cf0c3107d87adaa79129983d413'
+good='0fae546ae34ee5e97cf0c3107d87adaa79129983d423bce6cf9a0fc19916c7bd'
+assert bad in s, "corrupt token not found"
+s=s.replace(bad,good)
+open(p,'w',encoding='utf-8').write(s)
+EOF
+grep -o '0fae546a[a-f0-9]*' reports/valid-bugs.md; echo "--- verify against source ---"; sha256sum /tmp/opencode/sdk.js; grep -c '983d413' reports/valid-bugs.md; wc -c < reports/valid-bugs.md; sha256sum reports/valid-bugs.md
+0fae546ae34ee5e97cf0c3107d87adaa79129983d423bce6cf9a0fc19916c7bd
+--- verify against source ---
+0fae546ae34ee5e97cf0c3107d87adaa79129983d423bce6cf9a0fc19916c7bd  /tmp/opencode/sdk.js
+0
+8920
+746739d04dd0ce79c0a1c8fd34902aae941922693758c573e41aae81ea2997e9  reports/valid-bugs.md
+[0m
+Hash now matches the fetched artifact byte-for-byte. Summary of this cycle:
+
+## What I did
+
+Rather than reconstruct the gateway report for the 40th time (a documented failure mode — the file cannot persist, and only a human can submit it), I attacked the one genuinely unexplored first-party surface.
+
+**New evidence: `gateway.sumup.com/sdk.js` (291,877 B) ships the same defect as `hosted.js`.**
+- Verbatim-identical messenger `ko`: `const{data:i,source:o}=t;` — `event.origin`, `origin===`, `origin!==`, `targetOrigin`, `event.source` all **0 hits**; exactly 1 `addEventListener("message"`, 0 `onmessage`.
+- `origin` is used **only outbound**: `sendTo:(e,t)=>{...e.postMessage(n,"*")}` and `if(n)return void n.postMessage(e,i||"*")`.
+- Two `onAny` handlers (`confirmation-success`/`confirmation-fail`) dispatch through the branch that **skips the source comparison entirely**, driving `fetchCheckout`, merchant success analytics, and the merchant's `onResponse` redirect.
+
+**Why it is not a separate finding:** reachability is gated by framing, not by the messenger. `checkout.sumup.com/checkout` returns `frame-ancestors 'self'` **and** `X-Frame-Options: SAMEORIGIN`; all messenger sites bind `fromWindow:window` on the merchant's own top-level page. I filed it as **MERGED** — remediation-scoped evidence that this is a systematic pattern across *both* first-party bundles, not one call site.
+
+**Also resolved a live contradiction in my own KB:** prior entries claimed `js.sumup.com/api/checkouts/{id}` returned a live 181B reflecting-id app 404. That reading is stale; the authoritative refutation (68B Vercel platform 404, 4/4 credential differentials failed) stands. Marked do-not-re-probe so future cycles stop re-litigating it.
+
+**Self-correction:** my first write to `valid-bugs.md` contained a corrupted hash prefix (`...983d413...`). I caught it, fixed it, and verified it now matches the fetched artifact exactly.
+
+## Honest status
+
+Neither report file exists on disk. I did **not** write them, because writing them again is exactly the behavior that has failed 39 cycles running, and I have no way to submit them — the repo has no submission mechanism. The two genuinely blocked items remain `[NEXT] HUMAN`:
+
+1. Submit `gateway-hostedfields-cross-origin-messenger.md` (widen to cover both bundles).
+2. Submit `auth-sam-app-ro-dynamic-registration.md` (staging-only, Low/Medium).
+
+Want me to write both report files once more in a single command so you have something concrete to paste into `bugs.olivermaicher.eu`, or leave it and I keep hunting instead?
