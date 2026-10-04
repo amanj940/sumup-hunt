@@ -72620,3 +72620,400 @@ Continue if you have next steps, or stop and ask for clarification if you are un
 3. If authorized for AUTH_HELPED tests, probe: (a) `api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods` authz boundary with credential differentials; (b) `mcp.sumup.com/mcp` alg/kid handling with crafted RS256. Otherwise remain passive.
 
 Stop here unless you want to proceed with (1)-(2) now.
+===== ANALYST bigpickle 2026-10-04 00:49:42 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la reports/ 2>&1 | head -40; echo "---WC---"; wc -l reports/valid-bugs.md 2>&1; echo "---SHA---"; sha256sum reports/valid-bugs.md 2>&1
+total 9044
+drwxr-xr-x  2 runner runner    4096 Oct  4 00:46 .
+drwxr-xr-x 12 runner runner    4096 Oct  4 00:46 ..
+-rw-r--r--  1 runner runner 5609371 Oct  4 00:46 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   40362 Oct  4 00:46 analyst-laguna.log
+-rw-r--r--  1 runner runner   40176 Oct  4 00:46 analyst-ling3.log
+-rw-r--r--  1 runner runner   40548 Oct  4 00:46 analyst-longcat.log
+-rw-r--r--  1 runner runner 2899893 Oct  4 00:46 analyst-nemotron3.log
+-rw-r--r--  1 runner runner      54 Oct  4 00:46 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Oct  4 00:46 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Oct  4 00:46 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Oct  4 00:46 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   13696 Oct  4 00:46 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  564386 Oct  4 00:46 hypotheses.md
+-rw-r--r--  1 runner runner    9173 Oct  4 00:46 reposcan-findings.md
+-rw-r--r--  1 runner runner    7384 Oct  4 00:46 valid-bugs.md
+---WC---
+79 reports/valid-bugs.md
+---SHA---
+282390f83b2213178c41f92857bb9df779abc3deaaefb81fb9b8f8c886ae6369  reports/valid-bugs.md
+[0m
+[0m$ [0mls -la . 2>&1 | head -30; echo "---MTIMES---"; find . -maxdepth 2 -type f -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -20
+total 1184
+drwxr-xr-x 12 runner runner   4096 Oct  4 00:46 .
+drwxr-xr-x  3 runner runner   4096 Oct  4 00:46 ..
+drwxr-xr-x  7 runner runner   4096 Oct  4 00:46 .git
+drwxr-xr-x  3 runner runner   4096 Oct  4 00:46 .github
+-rw-r--r--  1 runner runner   1885 Oct  4 00:46 README.md
+-rw-r--r--  1 runner runner   1335 Oct  4 00:46 analyst-out.txt
+-rw-r--r--  1 runner runner 518730 Oct  4 00:46 analyst-prompt.txt
+-rw-r--r--  1 runner runner 514844 Oct  4 00:46 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Oct  4 00:46 inventory
+drwxr-xr-x  2 runner runner   4096 Oct  4 00:46 knowledge
+drwxr-xr-x  2 runner runner   4096 Oct  4 00:46 leads
+-rw-r--r--  1 runner runner  79878 Oct  4 00:46 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Oct  4 00:46 recon-notes
+drwxr-xr-x  2 runner runner   4096 Oct  4 00:46 reports
+drwxr-xr-x  2 runner runner   4096 Oct  4 00:46 reposcan-raw
+-rw-r--r--  1 runner runner   3299 Oct  4 00:46 scope.yml
+drwxr-xr-x  2 runner runner   4096 Oct  4 00:46 scripts
+-rw-r--r--  1 runner runner     33 Oct  4 00:46 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Oct  4 00:46 state_laguna.json
+-rw-r--r--  1 runner runner     33 Oct  4 00:46 state_ling3.json
+-rw-r--r--  1 runner runner     33 Oct  4 00:46 state_longcat.json
+-rw-r--r--  1 runner runner     33 Oct  4 00:46 state_mimo.json
+-rw-r--r--  1 runner runner     33 Oct  4 00:46 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Oct  4 00:46 triage
+---MTIMES---
+1791074798.2031506150 ./analyst-out.txt
+1791074791.6628076280 ./.git/opencode
+1791074790.7868004830 ./analyst-prompt.txt
+1791074790.7608002700 ./ctx.txt
+1791074783.6425598580 ./.git/HEAD
+1791074783.6407421900 ./.git/config
+1791074783.6217420350 ./.git/index
+1791074783.6207420270 ./triage/run-2026-10-04-00-27.md
+1791074783.6207420270 ./triage/run-2026-10-03-21-47.md
+1791074783.6207420270 ./triage/run-2026-10-03-18-38.md
+1791074783.6207420270 ./triage/run-2026-10-03-14-54.md
+1791074783.6207420270 ./triage/run-2026-10-03-10-28.md
+1791074783.6207420270 ./triage/run-2026-10-03-05-09.md
+1791074783.6207420270 ./triage/run-2026-10-02-23-59.md
+1791074783.6207420270 ./triage/run-2026-10-02-20-36.md
+1791074783.6207420270 ./triage/run-2026-10-02-15-53.md
+1791074783.6207420270 ./triage/run-2026-10-02-09-00.md
+1791074783.6207420270 ./triage/run-2026-10-02-02-34.md
+1791074783.6207420270 ./triage/run-2026-10-01-23-24.md
+1791074783.6207420270 ./triage/run-2026-10-01-19-24.md
+[0m
+I'll start by verifying the workspace state, since 39 consecutive cycles of re-materialization have made that the mandatory first step.
+## Objective
+- Continue the SumUp Payments Limited / SumUp Group bounty hunt in `POC` phase, target `api`, using passive-first rules and the required seven-step output.
+- Deliver the two surviving findings: `gateway.sumup.com/hosted.js` cross-origin checkout-write and `auth.sam-app.ro/oauth2/register`.
+
+## Important Details
+- Scope: company-owned SumUp assets only; live probes are read-only, `<=1 rps`, and limited to GET/HEAD/OPTIONS.
+- Final reporting channel: `bugs.olivermaicher.eu` per `scope.yml:4`; no repository submission mechanism exists.
+- Facts versus hypotheses must remain explicit. Do not revive retired, rejected, TLS-only, clickjacking-only, or scanner-only claims.
+- Workspace is re-materialized between cycles; prior file measurements are not current ground truth.
+- Always begin with `ls`/`sha256sum`; never reference a report until it has been read back.
+- Gateway source of truth: `https://gateway.sumup.com/hosted.js`, 26,839 B, sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`.
+- Gateway impact boundary: browser emission of `PUT /v0.2/checkouts/{id}` is proven, but downstream acceptance/payment effect is not proven; no response-exfiltration path exists.
+
+## Work State
+### Completed
+- Gateway finding, confidence 90/Medium: iframe has no framing protection; inbound `postMessage` handler never checks `event.origin`; attacker-controlled `form--submit` reaches checkout PUT logic.
+- Gateway checkout-ID gate is a static UUID v1–v5 regex, not an unrecoverable runtime pattern.
+- `gateway.sumup.com/sdk.js`, 291,877 B, sha256 `0fae546ae34ee5e97cf0c3107d87adaa79129983d423bce6cf9a0fc19916c7bd`, shares the missing-origin-validation messenger pattern.
+- `auth.sam-app.ro/oauth2/register` unauthenticated RFC 7591 registration is live; staging-only finding, confidence 85/Low-Medium.
+- Staging clients can mint JWTs through `client_credentials`, but tokens have empty scope, attacker-controlled `aud`, and no demonstrated production relay.
+- Production MCP JWT checks reject `alg:none` and RS256→HS256 confusion; optional `kid` try-all is parked as Low/hardening only.
+- `api.sumup.com/v0.{1,2}/checkouts/{id}/payment-methods` IDOR was retired after 35 identifier/credential responses were byte-identical.
+- `js.sumup.com/api/checkouts/{id}` is a 68-B Vercel platform 404, not an application route.
+- Contentful preview-token finding is closed: token rotated and returned 401.
+
+### Active
+- Latest workspace state reports a 39th re-materialization: `reports/valid-bugs.md` is back to its 79-line/7,384-B baseline, sha256 prefix `282390f8`; named report files were absent on open.
+- `reports/gateway-hostedfields-cross-origin-messenger.md` last measured 234 lines/9,967 B, sha256 `36c78b62bb0a8715ac86be9e2fc64a97ae11caff2965d2fa59a486ca5b2af06d`, but this is not current after re-materialization.
+- `reports/auth-sam-app-ro-dynamic-registration.md` still needs reconstruction and verified delivery.
+- Manual submission is the only delivery blocker; evidence and triage are otherwise substantially complete.
+
+### Blocked
+- Report artifacts do not persist reliably across cycles.
+- No automated path to `bugs.olivermaicher.eu`; `scripts/sync-issues.py` and `.github/workflows/sync-issues.yml` only mirror leads.
+- Full gateway payment-flow impact requires `AUTH_HELPED`; the anonymous PoC proves request emission only.
+- Any staging-to-production JWT relay remains unsupported because production and staging JWKS keys are isolated.
+
+## Next Move
+1. Run `ls -l reports/gateway-hostedfields-cross-origin-messenger.md reports/auth-sam-app-ro-dynamic-registration.md reports/valid-bugs.md && sha256sum reports/valid-bugs.md`, then reconstruct absent reports from current served bytes and verify them in the same write command.
+2. Manually submit both reports to `bugs.olivermaicher.eu`, preserving the gateway request-emission boundary and staging-only DCR scope.
+
+## Relevant Files
+- `scope.yml:4`: private report channel and program scope.
+- `inventory/sumup.md`: SumUp asset inventory.
+- `references/security/README.md`: documents authorized JavaScript-origin expectations relevant to `gateway.sumup.com`.
+- `reports/gateway-hostedfields-cross-origin-messenger.md`: required gateway finding report.
+- `reports/auth-sam-app-ro-dynamic-registration.md`: required staging DCR report.
+- `reports/valid-bugs.md`: triage ledger; currently believed reset to 79-line baseline.
+- `reports/hypotheses-nemotron3.txt`: prior ranked hypotheses and submission notes.
+- `art/lead_nemotron3.txt`: source of the gateway hypothesis.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+Workspace confirmed at baseline. Executing the next move: re-fetch served bytes, then reconstruct both reports.
+[0m→ [0mRead reports/valid-bugs.md
+[0m
+[0m$ [0mmkdir -p /tmp/opencode/gw && cd /tmp/opencode/gw && curl -fsS -m 30 https://gateway.sumup.com/hosted.js -o hosted.js && wc -c hosted.js && sha256sum hosted.js
+26839 hosted.js
+1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873  hosted.js
+[0m
+Hash matches recorded ground truth exactly — served bytes unchanged. Now extracting precise source evidence.
+[0m$ [0mcd /tmp/opencode/gw && echo "=== addEventListener('message' / onmessage occurrences ==="; grep -o -n "addEventListener(\"message\"[^;]\{0,120\}" hosted.js; echo; echo "=== UUID regex ==="; grep -o -n "[0-9a-fA-F]\{8\}-[0-9a-fA-F]\{4\}-[0-9a-fA-F]\{4\}-[0-9a-fA-F]\{4\}-[0-9a-fA-F]\{12\}" hosted.js | head -20; echo; echo "=== v0.2/checkouts refs ==="; grep -o -n "v0\.2/checkouts[^\"'\`]\{0,60\}" hosted.js | head -20
+=== addEventListener('message' / onmessage occurrences ===
+1:addEventListener("message",p)},unmount:()=>{f.send({message:i}),null==r||r.removeEventListener("message",p),r=void 0,t=void 0,Object.keys(c).forEa
+
+=== UUID regex ===
+
+=== v0.2/checkouts refs ===
+[0m
+[0m$ [0mcd /tmp/opencode/gw && echo "=== widget session header ==="; grep -o -n "X-SumUp-Widget-Session-Id[^\"'\`]\{0,80\}" hosted.js | head; echo; echo "=== payment_type ==="; grep -o -n "payment_type[^,;]\{0,80\}" hosted.js | head -20; echo; echo "=== product_origin / session_id ==="; grep -o -n "product_origin[^,;]\{0,60\}" hosted.js | head; grep -o -n "session_id[^,;]\{0,60\}" hosted.js | head
+=== widget session header ===
+1:X-SumUp-Widget-Session-Id
+
+=== payment_type ===
+1:payment_type)(e)?(e.personal_details&&e.personal_details.tax_id&&(r.card={...e.card
+1:payment_type){if(d=Ce(r.frames)
+1:payment_type:a.payment_type||"card"
+
+=== product_origin / session_id ===
+1:product_origin=i.origin
+1:session_id=i.sessionId)
+[0m
+Minified to a single line — extracting by byte offset with context instead.
+[0m$ [0mcd /tmp/opencode/gw && python3 - <<'PY'
+d=open('hosted.js').read()
+def ctx(pat,before=260,after=520,label=None,maxn=3):
+    import re
+    n=0
+    for m in re.finditer(pat,d):
+        s=max(0,m.start()-before); e=min(len(d),m.end()+after)
+        n+=1
+        print(f"--- {label or pat} #{n} @byte {m.start()} ---")
+        print(d[s:e])
+        print()
+        if n>=maxn: break
+ctx(r'addEventListener\("message",p\)',260,700,'inbound-message-handler',1)
+PY
+--- inbound-message-handler #1 @byte 2613 ---
+nt:a,type:o.TYPE,action:o.ACTION_MESSAGE},s);if(t)return void t.postMessage(e,n||"*");r&&r.parent.postMessage(e,"*")}catch(r){console.error(`Error while sending message: ${e}`,r),l({error:r,message:`Error while sending message: ${e}`})}},mount:()=>{null==r||r.addEventListener("message",p)},unmount:()=>{f.send({message:i}),null==r||r.removeEventListener("message",p),r=void 0,t=void 0,Object.keys(c).forEach((e=>delete c[e])),Object.keys(m).forEach((e=>delete m[e]))}};return u&&f.mount(),f.on(i,(()=>{f.unmount()})),f},l=null,c="required",m="invalid",p=!1,f=function(){for(var e=arguments.length,r=Array(e),t=0;t<e;t++)r[t]=arguments[t];return function(){for(var e=arguments.length,t=Array(e),a=0;a<e;a++)t[a]=arguments[a];return r.reduce(((e,r)=>e||r(...t)),"")}},h=/^[a-zA-ZÀ-ž]{1}[a-zA-ZÀ-ž\'\s\-\.]{1,128}$/,_={mask:e=>e,validate:f((e=>e?l:c),(e=>h.test(e)?l:m))},q=(e,r)=>r&&r.length?e.split("").reduce(((e,t)=>{if(e.length===r.length)return e;const a=r[e.length];if(void 0===a)retu
+[0m
+[0m$ [0mcd /tmp/opencode/gw && python3 - <<'PY'
+import re
+d=open('hosted.js').read()
+for pat,lab in [(r'/v0\.2/checkouts','checkout-path'),
+                (r'[0-9a-fA-F]{8\}-[0-9a-fA-F]{4\}-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}','uuid'),
+                (r'payment_type\)\{if\(d=Ce\(r\.frames\)','payment-type-branch')]:
+    ms=list(re.finditer(pat,d))
+    print(f"===== {lab}: {len(ms)} hit(s) =====")
+    for m in ms[:4]:
+        s=max(0,m.start()-420); e=min(len(d),m.end()+420)
+        print(f"--- @byte {m.start()} ---")
+        print(d[s:e]); print()
+PY
+===== checkout-path: 0 hit(s) =====
+===== uuid: 0 hit(s) =====
+===== payment-type-branch: 1 hit(s) =====
+--- @byte 24890 ---
+,"X-Sumup-Correlation-Id":r},body:JSON.stringify(n)}).then(xe).then(ge).then(ve)):pe(r)},createAppleSession:e=>{let{checkoutId:r,payload:t}=e;const a=we(t);return le(r)?s.endpoint("checkouts/".concat(r,"/apple-pay-session"),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)}):pe(r)}}),paymentMethods:ye(n),analytics:Ae(a)};var s,i}("https://api.sumup.com",n,s);let o={},d=[];if("card"===a.payment_type){if(d=Ce(r.frames),!d.length)return;const e=d.filter((e=>!e.isValid));if(e.length)return e.forEach((e=>{let{frame:r,input:a}=e;t.sendTo(r,{message:z,value:{name:a.name}})})),void t.send({message:R,value:{message:"Invalid form submit."}});o=$e(d.filter((e=>{let{input:r}=e;return!!r})).map((e=>{let{input:r}=e;return r})))}const u=be({payment_type:a.payment_type||"card",device_information:a.device_information,method_details:a.method_deta
+[0m
+Two claims in my summary do **not** reproduce against current bytes (`/v0.2/checkouts` = 0 hits, literal UUID regex = 0 hits). I must resolve this before writing anything.
+[0m$ [0mcd /tmp/opencode/gw && python3 - <<'PY'
+import re
+d=open('hosted.js').read()
+print("=== version-prefix candidates ===")
+for pat in [r'endpoint\s*[:=]\s*function', r'endpoint\(', r'"/v0', r'/v0\.[0-9]', r'apiVersion', r'v0\.2']:
+    ms=list(re.finditer(pat,d)); print(f"{pat!r}: {len(ms)} hits")
+    for m in ms[:6]:
+        s=max(0,m.start()-200); e=min(len(d),m.end()+200)
+        print(f"  @{m.start()}: ...{d[s:e]}...")
+PY
+=== version-prefix candidates ===
+'endpoint\\s*[:=]\\s*function': 0 hits
+'endpoint\\(': 4 hits
+  @18804: ...ndow.location.href);if(qe(t)||!t)return Promise.resolve([ce]);if(!le(t))return pe(t);const n=new URLSearchParams;return"Hosted Checkout"===(null==a?void 0:a.origin)&&n.set("hosted_checkout","true"),e.endpoint("checkouts/".concat(t,"/payment-methods").concat("".concat(n)?"?".concat(n):"")).then(de)}}}const ge=e=>{if(e.next_step){const{next_step:r}=e,t=(r.mechanism||[]).includes("iframe"),a=(r.mechanism||[])...
+  @21786: ...e?n(e.value):(r=e.value,r instanceof t?r:new t((function(e){e(r)}))).then(i,o)}d((a=a.apply(e,r||[])).next())}))};function Ae(e){return{sendEvent:(r,t)=>Ne(this,void 0,void 0,(function*(){try{yield e.endpoint("internal/analytics",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_type:r,contents:t},((e,r)=>void 0===r?null:r))})}catch(e){Oe(e)}}))}}const Te=(e,r,t,a,n=B)=>...
+  @24382: ...onst n=we(t);if(!r)throw new Error("Unable to process checkout without a valid checkoutId");return qe(r)?Ee(n):le(r)?(a&&(n.sca_experience=a),i&&(n.product_origin=i.origin,n.session_id=i.sessionId),s.endpoint("checkouts/".concat(r),{method:"PUT",headers:{"Content-Type":"application/json","X-Sumup-Correlation-Id":r},body:JSON.stringify(n)}).then(xe).then(ge).then(ve)):pe(r)},createAppleSession:e=>{let{check...
+  @24641: ...tent-Type":"application/json","X-Sumup-Correlation-Id":r},body:JSON.stringify(n)}).then(xe).then(ge).then(ve)):pe(r)},createAppleSession:e=>{let{checkoutId:r,payload:t}=e;const a=we(t);return le(r)?s.endpoint("checkouts/".concat(r,"/apple-pay-session"),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)}):pe(r)}}),paymentMethods:ye(n),analytics:Ae(a)};var s,i}("https://api.sumu...
+'"/v0': 0 hits
+'/v0\\.[0-9]': 0 hits
+'apiVersion': 0 hits
+'v0\\.2': 1 hits
+  @24075: ...r;ke("messenger_id",e.name),Oe(t,a)}});return t.onAny($,(e=>{let{payment:a,sessionId:n,product:s}=e;const i=function(e,r,t=fe(window.location.href)){const a=Te(e,r,t,"v0.1",(e=>e.text())),n=Te(e,r,t,"v0.2",B);return{checkouts:(s=n,i=t,{processCheckout:e=>{let{checkoutId:r,payload:t,redirectMechanism:a}=e;const n=we(t);if(!r)throw new Error("Unable to process checkout without a valid checkoutId");retur...
+[0m
+[0m$ [0mcd /tmp/opencode/gw && python3 - <<'PY'
+import re
+d=open('hosted.js').read()
+print("=== uuid-ish regexes (loose) ===")
+for pat in [r'\{8\}', r'1-5', r'0-9a-f', r'a-f0-9', r'\\d\{8\}', r'\[0-9a-f\]']:
+    ms=list(re.finditer(pat,d)); print(f"{pat!r}: {len(ms)} hits")
+    for m in ms[:5]:
+        s=max(0,m.start()-260); e=min(len(d),m.end()+260)
+        print(f"  @{m.start()}: ...{d[s:e]}...")
+        print()
+PY
+=== uuid-ish regexes (loose) ===
+'\\{8\\}': 1 hits
+  @17867: ...ate":{"required":false},"installments":{"allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Inv...
+
+'1-5': 1 hits
+  @4313: ...5165[2-9])|(6516[6-7][0-9]))|^(6550[0-1][0-9])|^((65502[0-9])|(6550[3-4][0-9])|(65505[0-8]))"),min:16,max:16},{brand:"visa",pattern:"^4",min:13,max:16},{brand:"mastercard",pattern:"^(?:2(?:2(?:2[1-9]\\d{2}|[3-9]\\d{3})|[3-6]\\d{4}|7(?:[0-1]\\d{3}|20\\d{2}))|5[1-5]\\d{4})",min:16,max:16},{brand:"amex",pattern:"^3[47]",min:15,max:15},{brand:"diners",pattern:"^(?:3(?:0(?:[0-5]\\d|95)|[68-9]\\d{2}))",min:14,max:19},{brand:"discover",pattern:"^6(?:011|22(?:1(?:2[6-9]|[3-9])|[2-8]|9(?:[0-1]|2[0-5]))|4[4-9]|5)",min:16,max:16...
+
+'0-9a-f': 5 hits
+  @17860: ...birth_date":{"required":false},"installments":{"allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me(...
+
+  @17872: ...{"required":false},"installments":{"allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Invalid UUI...
+
+  @17889: ...},"installments":{"allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Invalid UUID checkout: ".con...
+
+  @17908: ...allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Invalid UUID checkout: ".concat(e))),fe=e=>{try...
+
+  @17920: ...se},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Invalid UUID checkout: ".concat(e))),fe=e=>{try{const r=new...
+
+'a-f0-9': 0 hits
+'\\\\d\\{8\\}': 0 hits
+'\\[0-9a-f\\]': 5 hits
+  @17859: ..."birth_date":{"required":false},"installments":{"allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("...
+
+  @17871: ...:{"required":false},"installments":{"allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Invalid UUID...
+
+  @17888: ...e},"installments":{"allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Invalid UUID checkout: ".conc...
+
+  @17907: ..."allowed":false},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Invalid UUID checkout: ".concat(e))),fe=e=>{try{...
+
+  @17919: ...lse},"sepa":{"required":true}},"icon":"https://static.sumup.com/online-payment/icons/apm/sepa_24.svg"}');function de(e){return e.map((e=>({...e,metadata:t[e.id]}))).filter((e=>e.metadata))}const ue=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i,le=e=>ue.test(e),ce={id:"card",name:"Card",metadata:V};class me extends Error{constructor(e){super(e),this.name="InvalidDataError",this.code="INVALID_DATA"}}const pe=e=>Promise.reject(new me("Invalid UUID checkout: ".concat(e))),fe=e=>{try{const r=new ...
+[0m
+Both disputed claims **resolved — my earlier searches were faulty, not the findings.** Now confirming the inbound handler and response headers.
+[0m$ [0mcd /tmp/opencode/gw && python3 - <<'PY'
+import re
+d=open('hosted.js').read()
+# find definition of inbound handler `p` preceding byte 2613
+seg=d[:2620]
+print("=== window before addEventListener('message',p) @2613 ===")
+print(d[900:2630])
+PY
+=== window before addEventListener('message',p) @2613 ===
+(e.value):(r=e.value,r instanceof t?r:new t((function(e){e(r)}))).then(i,o)}d((a=a.apply(e,r||[])).next())}))};const i="messenger--unmount",o=Object.freeze({TYPE:"SumUpCard",ACTION_MESSAGE:"message"}),d=e=>e.type===o.TYPE,u=({id:e,fromWindow:r,toWindow:t,variant:a,origin:n,autoMount:u=!1,onError:l=({error:e})=>{throw e}})=>{const c={},m={},p=r=>{const{data:n,source:i}=r;n&&n.message&&(d(n)&&(m[n.message]||[]).forEach((r=>s(void 0,void 0,void 0,(function*(){try{yield Promise.resolve(r.handler(n.value,n))}catch(r){console.error(`Error while receiving message: ${e} - ${n.message}`,r),l({error:r,message:`Error while receiving message: ${e} - ${n.message}`})}})))),t&&i!==t||(c[n.message]||[]).forEach((r=>s(void 0,void 0,void 0,(function*(){try{((e,r,t)=>Boolean(d(e)&&e.action===o.ACTION_MESSAGE&&(e.variant===r||t.ignoreVariant)&&e.message))(n,a,r.options||{})&&(yield Promise.resolve(r.handler(n.value,n)))}catch(r){console.error(`Error while receiving message: ${e} - ${n.message}`,r),l({error:r,message:`Error while receiving message: ${e} - ${n.message}`})}})))))},f={unsubscribe:(e,r)=>{c&&(c[e]=(c[e]||[]).filter((({handler:e})=>e!==r)))},onAny:(e,r)=>{m&&(m[e]=[{handler:r,options:{ignoreVariant:!0}}])},on:(e,r,t={})=>{c&&(t.uniqueListener?c[e]=[{handler:r,options:t}]:c[e]=[...c[e]||[],{handler:r,options:t}])},sendTo:(e,r)=>{const t=Object.assign({variant:a,type:o.TYPE},r);e.postMessage(t,"*")},send:s=>{try{const e=Object.assign({variant:a,type:o.TYPE,action:o.ACTION_MESSAGE},s);if(t)return void t.postMessage(e,n||"*");r&&r.parent.postMessage(e,"*")}catch(r){console.error(`Error while sending message: ${e}`,r),l({error:r,message:`Error while sending message: ${e}`})}},mount:()=>{null==r||r.addEventListener(
+[0m
+[0m$ [0mcd /tmp/opencode/gw && echo "=== HEAD gateway.sumup.com ==="; curl -sS -m 30 -I https://gateway.sumup.com/ | sed -n '1,40p'
+=== HEAD gateway.sumup.com ===
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-origin: *
+age: 274516
+cache-control: public, max-age=0, must-revalidate
+content-disposition: inline
+content-type: text/html; charset=utf-8
+date: Sun, 04 Oct 2026 00:47:55 GMT
+etag: "9bf6c0269bb41a2f6b3f65c3db7661cc"
+last-modified: Wed, 30 Sep 2026 20:32:38 GMT
+server: Vercel
+strict-transport-security: max-age=63072000
+x-vercel-cache: HIT
+x-vercel-id: cle1::ll997-1791074875236-27d58f33ef2e
+content-length: 546
+[0m
+[0m$ [0mcd /tmp/opencode/gw && python3 - <<'PY'
+import re
+d=open('hosted.js').read()
+for pat in [r'onAny\(', r'\$="[^"]+"', r'="form--submit"', r'form--submit', r'type:"SumUpCard"', r'TYPE:"SumUpCard"']:
+    ms=list(re.finditer(pat,d))
+    print(f"{pat!r}: {len(ms)} hits")
+    for m in ms[:4]:
+        s=max(0,m.start()-180); e=min(len(d),m.end()+180)
+        print(f"  @{m.start()}: ...{d[s:e]}...")
+    print()
+PY
+'onAny\\(': 3 hits
+  @7302: ...mplete",r.autocomplete),e.setAttribute("data-isvalid",r.valid?"true":"false"),r.maxLength&&"number"==typeof r.maxLength&&e.setAttribute("maxLength",r.maxLength),e.disabled=!1})),r.onAny(z,(()=>{r.send({message:I,value:{name:a}})})),{mask:e=>n.mask?n.mask(e):e,validate:(t,s)=>{if(n.validate){const i=n.validate(t,s);e.setAttribute("data-isvalid",i?"false":"true"),r....
+  @23923: ....name,fromWindow:e,toWindow:e.parent,variant:"hostedfield",origin:document.referrer,autoMount:!0,onError:r=>{let{error:t,message:a}=r;ke("messenger_id",e.name),Oe(t,a)}});return t.onAny($,(e=>{let{payment:a,sessionId:n,product:s}=e;const i=function(e,r,t=fe(window.location.href)){const a=Te(e,r,t,"v0.1",(e=>e.text())),n=Te(e,r,t,"v0.2",B);return{checkouts:(s=n,i=t...
+  @26570: ...;function Ue(e){const r=u({id:e.name,fromWindow:e,variant:"hostedfield",autoMount:!0,onError:r=>{let{error:t,message:a}=r;ke("messenger_id",e.name),Oe(t,a)}});return{onLoad:()=>{r.onAny(Je,(e=>{let{metric:t,labels:a}=e;(function(e){Me===ze&&console.log("metric-event:",JSON.stringify(e))})({name:t,labels:a}),r.send({message:"".concat(Je,"--ack")})}))},onUnload:()=>...
+
+'\\$="[^"]+"': 1 hits
+  @6565: ...icator",k={[O.NAME]:_,[O.NUMBER]:w,[O.EXPIRATION]:x,[O.CVV]:E,[S]:{isPlaceHolder:!0}},N="input--change",A="input--recognize",T="input--focus",I="input--blur",P="input--initialize",$="form--submit",j="form--submit-sent",L="form--on-result",C="form--on-error",R="form--invalid",z="form--invalid-input";function M(e){e.disabled=!0;const r=u({fromWindow:window,variant:"hostedfiel...
+
+'="form--submit"': 1 hits
+  @6566: ...cator",k={[O.NAME]:_,[O.NUMBER]:w,[O.EXPIRATION]:x,[O.CVV]:E,[S]:{isPlaceHolder:!0}},N="input--change",A="input--recognize",T="input--focus",I="input--blur",P="input--initialize",$="form--submit",j="form--submit-sent",L="form--on-result",C="form--on-error",R="form--invalid",z="form--invalid-input";function M(e){e.disabled=!0;const r=u({fromWindow:window,variant:"hostedfiel...
+
+'form--submit': 2 hits
+  @6568: ...tor",k={[O.NAME]:_,[O.NUMBER]:w,[O.EXPIRATION]:x,[O.CVV]:E,[S]:{isPlaceHolder:!0}},N="input--change",A="input--recognize",T="input--focus",I="input--blur",P="input--initialize",$="form--submit",j="form--submit-sent",L="form--on-result",C="form--on-error",R="form--invalid",z="form--invalid-input";function M(e){e.disabled=!0;const r=u({fromWindow:window,variant:"hostedfie...
+  @6585: ..._,[O.NUMBER]:w,[O.EXPIRATION]:x,[O.CVV]:E,[S]:{isPlaceHolder:!0}},N="input--change",A="input--recognize",T="input--focus",I="input--blur",P="input--initialize",$="form--submit",j="form--submit-sent",L="form--on-result",C="form--on-error",R="form--invalid",z="form--invalid-input";function M(e){e.disabled=!0;const r=u({fromWindow:window,variant:"hostedfield",autoMount:!0}...
+
+'type:"SumUpCard"': 0 hits
+
+'TYPE:"SumUpCard"': 1 hits
+  @1057: ...ion d(e){var r;e.done?n(e.value):(r=e.value,r instanceof t?r:new t((function(e){e(r)}))).then(i,o)}d((a=a.apply(e,r||[])).next())}))};const i="messenger--unmount",o=Object.freeze({TYPE:"SumUpCard",ACTION_MESSAGE:"message"}),d=e=>e.type===o.TYPE,u=({id:e,fromWindow:r,toWindow:t,variant:a,origin:n,autoMount:u=!1,onError:l=({error:e})=>{throw e}})=>{const c={},m={},p=r=>{const...
+[0m
+All evidence confirmed. One last detail — the exact message key name for the PoC.
+Everything confirmed. Verifying the DCR endpoint passively (GET discovery only — no mutating POST).
+[0m$ [0mcd /tmp/opencode/gw && curl -sS -m 30 https://auth.sam-app.ro/.well-known/openid-configuration -o oidc.json -w 'http_code=%{http_code} size=%{size_download}\n'; echo "---registration_endpoint / issuer---"; python3 -c "
+import json;d=json.load(open('oidc.json'))
+for k in ['issuer','registration_endpoint','token_endpoint','authorization_endpoint']:print(k,'=',d.get(k))
+print('grant_types_supported =',d.get('grant_types_supported'))
+"
+http_code=200 size=2761
+---registration_endpoint / issuer---
+issuer = https://auth.sam-app.ro
+registration_endpoint = https://auth.sam-app.ro/oauth2/register
+token_endpoint = https://auth.sam-app.ro/oauth2/token
+authorization_endpoint = https://auth.sam-app.ro/oauth2/auth
+grant_types_supported = ['authorization_code', 'client_credentials', 'refresh_token', 'urn:ietf:params:oauth:grant-type:device_code']
+[0m
+[0m← [0mWrite reports/gateway-hostedfields-cross-origin-messenger.md
+Wrote file successfully.
+[0m
+Passive confirmation: DCR endpoint still advertised. Writing both reports with verified evidence and honest impact bounds.
+[0m← [0mWrite reports/auth-sam-app-ro-dynamic-registration.md
+Wrote file successfully.
+[0m
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && cat >> reports/valid-bugs.md <<'EOF'
+
+- 2 lead(s) marked VALID at 2026-10-04 00:50:00 UTC
+  - **Verdict: VALID** — gateway messenger inbound handler never validates `event.origin`; `form--submit` is registered via `onAny` (`ignoreVariant: true`), so any origin supplying `type:"SumUpCard"` reaches `processCheckout` and emits `PUT https://api.sumup.com/v0.2/checkouts/{id}`. UUID gate is a static public regex (byte 17859), not a secret. Widget shell (546 B) has no XFO/CSP frame-ancestors/Referrer-Policy. Bounded: response never returned (blind), and downstream acceptance unconfirmed because `product_origin`/`session_id` drop when attacker does not control widget URL params. Same defect in `gateway.sumup.com/sdk.js`. Evidence: `reports/gateway-hostedfields-cross-origin-messenger.md`. hosted.js 26,839 B sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`.
+  - **Verdict: VALID (staging only)** — unauthenticated RFC 7591 dynamic client registration at `auth.sam-app.ro/oauth2/register` returns `201` with attacker-supplied client + issued `client_id`/`client_secret`; registered clients mint signed JWTs via `client_credentials`. Mitigations: empty forced scope, PKCE required, no client-management endpoints, staging not federated with production, zero JWKS key overlap with prod. Bounded: no production route for DCR and no demonstrated staging-to-production relay. Evidence: `reports/auth-sam-app-ro-dynamic-registration.md`. Discovery re-confirmed 2026-10-04 (`registration_endpoint` advertised); state-changing requests deliberately not replayed.
+EOF
+echo "=== READBACK ==="; wc -lc reports/gateway-hostedfields-cross-origin-messenger.md reports/auth-sam-app-ro-dynamic-registration.md reports/valid-bugs.md; echo "=== SHA256 ==="; sha256sum reports/gateway-hostedfields-cross-origin-messenger.md reports/auth-sam-app-ro-dynamic-registration.md reports/valid-bugs.md
+=== READBACK ===
+  248  9869 reports/gateway-hostedfields-cross-origin-messenger.md
+  155  6695 reports/auth-sam-app-ro-dynamic-registration.md
+   83  8932 reports/valid-bugs.md
+  486 25496 total
+=== SHA256 ===
+e6ffd547ec2f4555ea6a019bc663d3640bd5f949e520138f985d500161be79da  reports/gateway-hostedfields-cross-origin-messenger.md
+54595ea08fe9b23767b4b4222a47d73ad3bab32aa961b92dd78404c62762dd26  reports/auth-sam-app-ro-dynamic-registration.md
+86e33373646666d9a7122349b23df99470a3aa0d6ca206c1de04c54d586df6cc  reports/valid-bugs.md
+[0m
+Now updating the ledger and verifying all three files read back.
+[0m$ [0mcd /home/runner/work/sumup-hunt/sumup-hunt && echo "=== spot-check key claims ==="; grep -c "event.origin" reports/gateway-hostedfields-cross-origin-messenger.md; grep -n "v0.2/checkouts\|ignoreVariant\|downstream acceptance is unconfirmed\|No production compromise is demonstrated" reports/gateway-hostedfields-cross-origin-messenger.md reports/auth-sam-app-ro-dynamic-registration.md | head; echo "=== git status ==="; git status --short
+=== spot-check key claims ===
+6
+reports/gateway-hostedfields-cross-origin-messenger.md:17:`ignoreVariant: true`, it is invoked for **any** sender that supplies
+reports/gateway-hostedfields-cross-origin-messenger.md:22:PUT https://api.sumup.com/v0.2/checkouts/{checkoutId}
+reports/gateway-hostedfields-cross-origin-messenger.md:43:        (e.variant === r || t.ignoreVariant) && e.message))(n, a, r.options || {})
+reports/gateway-hostedfields-cross-origin-messenger.md:65:onAny: (e, r) => { m[e] = [{ handler: r, options: { ignoreVariant: true } }]; },
+reports/gateway-hostedfields-cross-origin-messenger.md:129:`PUT https://api.sumup.com/v0.2/checkouts/{checkoutId}`.
+reports/gateway-hostedfields-cross-origin-messenger.md:186:`https://api.sumup.com/v0.2/checkouts/{checkoutId}` is emitted with
+reports/gateway-hostedfields-cross-origin-messenger.md:229:4. Make the `onAny` registry require an origin check even when `ignoreVariant` is set;
+reports/gateway-hostedfields-cross-origin-messenger.md:230:   `ignoreVariant` should relax the *variant* comparison, not the *origin* check.
+reports/auth-sam-app-ro-dynamic-registration.md:112:- **No production compromise is demonstrated.** The production authorisation route for
+=== git status ===
+ M reports/valid-bugs.md
+?? analyst-out.txt
+?? analyst-prompt.txt
+?? ctx.txt
+?? reports/auth-sam-app-ro-dynamic-registration.md
+?? reports/gateway-hostedfields-cross-origin-messenger.md
+[0m
+Both reports are reconstructed, verified, and the ledger is updated.
+
+**Key correction during this run:** two claims in the prior summary initially failed my verification (`/v0.2/checkouts` → 0 hits, literal UUID regex → 0 hits). Rather than proceed, I re-derived them from bytes and found **my search patterns were wrong, not the findings**:
+- Version prefix is injected indirectly via `Te(e,r,t,"v0.2",B)` at byte ~24075, so the literal string never appears.
+- The real gate is `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i` — case-insensitive with a version nibble, which my `a-fA-F` search missed.
+
+**Root cause sharpened:** the messenger factory does set `toWindow: e.parent`, so the inbound `t && i !== t` check exists — but it only gates the `on` registry (branch b). The `onAny` registry (branch a, which holds `form--submit`) runs **before** that check, gated only by `type: "SumUpCard"`. `event.origin` is never read anywhere inbound.
+
+**Artifacts written and read back:**
+- `reports/gateway-hostedfields-cross-origin-messenger.md` — 248 lines, 9,869 B, sha256 `e6ffd547…`
+- `reports/auth-sam-app-ro-dynamic-registration.md` — 155 lines, 6,695 B, sha256 `54595ea0…`
+- `reports/valid-bugs.md` — 79→83 lines, 8,932 B, sha256 `86e33373…`
+
+Live bytes re-verified unchanged: `hosted.js` 26,839 B, sha256 `1302f1d6…`; shell 546 B with no `X-Frame-Options`/`CSP`/`Referrer-Policy`.
+
+**One deliberate deviation:** I did *not* re-run the DCR `POST`, since it is state-changing and violates the passive-probe constraint. The report states the `201`/token-minting behaviour as observed earlier and marks only the GET discovery as re-confirmed today — so it will not overstate freshness to the triager.
+
+**Still blocked and needing you:** there is no submission path to `bugs.olivermaicher.eu` in this repo. Given39 prior re-materializations, please copy the two reports out of the workspace now — they will likely vanish before another cycle. I'd also suggest human review of the gateway severity: I filed it Medium, but the honest ceiling is CSRF-style checkout-state manipulation, since response data is never returned and API-side acceptance is unproven.
