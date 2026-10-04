@@ -1827,3 +1827,23 @@ www.sumup.com
 - NEW `gateway.sumup.com/hosted.js` cross-origin postMessage defect re-verified LIVE and byte-identical (sha256 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873); origin-validation greps 0
 - NEW `auth.sam-app.ro/oauth2/register` POST 201 unauthenticated RFC 7591 confirmed LIVE; mints JWTs (empty `scp`, attacker-controlled `aud`); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, 
 - CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
+
+## 2026-10-04 23:42:43 UTC
+- CHANGED Workspace re-materialized 41st consecutive cycle — reports/ holds only logs + hypotheses + valid-bugs.md at exact 79-line/7,384-B/282390f83b221317 pre-append state on open; artifacts written in cycle 
+- NEW reports/gateway-hostedfields-cross-origin-messenger.md reconstructed and written to disk in same act (239 L / 10,083 B / sha256 41ec5aabbfb36fb9460d8cc18d955cdd0a4dc050c31b4c1f0ce349d16e4ab5f3) — veri
+- NEW reports/auth-sam-app-ro-dynamic-registration.md reconstructed and written to disk in same act (132 L / 7,172 B / sha256 ffffbc027e7fb852507054340a246e4e968bf17868dd2175fe976c4ff5b6fdb1).
+- CHANGED gateway.sumup.com/hosted.js re-verified byte-identical (26,839 B / sha256 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873); origin-validation greps 0/0/0/0/0; framing headers 0.
+- CHANGED api.sumup.com/v0.1/merchants/{code}/payment-methods: unauthenticated returns 404 (was 200 static {"card"}) — gateway requires bearer even for spec-declared oauth2:[] operations.
+- NEW Workspace re-materialized 41st consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not per
+- NEW Both final reports reconstructed from verified evidence and confirmed on disk in same act: `reports/gateway-hostedfields-cross-origin-messenger.md` (239 L / 10,083 B / sha256 41ec5aabbfb36fb9460d8cc18
+- NEW Gateway evidence re-derived from served bytes (read-only GET, 1 rps): `hosted.js` byte-identical 26,839 B / sha256 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873; `grep -c 'event\.'`
+- NEW Every gateway code citation re-read from minified source this cycle: `Te` endpoint factory injects `X-SumUp-Widget-Session-Id` unconditionally (string "undefined" when absent); `Sumup-Product-Origin` 
+- NEW PoC envelope confirmed from constants: `TYPE:"SumUpCard"`, `ACTION_MESSAGE:"message"`, `variant:"hostedfield"`, `form--submit` = `$`
+- CHANGED KB CORRECTION: staging JWKS is 11 entries but 9 UNIQUE keys (public:3a13954d-… and public:f06a4960-… each duplicated) vs prod 8 — prior "staging 11 keys" overstated real key count
+- CHANGED KB CORRECTION: staging discovery advertises 20 `scopes_supported` values (offline_access + members/merchants/roles/checkouts/customers/api_keys read+write, receipts.read, refunds.write, transactions.r
+- CHANGED DCR report states prod client-provenance-sync path as explicitly UNTESTED rather than closed (three framings in log: "client-level sync to prod provenance DB untested"; "not synced to prod api"; "prod
+- NEW `api.sumup.com/v0.1/merchants/{code}/payment-methods` unauthenticated now returns 404 (was 200 static `{"card"}`) — gateway requires bearer even for spec-declared `oauth2:[]` operations
+- NEW `mcp.sumup.com/.well-known/oauth-protected-resource` → 200 at two paths (prod, never fetched in 29 cycles); publishes `scopes_supported:["offline_access","email"]`; kid-optional try-all on `/mcp` (RFC
+- NEW `gateway.sumup.com/hosted.js` cross-origin postMessage defect re-verified LIVE and byte-identical (sha256 1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873); origin-validation greps 0
+- NEW `auth.sam-app.ro/oauth2/register` POST 201 unauthenticated RFC 7591 confirmed LIVE; mints JWTs (empty `scp`, attacker-controlled `aud`); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, 
+- CHANGED No submission mechanism exists in repo — `scope.yml:4` declares disclosure via bugs.olivermaicher.eu (private program); `scripts/sync-issues.py` + `.github/workflows/sync-issues.yml` mirror leads only
