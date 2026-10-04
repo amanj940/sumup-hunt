@@ -1,4 +1,4 @@
-## 2026-10-04 17:45:10 UTC [target] (model bigpickle)
+## 2026-10-04 20:37:10 UTC [target] (model bigpickle)
 [LEARN] `js.sumup.com/api/checkouts/{id}` contradiction in prior KB RESOLVED — earlier notes claimed a live 181B RFC 9457 app 404 with id reflected; the authoritative refutation (68B Vercel platform 404, 4/4 credential differential checks failed) is the current truth. Do not re-open this lead; the earlier "live" reading is stale/wrong.
 confidence: 90%
 confidence: 85%
