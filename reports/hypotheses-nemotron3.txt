@@ -1,4 +1,4 @@
-## 2026-10-04 00:47:17 UTC [target] (model nemotron3)
+## 2026-10-04 06:43:56 UTC [target] (model nemotron3)
 [NEW] Workspace re-materialized 40th consecutive cycle — `reports/` holds only logs + hypotheses + `valid-bugs.md` at exact 79-line/7,384-B/282390f8 pre-append state; artifacts written in cycle N do not persist to N+1
 [NEW] `gateway.sumup.com/hosted.js` cross-origin postMessage defect re-verified LIVE and byte-identical (sha256 `1302f1d6a8fa330a71e50647be0281e4b977a198cbf27e0fd59cbecc9f220873`); origin-validation greps 0/0/0/0; framing headers 0
 [NEW] `auth.sam-app.ro/oauth2/register` POST 201 unauthenticated RFC 7591 confirmed LIVE; mints JWTs (empty `scp`, attacker-controlled `aud`); cross-env JWKS isolation holds (prod 8 keys, staging 9 unique, ZERO overlap)
