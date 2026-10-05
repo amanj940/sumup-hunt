@@ -1625,3 +1625,12 @@ https://mcp.sumup.com/mcp -> HTTP 401
 https://js.sumup.com/api/checkouts/{valid-uuid-like-or-random -> HTTP 404
 https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555 -> HTTP 404
 https://js.sumup.com/api/checkouts/not-a-uuid?attempts=2 -> HTTP 404
+
+## 2026-10-05 02:41:23 UTC
+https://gateway.sumup.com/ -> 200 len=546
+https://gateway.sumup.com/hosted.js -> 200 len=26839
+https://mcp.sumup.com/mcp -> HTTP 401
+https://api.sumup.com/v0.2/checkouts/{attacker-chosen-id -> HTTP 404
+https://js.sumup.com/api/checkouts/{id -> HTTP 404
+https://js.sumup.com/api/checkouts/11111111-2222-4333-8444-555555555555 -> HTTP 404
+https://js.sumup.com/api/checkouts/not-a-uuid?attempts=2 -> HTTP 404
